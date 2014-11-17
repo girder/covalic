@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+"""
+This is a dummy placeholder for the actual scoring executable. It makes up
+a score and prints it to stdout.
+"""
+
+import random
+
+if __name__ == '__main__':
+    print random.random()

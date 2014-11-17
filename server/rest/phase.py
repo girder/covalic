@@ -17,10 +17,14 @@
 #  limitations under the License.
 ###############################################################################
 
+import cherrypy
+import os
+
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
 from girder.constants import AccessType
+from girder.plugins.celery_jobs import getCeleryUser
 
 
 class Phase(Resource):
@@ -37,13 +41,36 @@ class Phase(Resource):
     def postSubmission(self, phase, folder, params):
         user = self.getCurrentUser()
         title = '{} submission: {}'.format(phase['name'], folder['name'])
-        token = self.model('token').createToken(days=7)
+        apiUrl = os.path.dirname(os.path.dirname(os.path.dirname(
+            cherrypy.url())))
+        jobModel = self.model('job', 'jobs')
+
+        job = jobModel.createJob(
+            title=title, type='covalic_score', handler='celery', user=user)
+        jobToken = jobModel.createJobToken(job)
+        celeryUser = getCeleryUser()
+        celeryToken =self.model('token').createToken(user=celeryUser, days=7)
+        self.model('folder').setUserAccess(
+            folder, user=celeryUser, level=AccessType.READ, save=True)
+
         kwargs = {
-            'hello': 'world'
+            'input': [{
+                'type': 'http',
+                'method': 'GET',
+                'url': '/'.join((
+                    apiUrl, 'folder', str(folder['_id']), 'download')),
+                'headers': {'Girder-Token': celeryToken['_id']}
+            }],
+            'jobUpdate': {
+                'type': 'http',
+                'method': 'PUT',
+                'url': '/'.join((apiUrl, 'job', str(job['_id']))),
+                'headers': {'Girder-Token': jobToken['_id']}
+            }
         }
-        job = self.model('job', 'jobs').createJob(
-            title=title, type='covalic_score', handler='celery', user=user,
-            kwargs=kwargs)
+        job['kwargs'] = kwargs
+        job = jobModel.save(job)
+        jobModel.scheduleJob(job)
 
         return job
     postSubmission.description = (
