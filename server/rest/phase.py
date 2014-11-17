@@ -35,7 +35,17 @@ class Phase(Resource):
     @loadmodel(map={'folderId': 'folder'}, level=AccessType.ADMIN,
                model='folder')
     def postSubmission(self, phase, folder, params):
-        return phase, folder
+        user = self.getCurrentUser()
+        title = '{} submission: {}'.format(phase['name'], folder['name'])
+        token = self.model('token').createToken(days=7)
+        kwargs = {
+            'hello': 'world'
+        }
+        job = self.model('job', 'jobs').createJob(
+            title=title, type='covalic_score', handler='celery', user=user,
+            kwargs=kwargs)
+
+        return job
     postSubmission.description = (
         Description('Make a submission to the challenge.')
         .param('id', 'The ID of the challenge phase to submit to.',
