@@ -17,12 +17,33 @@
 #  limitations under the License.
 ###############################################################################
 
-from .rest import phase
+import datetime
+
+from girder.constants import AccessType
+from girder.models.model_base import AccessControlledModel
 
 
-def load(info):
-    phaseExt = phase.Phase()
-    info['apiRoot'].challenge_phase.route(
-        'POST', (':id', 'submission'), phaseExt.postSubmission)
-    info['apiRoot'].challenge_phase.route(
-        'POST', (':id', 'score'), phaseExt.postScore)
+class Submission(Model):
+    def initialize(self):
+        self.name = 'covalic_submission'
+        self.ensureIndices(('userId', 'phaseId'))
+
+    def validate(self, doc):
+        return doc
+
+    def createSubmission(self, creator, phase, folder):
+        submission = {
+            'name': name,
+            'creatorId': creator['_id'],
+            'phaseId': phase['_id'],
+            'folderId': folder['_id'],
+            'created': datetime.datetime.utcnow(),
+            'score': None,
+            'job': None
+        }
+
+        return self.save(submission)
+
+    def filter(self, submission, user=None):
+        # TODO filter
+        return submission
