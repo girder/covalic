@@ -53,6 +53,11 @@ class Phase(Resource):
         self.model('folder').setUserAccess(
             folder, user=celeryUser, level=AccessType.READ, save=True)
 
+        if not self.model('phase', 'challenge').hasAccess(
+            phase, user=celeryUser, level=AccessType.ADMIN):
+                self.model('phase', 'challenge').setUserAccess(
+                    phase, user=celeryUser, level=AccessType.ADMIN, save=True)
+
         kwargs = {
             'input': [{
                 'type': 'http',
@@ -66,6 +71,13 @@ class Phase(Resource):
                 'method': 'PUT',
                 'url': '/'.join((apiUrl, 'job', str(job['_id']))),
                 'headers': {'Girder-Token': jobToken['_id']}
+            },
+            'scoreTarget': {
+                'type': 'http',
+                'method': 'POST',
+                'url': '/'.join((apiUrl, 'challenge_phase', str(phase['_id']),
+                                 'score')),
+                'headers': {'Girder-Token': celeryToken['_id']}
             }
         }
         job['kwargs'] = kwargs
@@ -78,3 +90,17 @@ class Phase(Resource):
         .param('id', 'The ID of the challenge phase to submit to.',
                paramType='path')
         .param('folderId', 'The folder ID containing the submission data.'))
+
+    @access.user
+    @loadmodel(map={'id': 'phase'}, level=AccessType.ADMIN,
+               model='phase', plugin='challenge')
+    def postScore(self, phase, params):
+        # TODO delete self.getCurrentToken()
+        pass
+    postScore.description = (
+        Description('Post a score for this phase.')
+        .notes('This should only be called by the scoring service, not by '
+               'end users.')
+        .param('id', 'The ID of the phase that was submitted to.',
+               paramType='path')
+        .errorResponse('ID was invalid.'))
