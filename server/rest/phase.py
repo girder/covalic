@@ -34,12 +34,18 @@ class Phase(Resource):
     """
 
     @access.user
-    @loadmodel(map={'id': 'phase'}, level=AccessType.WRITE,
+    @loadmodel(map={'id': 'phase'}, level=AccessType.READ,
                model='phase', plugin='challenge')
     @loadmodel(map={'folderId': 'folder'}, level=AccessType.ADMIN,
                model='folder')
     def postSubmission(self, phase, folder, params):
         user = self.getCurrentUser()
+
+        # Only users in the participant group (or with write access) may submit
+        if phase['participantGroupId'] not in user['groups']:
+            self.model('phase', 'challenge').requireAccess(
+                phase, user, level=AccessType.WRITE)
+
         title = '{} submission: {}'.format(phase['name'], folder['name'])
         apiUrl = os.path.dirname(os.path.dirname(os.path.dirname(
             cherrypy.url())))
@@ -53,19 +59,37 @@ class Phase(Resource):
         self.model('folder').setUserAccess(
             folder, user=celeryUser, level=AccessType.READ, save=True)
 
+        groundTruth = self.model('folder').load(phase['groundTruthFolderId'],
+                                                force=True)
+
         if not self.model('phase', 'challenge').hasAccess(
             phase, user=celeryUser, level=AccessType.ADMIN):
                 self.model('phase', 'challenge').setUserAccess(
                     phase, user=celeryUser, level=AccessType.ADMIN, save=True)
 
+        if not self.model('folder').hasAccess(
+            folder, user=celeryUser, level=AccessType.READ):
+                self.model('folder').setUserAccess(
+                    groundTruth, user=celeryUser, level=AccessType.READ,
+                    save=True)
+
         kwargs = {
-            'input': [{
-                'type': 'http',
-                'method': 'GET',
-                'url': '/'.join((
-                    apiUrl, 'folder', str(folder['_id']), 'download')),
-                'headers': {'Girder-Token': celeryToken['_id']}
-            }],
+            'input': {
+                'submission': {
+                    'type': 'http',
+                    'method': 'GET',
+                    'url': '/'.join((
+                        apiUrl, 'folder', str(folder['_id']), 'download')),
+                    'headers': {'Girder-Token': celeryToken['_id']}
+                },
+                'ground_truth': {
+                    'type': 'http',
+                    'method': 'GET',
+                    'url': '/'.join((
+                        apiUrl, 'folder', str(groundTruth['_id']), 'download')),
+                    'headers': {'Girder-Token': celeryToken['_id']}
+                }
+            },
             'jobUpdate': {
                 'type': 'http',
                 'method': 'PUT',
@@ -78,7 +102,8 @@ class Phase(Resource):
                 'url': '/'.join((apiUrl, 'challenge_phase', str(phase['_id']),
                                  'score')),
                 'headers': {'Girder-Token': celeryToken['_id']}
-            }
+            },
+            'cleanup': False
         }
         job['kwargs'] = kwargs
         job = jobModel.save(job)

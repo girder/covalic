@@ -10,9 +10,7 @@ def _readFilenameFromResponse(request):
     to use the content disposition header, otherwise falling back to the last
     token of the URL.
     """
-    print request.headers['Content-Disposition']
     match = re.search('filename="(.*)"', request.headers['Content-Disposition'])
-    print match
 
     if match is None:
         return [t for t in request.url.split('/') if t][-1]
@@ -33,30 +31,37 @@ def fetchHttpInput(tempDir, spec):
     filename = spec.get('filename', _readFilenameFromResponse(request))
     path = os.path.join(tempDir, filename)
 
+    total = 0
+    maxSize = spec.get('maxSize')
+
     with open(path, 'wb') as out:
         for buf in request.iter_content(32768):
+            length = len(buf)
+            if maxSize and length + total > maxSize:
+                raise Exception('Exceeded max download size of {} bytes.'
+                                .format(maxSize))
             out.write(buf)
+            total += length
 
     return path
 
 
 def fetchInputs(tempDir, inputList):
     """
-    Fetch all inputs, return a list of corresponding local files. Right now,
-    the only supported type is 'http'.
+    Fetch all inputs. For each input, writes a '_localPath' key into the
+    input spec that denotes where the file was written on the local disk.
     """
-    localFiles = []
+    localFiles = {}
 
-    for input in inputList:
+    for label, input in inputList.iteritems():
         inputType = input.get('type', 'http').lower()
 
         if inputType == 'http':
-            localFiles.append(fetchHttpInput(tempDir, input))
+            localFiles[label] = fetchHttpInput(tempDir, input)
         else:
             raise Exception('Invalid input type: ' + inputType)
 
     return localFiles
-
 
 def cleanup(tempDir):
     """

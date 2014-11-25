@@ -11,7 +11,12 @@ def covalic_score(task, *args, **kwargs):
     if not os.path.isdir(tempDir):
         os.makedirs(tempDir)
 
-    files = utils.fetchInputs(tempDir, kwargs.get('input', ()))
-
-    if kwargs.get('cleanup', True):
-        utils.cleanup(tempDir)
+    try:
+        inputs = kwargs.get('input', {})
+        localFiles = utils.fetchInputs(tempDir, inputs)
+    except:
+        # TODO update job status and log.
+        raise
+    finally:
+        if kwargs.get('cleanup', True):
+            utils.cleanup(tempDir)
