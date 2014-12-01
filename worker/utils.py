@@ -18,7 +18,7 @@ def _readFilenameFromResponse(request):
         return match.group(1)
 
 
-def fetchHttpInput(tempDir, spec):
+def fetchHttpInput(tmpDir, spec):
     """
     Downloads an input file via HTTP using requests.
     """
@@ -29,7 +29,7 @@ def fetchHttpInput(tempDir, spec):
     request.raise_for_status()
 
     filename = spec.get('filename', _readFilenameFromResponse(request))
-    path = os.path.join(tempDir, filename)
+    path = os.path.join(tmpDir, filename)
 
     total = 0
     maxSize = spec.get('maxSize')
@@ -46,7 +46,7 @@ def fetchHttpInput(tempDir, spec):
     return path
 
 
-def fetchInputs(tempDir, inputList):
+def fetchInputs(tmpDir, inputList):
     """
     Fetch all inputs. For each input, writes a '_localPath' key into the
     input spec that denotes where the file was written on the local disk.
@@ -57,18 +57,18 @@ def fetchInputs(tempDir, inputList):
         inputType = input.get('type', 'http').lower()
 
         if inputType == 'http':
-            localFiles[label] = fetchHttpInput(tempDir, input)
+            localFiles[label] = fetchHttpInput(tmpDir, input)
         else:
             raise Exception('Invalid input type: ' + inputType)
 
     return localFiles
 
-def cleanup(tempDir):
+def cleanup(tmpDir):
     """
     Cleanup from a job is performed by this function. For now, this is simply
     deleting the temp directory.
 
-    :param tempDir: The temporary directory to remove.
+    :param tmpDir: The temporary directory to remove.
     """
-    if os.path.isdir(tempDir):
-        shutil.rmtree(tempDir)
+    if os.path.isdir(tmpDir):
+        shutil.rmtree(tmpDir)
