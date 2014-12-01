@@ -26,21 +26,24 @@ from girder.models.model_base import AccessControlledModel
 class Submission(Model):
     def initialize(self):
         self.name = 'covalic_submission'
-        self.ensureIndices(('userId', 'phaseId'))
+        leaderboardIdx = (('phaseId', 1), ('score._overall', -1))
+        self.ensureIndices(('creatorId', 'phaseId'), ('created', -1),
+                           leaderboardIdx)
 
     def validate(self, doc):
         return doc
 
-    def createSubmission(self, creator, phase, folder):
+    def createSubmission(self, creator, phase, folder, job=None):
         submission = {
-            'name': name,
             'creatorId': creator['_id'],
             'phaseId': phase['_id'],
             'folderId': folder['_id'],
             'created': datetime.datetime.utcnow(),
-            'score': None,
-            'job': None
+            'score': None
         }
+
+        if job is not None:
+            submission['jobId'] = job['_id']
 
         return self.save(submission)
 

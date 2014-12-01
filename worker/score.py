@@ -2,10 +2,9 @@ import json
 import os
 import requests
 import subprocess
-import zipfile
 
 from .celery import app, config
-from . import job_util
+from . import job_util, utils
 
 
 @app.task(name='covalic_score', bind=True)
@@ -15,10 +14,9 @@ def covalic_score(*args, **kwargs):
 
     # Unzip the input files since they are folders
     for label, path in kwargs['_localInput'].iteritems():
-        with zipfile.ZipFile(path) as zf:
-            output = os.path.join(kwargs['_tmpDir'], label)
-            zf.extractall(output)
-            localDirs[label] = output
+        output = os.path.join(kwargs['_tmpDir'], label)
+        utils.extractZip(path, output, flatten=True)
+        localDirs[label] = output
 
     # Call our scoring executable, passing test data and grouth truth
     command = (
@@ -38,7 +36,7 @@ def covalic_score(*args, **kwargs):
             p.returncode))
 
     scoreTarget = kwargs['scoreTarget']
-    method = getattr(requests, scoreTarget['method'].lower())
-    req = method(scoreTarget['url'], headers=scoreTarget.get('headers', {}),
+    httpMethod = getattr(requests, scoreTarget['method'].lower())
+    req = httpMethod(scoreTarget['url'], headers=scoreTarget.get('headers'),
                  data=json.loads(stdout))
     req.raise_for_status()

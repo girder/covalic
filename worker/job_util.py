@@ -70,9 +70,9 @@ class JobManager(object):
         buffer is empty, this is a no-op.
         """
         if len(self._buf):
-            method = getattr(requests, self.method.lower())
+            httpMethod = getattr(requests, self.method.lower())
 
-            method(self.url, headers=self.headers, data={'log': self._buf})
+            httpMethod(self.url, headers=self.headers, data={'log': self._buf})
             self._buf = ''
 
     def write(self, message):
@@ -94,8 +94,8 @@ class JobManager(object):
         :param status: The status to set on the job.
         :type status: JobStatus
         """
-        method = getattr(requests, self.method.lower())
-        method(self.url, headers=self.headers, data={'status': status})
+        httpMethod = getattr(requests, self.method.lower())
+        httpMethod(self.url, headers=self.headers, data={'status': status})
 
 
 class task(object):
@@ -136,7 +136,8 @@ class task(object):
                     self._makeTmpDir(task.request.id, kwargs)
                     kwargs['_localInput'] = utils.fetchInputs(
                         kwargs['_tmpDir'], kwargs.get('input', {}))
-                    retVal = fn(task, *args, **kwargs)
+                    oldCwd = os.getcwd()
+                    retVal = fn(task, jobMgr, *args, **kwargs)
                     jobMgr.updateStatus(JobStatus.SUCCESS)
                     return retVal
                 except:
@@ -147,6 +148,7 @@ class task(object):
                     jobMgr.updateStatus(JobStatus.ERROR)
                     raise  # Raise so that celery also sees the exception
                 finally:
+                    os.chdir(oldCwd)
                     if kwargs.get('cleanup', True) and self.tmpDir:
                         utils.cleanup(kwargs['_tmpDir'])
         return wrapped
