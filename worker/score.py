@@ -1,4 +1,8 @@
+import json
 import os
+import requests
+import subprocess
+import zipfile
 
 from .celery import app, config
 from . import job_util
@@ -7,5 +11,34 @@ from . import job_util
 @app.task(name='covalic_score', bind=True)
 @job_util.task(logPrint=True)
 def covalic_score(*args, **kwargs):
-    print args
-    print kwargs
+    localDirs = {}
+
+    # Unzip the input files since they are folders
+    for label, path in kwargs['_localInput'].iteritems():
+        with zipfile.ZipFile(path) as zf:
+            output = os.path.join(kwargs['_tmpDir'], label)
+            zf.extractall(output)
+            localDirs[label] = output
+
+    # Call our scoring executable, passing test data and grouth truth
+    command = (
+        os.path.abspath(config.get('covalic', 'score_executable')),
+        '--submission', localDirs['submission'],
+        '--ground_truth', localDirs['ground_truth']
+    )
+    p = subprocess.Popen(args=command, cwd=kwargs['_tmpDir'],
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+
+    if p.returncode != 0:
+        print 'STDOUT: ' + stdout
+        print 'STDERR: ' + stderr
+
+        raise Exception('Scoring subprocess returned error code {}'.format(
+            p.returncode))
+
+    scoreTarget = kwargs['scoreTarget']
+    method = getattr(requests, scoreTarget['method'].lower())
+    req = method(scoreTarget['url'], headers=scoreTarget.get('headers', {}),
+                 data=json.loads(stdout))
+    req.raise_for_status()

@@ -121,7 +121,8 @@ class Phase(Resource):
                model='phase', plugin='challenge')
     def postScore(self, phase, params):
         # TODO delete self.getCurrentToken()
-        pass
+        print phase['_id']
+        print params
     postScore.description = (
         Description('Post a score for this phase.')
         .notes('This should only be called by the scoring service, not by '

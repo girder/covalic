@@ -141,7 +141,7 @@ class task(object):
                     return retVal
                 except:
                     t, val, tb = sys.exc_info()
-                    msg = '{}: {}\n{}'.format(t.__name__, repr(val),
+                    msg = '{}: {}\n{}'.format(t.__name__, val,
                                               traceback.extract_tb(tb))
                     jobMgr.write(msg)
                     jobMgr.updateStatus(JobStatus.ERROR)

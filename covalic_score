@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
 """
-This is a dummy placeholder for the actual scoring executable. It makes up
-a score and prints it to stdout.
+This is a dummy placeholder for the actual scoring executable. It randomly
+chooses scores for each metric and prints them to stdout as JSON.
 """
 
+import json
 import random
 
 if __name__ == '__main__':
-    print random.random()
+    metrics = (
+        'Dice 1', 'Dice 2', 'Adb 1', 'Adb 2', 'Hdb 1', 'Hdb 2', 'Sens 1',
+        'Sens 2', 'Spec 1', 'Spec 2')
+
+    val = {metric: random.random() for metric in metrics}
+    print(json.dumps(val, indent=0))
