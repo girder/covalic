@@ -18,6 +18,7 @@
 ###############################################################################
 
 import cherrypy
+import json
 import os
 
 from girder.api import access
@@ -103,7 +104,7 @@ class Phase(Resource):
                                  'score')),
                 'headers': {'Girder-Token': celeryToken['_id']}
             },
-            'cleanup': False
+            'cleanup': True
         }
         job['kwargs'] = kwargs
         job = jobModel.save(job)
@@ -121,8 +122,7 @@ class Phase(Resource):
                model='phase', plugin='challenge')
     def postScore(self, phase, params):
         # TODO delete self.getCurrentToken()
-        print phase['_id']
-        print params
+        print json.loads(cherrypy.request.body.read())
     postScore.description = (
         Description('Post a score for this phase.')
         .notes('This should only be called by the scoring service, not by '

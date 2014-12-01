@@ -5,13 +5,42 @@ This is a dummy placeholder for the actual scoring executable. It randomly
 chooses scores for each metric and prints them to stdout as JSON.
 """
 
+import argparse
 import json
+import os
 import random
 
+
+def findFiles(submission, groundTruth):
+    """
+    Find all input files within the submission and ground truth directory.
+    If the files in each directory do not match, exits with error status.
+
+    (This doesn't do the matching at all yet, just uses the GT dir.)
+    """
+    return [(os.path.join(submission, f), os.path.join(groundTruth, f))
+            for f in os.listdir(groundTruth)]
+
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='COVALIC scoring program.')
+    parser.add_argument('--submission', help='Path to submission directory',
+                        required=True)
+    parser.add_argument('--ground_truth', help='Path to ground truth directory',
+                        required=True)
+
+    args = parser.parse_args()
+
+    files = findFiles(args.submission, args.ground_truth)
+
     metrics = (
         'Dice 1', 'Dice 2', 'Adb 1', 'Adb 2', 'Hdb 1', 'Hdb 2', 'Sens 1',
         'Sens 2', 'Spec 1', 'Spec 2')
 
-    val = {metric: random.random() for metric in metrics}
-    print(json.dumps(val, indent=0))
+    val = {}
+    for metric in metrics:
+        val[metric] = {}
+        for submission, truth in files:
+            val[metric][os.path.basename(truth)] = random.random()
+
+    print(json.dumps(val, indent=4))

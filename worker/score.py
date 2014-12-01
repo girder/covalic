@@ -1,4 +1,3 @@
-import json
 import os
 import requests
 import subprocess
@@ -24,8 +23,8 @@ def covalic_score(*args, **kwargs):
         '--submission', localDirs['submission'],
         '--ground_truth', localDirs['ground_truth']
     )
-    p = subprocess.Popen(args=command, cwd=kwargs['_tmpDir'],
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    p = subprocess.Popen(args=command, stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
 
     if p.returncode != 0:
@@ -38,5 +37,5 @@ def covalic_score(*args, **kwargs):
     scoreTarget = kwargs['scoreTarget']
     httpMethod = getattr(requests, scoreTarget['method'].lower())
     req = httpMethod(scoreTarget['url'], headers=scoreTarget.get('headers'),
-                 data=json.loads(stdout))
+                     data=stdout)
     req.raise_for_status()
