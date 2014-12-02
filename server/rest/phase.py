@@ -63,6 +63,9 @@ class Phase(Resource):
         groundTruth = self.model('folder').load(phase['groundTruthFolderId'],
                                                 force=True)
 
+        submission = self.model('submission', 'covalic').createSubmission(
+            user, phase, folder, job)
+
         if not self.model('phase', 'challenge').hasAccess(
             phase, user=celeryUser, level=AccessType.ADMIN):
                 self.model('phase', 'challenge').setUserAccess(
@@ -101,12 +104,14 @@ class Phase(Resource):
                 'type': 'http',
                 'method': 'POST',
                 'url': '/'.join((apiUrl, 'challenge_phase', str(phase['_id']),
-                                 'score')),
+                                 'score')) + '?submissionId=' +
+                                 str(submission['_id']),
                 'headers': {'Girder-Token': celeryToken['_id']}
             },
             'cleanup': True
         }
         job['kwargs'] = kwargs
+        job['covalicSubmissionId'] = submission['_id']
         job = jobModel.save(job)
         jobModel.scheduleJob(job)
 
@@ -120,13 +125,25 @@ class Phase(Resource):
     @access.user
     @loadmodel(map={'id': 'phase'}, level=AccessType.ADMIN,
                model='phase', plugin='challenge')
-    def postScore(self, phase, params):
-        # TODO delete self.getCurrentToken()
-        print json.loads(cherrypy.request.body.read())
+    @loadmodel(map={'submissionId': 'submission'}, model='submission',
+               plugin='covalic')
+    def postScore(self, phase, submission, params):
+        submission['score'] = json.loads(cherrypy.request.body.read())
+        submission = self.model('submission', 'covalic').save(submission)
+
+        # Delete the celery user's job token since the job is now complete.
+        token = self.getCurrentToken()
+        self.model('token').remove(token)
+
+        return submission
     postScore.description = (
         Description('Post a score for this phase.')
         .notes('This should only be called by the scoring service, not by '
                'end users.')
         .param('id', 'The ID of the phase that was submitted to.',
                paramType='path')
-        .errorResponse('ID was invalid.'))
+        .param('submissionId', 'The ID of the submission being scored.')
+        .param('body', 'The JSON object containing the scores for this '
+               'submission.', paramType='body')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Admin access was denied for the challenge phase.', 403))

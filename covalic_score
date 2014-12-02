@@ -37,10 +37,14 @@ if __name__ == '__main__':
         'Dice 1', 'Dice 2', 'Adb 1', 'Adb 2', 'Hdb 1', 'Hdb 2', 'Sens 1',
         'Sens 2', 'Spec 1', 'Spec 2')
 
-    val = {}
+    vals = []
     for metric in metrics:
-        val[metric] = {}
+        val = {'metric': metric, 'datasets': []}
         for submission, truth in files:
-            val[metric][os.path.basename(truth)] = random.random()
+            val['datasets'].append({
+                'name': os.path.basename(truth),
+                'value': random.random()
+            })
+        vals.append(val)
 
-    print(json.dumps(val, indent=4))
+    print(json.dumps(vals, indent=4))

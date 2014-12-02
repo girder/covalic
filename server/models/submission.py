@@ -20,17 +20,22 @@
 import datetime
 
 from girder.constants import AccessType
-from girder.models.model_base import AccessControlledModel
+from girder.models.model_base import Model
+from girder.plugins.covalic import scoring
 
 
 class Submission(Model):
     def initialize(self):
         self.name = 'covalic_submission'
-        leaderboardIdx = (('phaseId', 1), ('score._overall', -1))
-        self.ensureIndices(('creatorId', 'phaseId'), ('created', -1),
-                           leaderboardIdx)
+        leaderboardIdx = ([('phaseId', 1), ('score._overall', -1)], {})
+        userPhaseIdx = ([('creatorId', 1), ('phaseId', 1)], {})
+        self.ensureIndices((leaderboardIdx, userPhaseIdx))
 
     def validate(self, doc):
+        if doc.get('score') is not None:
+            scoring.computeAverageScores(doc['score'])
+            scoring.computeOverallScore(doc['score'])
+
         return doc
 
     def createSubmission(self, creator, phase, folder, job=None):

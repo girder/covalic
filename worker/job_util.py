@@ -136,8 +136,9 @@ class task(object):
                     self._makeTmpDir(task.request.id, kwargs)
                     kwargs['_localInput'] = utils.fetchInputs(
                         kwargs['_tmpDir'], kwargs.get('input', {}))
+                    kwargs['_jobManager'] = jobMgr
                     oldCwd = os.getcwd()
-                    retVal = fn(task, jobMgr, *args, **kwargs)
+                    retVal = fn(task, *args, **kwargs)
                     jobMgr.updateStatus(JobStatus.SUCCESS)
                     return retVal
                 except:
