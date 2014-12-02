@@ -120,5 +120,7 @@ def load(info):
     phaseExt = phase.Phase()
     info['apiRoot'].challenge_phase.route(
         'POST', (':id', 'submission'), phaseExt.postSubmission)
+    info['apiRoot'].challenge_phase.route(
+        'POST', (':id', 'score'), phaseExt.postScore)
     info['serverRoot'], info['serverRoot'].girder = CustomAppRoot(), info['serverRoot']
     info['serverRoot'].api = info['serverRoot'].girder.api

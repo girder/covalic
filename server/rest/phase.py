@@ -18,6 +18,7 @@
 ###############################################################################
 
 import cherrypy
+import json
 import os
 
 from girder.api import access
@@ -34,12 +35,18 @@ class Phase(Resource):
     """
 
     @access.user
-    @loadmodel(map={'id': 'phase'}, level=AccessType.WRITE,
+    @loadmodel(map={'id': 'phase'}, level=AccessType.READ,
                model='phase', plugin='challenge')
     @loadmodel(map={'folderId': 'folder'}, level=AccessType.ADMIN,
                model='folder')
     def postSubmission(self, phase, folder, params):
         user = self.getCurrentUser()
+
+        # Only users in the participant group (or with write access) may submit
+        if phase['participantGroupId'] not in user['groups']:
+            self.model('phase', 'challenge').requireAccess(
+                phase, user, level=AccessType.WRITE)
+
         title = '{} submission: {}'.format(phase['name'], folder['name'])
         apiUrl = os.path.dirname(os.path.dirname(os.path.dirname(
             cherrypy.url())))
@@ -53,22 +60,58 @@ class Phase(Resource):
         self.model('folder').setUserAccess(
             folder, user=celeryUser, level=AccessType.READ, save=True)
 
+        groundTruth = self.model('folder').load(phase['groundTruthFolderId'],
+                                                force=True)
+
+        submission = self.model('submission', 'covalic').createSubmission(
+            user, phase, folder, job)
+
+        if not self.model('phase', 'challenge').hasAccess(
+            phase, user=celeryUser, level=AccessType.ADMIN):
+                self.model('phase', 'challenge').setUserAccess(
+                    phase, user=celeryUser, level=AccessType.ADMIN, save=True)
+
+        if not self.model('folder').hasAccess(
+            folder, user=celeryUser, level=AccessType.READ):
+                self.model('folder').setUserAccess(
+                    groundTruth, user=celeryUser, level=AccessType.READ,
+                    save=True)
+
         kwargs = {
-            'input': [{
-                'type': 'http',
-                'method': 'GET',
-                'url': '/'.join((
-                    apiUrl, 'folder', str(folder['_id']), 'download')),
-                'headers': {'Girder-Token': celeryToken['_id']}
-            }],
+            'input': {
+                'submission': {
+                    'type': 'http',
+                    'method': 'GET',
+                    'url': '/'.join((
+                        apiUrl, 'folder', str(folder['_id']), 'download')),
+                    'headers': {'Girder-Token': celeryToken['_id']}
+                },
+                'ground_truth': {
+                    'type': 'http',
+                    'method': 'GET',
+                    'url': '/'.join((
+                        apiUrl, 'folder', str(groundTruth['_id']), 'download')),
+                    'headers': {'Girder-Token': celeryToken['_id']}
+                }
+            },
             'jobUpdate': {
                 'type': 'http',
                 'method': 'PUT',
                 'url': '/'.join((apiUrl, 'job', str(job['_id']))),
                 'headers': {'Girder-Token': jobToken['_id']}
-            }
+            },
+            'scoreTarget': {
+                'type': 'http',
+                'method': 'POST',
+                'url': '/'.join((apiUrl, 'challenge_phase', str(phase['_id']),
+                                 'score')) + '?submissionId=' +
+                                 str(submission['_id']),
+                'headers': {'Girder-Token': celeryToken['_id']}
+            },
+            'cleanup': True
         }
         job['kwargs'] = kwargs
+        job['covalicSubmissionId'] = submission['_id']
         job = jobModel.save(job)
         jobModel.scheduleJob(job)
 
@@ -78,3 +121,29 @@ class Phase(Resource):
         .param('id', 'The ID of the challenge phase to submit to.',
                paramType='path')
         .param('folderId', 'The folder ID containing the submission data.'))
+
+    @access.user
+    @loadmodel(map={'id': 'phase'}, level=AccessType.ADMIN,
+               model='phase', plugin='challenge')
+    @loadmodel(map={'submissionId': 'submission'}, model='submission',
+               plugin='covalic')
+    def postScore(self, phase, submission, params):
+        submission['score'] = json.loads(cherrypy.request.body.read())
+        submission = self.model('submission', 'covalic').save(submission)
+
+        # Delete the celery user's job token since the job is now complete.
+        token = self.getCurrentToken()
+        self.model('token').remove(token)
+
+        return submission
+    postScore.description = (
+        Description('Post a score for this phase.')
+        .notes('This should only be called by the scoring service, not by '
+               'end users.')
+        .param('id', 'The ID of the phase that was submitted to.',
+               paramType='path')
+        .param('submissionId', 'The ID of the submission being scored.')
+        .param('body', 'The JSON object containing the scores for this '
+               'submission.', paramType='body')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Admin access was denied for the challenge phase.', 403))
