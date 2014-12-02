@@ -68,22 +68,15 @@ class CustomAppRoot(object):
               type="image/png"
               href="${staticRoot}/img/Girder_Favicon.png">
 
-        % for plugin in pluginCss:
-            <link rel="stylesheet"
-                  href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
-        % endfor
       </head>
-      <body>
-      Welcome to the hungle
-        <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
-        <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
+        <body>
+        <div id="c-global-info-apiroot" class="hide">${apiRoot}</div>
+        <div id="c-global-info-staticroot" class="hide">${staticRoot}</div>
         <script src="${staticRoot}/built/libs.min.js"></script>
         <script src="${staticRoot}/built/app.min.js"></script>
+        <script src="${staticRoot}/built/plugins/covalic/plugin.min.js"></script>
+        <script src="${staticRoot}/built/plugins/covalic/main.min.js"></script>
 
-        % for plugin in pluginJs:
-          <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js">
-          </script>
-        % endfor
       </body>
     </html>
     """
