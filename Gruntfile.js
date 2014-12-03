@@ -70,6 +70,7 @@ module.exports = function (grunt) {
                 staticDir + '/templates.js',
                 jsDir + '/init.js',
                 jsDir + '/covalic-version.js',
+                jsDir + '/view.js',
                 jsDir + '/app.js',
                 jsDir + '/router.js',
                 jsDir + '/utilities.js',

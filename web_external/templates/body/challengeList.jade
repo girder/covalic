@@ -1,0 +1,9 @@
+.c-challenge-list-header
+
+each challenge in challenges
+  .c-challenge-list-entry
+    .c-challenge-right-column
+      .c-challenge-title
+      a.c-challenge-link(c-challenge-cid="#{challenge.cid}")
+        b #{challenge.get('name')}
+      .g-clear-right

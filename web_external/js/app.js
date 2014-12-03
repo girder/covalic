@@ -23,6 +23,15 @@ covalic.App = Backbone.View.extend({
     render: function() {
         this.$el.html(jade.templates.layout());
 
+        new covalic.views.LayoutHeaderView({
+            el: this.$('#c-app-header-container')
+        }).render();
+
+        new covalic.views.ChallengesView({
+            el: this.$('#c-app-body-container')
+        }).render();
+
+
         return this;
     },
 });
