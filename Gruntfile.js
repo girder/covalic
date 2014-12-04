@@ -72,7 +72,6 @@ module.exports = function (grunt) {
                 jsDir + '/covalic-version.js',
                 jsDir + '/view.js',
                 jsDir + '/app.js',
-                jsDir + '/router.js',
                 jsDir + '/utilities.js',
                 jsDir + '/models/**/*.js',
                 jsDir + '/collections/**/*.js',
