@@ -27,14 +27,14 @@ from girder.plugins.covalic import scoring
 class Submission(Model):
     def initialize(self):
         self.name = 'covalic_submission'
-        leaderboardIdx = ([('phaseId', 1), ('score._overall', -1)], {})
+        leaderboardIdx = ([('phaseId', 1), ('overallScore', -1)], {})
         userPhaseIdx = ([('creatorId', 1), ('phaseId', 1)], {})
         self.ensureIndices((leaderboardIdx, userPhaseIdx))
 
     def validate(self, doc):
         if doc.get('score') is not None:
             scoring.computeAverageScores(doc['score'])
-            scoring.computeOverallScore(doc['score'])
+            doc['overallScore'] = scoring.computeOverallScore(doc['score'])
 
         return doc
 
