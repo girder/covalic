@@ -70,8 +70,8 @@ class CustomAppRoot(object):
 
       </head>
         <body>
-        <div id="c-global-info-apiroot" class="hide">${apiRoot}</div>
-        <div id="c-global-info-staticroot" class="hide">${staticRoot}</div>
+        <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
+        <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
         <script src="${staticRoot}/built/libs.min.js"></script>
         <script src="${staticRoot}/built/app.min.js"></script>
         <script src="${staticRoot}/built/plugins/covalic/plugin.min.js"></script>
