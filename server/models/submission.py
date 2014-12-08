@@ -19,7 +19,6 @@
 
 import datetime
 
-from girder.constants import AccessType
 from girder.models.model_base import Model
 from girder.plugins.covalic import scoring
 
@@ -41,8 +40,8 @@ class Submission(Model):
                 doc['latest'] = True
 
                 Model.update(query={
-                    'phaseId': phase['_id'],
-                    'creatorId': creator['_id'],
+                    'phaseId': doc['phaseId'],
+                    'creatorId': doc['creatorId'],
                     'latest': True
                 }, update={
                     '$set': {'latest': False}

@@ -86,7 +86,7 @@ class Phase(Resource):
             title=title, type='covalic_score', handler='celery', user=user)
         jobToken = jobModel.createJobToken(job)
         celeryUser = getCeleryUser()
-        celeryToken =self.model('token').createToken(user=celeryUser, days=7)
+        celeryToken = self.model('token').createToken(user=celeryUser, days=7)
         self.model('folder').setUserAccess(
             folder, user=celeryUser, level=AccessType.READ, save=True)
 
@@ -97,15 +97,15 @@ class Phase(Resource):
             user, phase, folder, job)
 
         if not self.model('phase', 'challenge').hasAccess(
-            phase, user=celeryUser, level=AccessType.ADMIN):
-                self.model('phase', 'challenge').setUserAccess(
-                    phase, user=celeryUser, level=AccessType.ADMIN, save=True)
+                phase, user=celeryUser, level=AccessType.ADMIN):
+            self.model('phase', 'challenge').setUserAccess(
+                phase, user=celeryUser, level=AccessType.ADMIN, save=True)
 
         if not self.model('folder').hasAccess(
-            folder, user=celeryUser, level=AccessType.READ):
-                self.model('folder').setUserAccess(
-                    groundTruth, user=celeryUser, level=AccessType.READ,
-                    save=True)
+                folder, user=celeryUser, level=AccessType.READ):
+            self.model('folder').setUserAccess(
+                groundTruth, user=celeryUser, level=AccessType.READ,
+                save=True)
 
         kwargs = {
             'input': {
@@ -133,9 +133,9 @@ class Phase(Resource):
             'scoreTarget': {
                 'type': 'http',
                 'method': 'POST',
-                'url': '/'.join((apiUrl, 'challenge_phase', str(phase['_id']),
-                                 'score')) + '?submissionId=' +
-                                 str(submission['_id']),
+                'url': '/'.join((
+                    apiUrl, 'challenge_phase', str(phase['_id']),
+                    'score')) + '?submissionId=' + str(submission['_id']),
                 'headers': {'Girder-Token': celeryToken['_id']}
             },
             'cleanup': True
