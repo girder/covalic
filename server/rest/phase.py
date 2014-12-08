@@ -35,8 +35,7 @@ class Phase(Resource):
     bound in the load() method for this plugin.
     """
     @access.public
-    @loadmodel(map={'id': 'phase'}, level=AccessType.READ,
-               model='phase', plugin='challenge')
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
     def listSubmissions(self, phase, params):
         limit, offset, sort = self.getPagingParameters(
             params, 'overallScore', defaultSortDir=pymongo.DESCENDING)
@@ -65,8 +64,7 @@ class Phase(Resource):
                required=False, dataType='int'))
 
     @access.user
-    @loadmodel(map={'id': 'phase'}, level=AccessType.READ,
-               model='phase', plugin='challenge')
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
     @loadmodel(map={'folderId': 'folder'}, level=AccessType.ADMIN,
                model='folder')
     def postSubmission(self, phase, folder, params):
@@ -153,8 +151,7 @@ class Phase(Resource):
         .param('folderId', 'The folder ID containing the submission data.'))
 
     @access.user
-    @loadmodel(map={'id': 'phase'}, level=AccessType.ADMIN,
-               model='phase', plugin='challenge')
+    @loadmodel(model='phase', plugin='challenge'), level=AccessType.ADMIN)
     @loadmodel(map={'submissionId': 'submission'}, model='submission',
                plugin='covalic')
     def postScore(self, phase, submission, params):
