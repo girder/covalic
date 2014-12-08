@@ -20,6 +20,7 @@
 import cherrypy
 import json
 import os
+import pymongo
 
 from girder.api import access
 from girder.api.describe import Description
@@ -33,6 +34,35 @@ class Phase(Resource):
     Contains additional routes for the challenge_phase resource type; they are
     bound in the load() method for this plugin.
     """
+    @access.public
+    @loadmodel(map={'id': 'phase'}, level=AccessType.READ,
+               model='phase', plugin='challenge')
+    def listSubmissions(self, phase, params):
+        limit, offset, sort = self.getPagingParameters(
+            params, 'overallScore', defaultSortDir=pymongo.DESCENDING)
+
+        userFilter = None
+        if 'userId' in params:
+            userFilter = self.model('user').load(
+                params['userId'], user=self.getCurrentUser(),
+                level=AccessType.READ)
+
+        results = self.model('submission', 'covalic').list(
+            phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter)
+        return [self.model('submission', 'covalic').filter(s) for s in results]
+    listSubmissions.description = (
+        Description('List submissions to this phase.')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .param('limit', "Result set size limit (default=50).", required=False,
+               dataType='int')
+        .param('offset', "Offset into result set (default=0).", required=False,
+               dataType='int')
+        .param('sort', 'Field to sort the result list by ('
+               'default=overallScore)', required=False)
+        .param('userId', 'Show only results for the given user.',
+               required=False)
+        .param('sortdir', "1 for ascending, -1 for descending (default=-1)",
+               required=False, dataType='int'))
 
     @access.user
     @loadmodel(map={'id': 'phase'}, level=AccessType.READ,

@@ -22,7 +22,7 @@ from .rest import phase
 
 def load(info):
     phaseExt = phase.Phase()
-    info['apiRoot'].challenge_phase.route(
-        'POST', (':id', 'submission'), phaseExt.postSubmission)
-    info['apiRoot'].challenge_phase.route(
-        'POST', (':id', 'score'), phaseExt.postScore)
+    phaseEndpoint = info['apiRoot'].challenge_phase
+    phaseEndpoint.route('POST', (':id', 'submission'), phaseExt.postSubmission)
+    phaseEndpoint.route('POST', (':id', 'score'), phaseExt.postScore)
+    phaseEndpoint.route('GET', (':id', 'submission'), phaseExt.listSubmissions)

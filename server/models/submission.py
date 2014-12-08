@@ -27,7 +27,9 @@ from girder.plugins.covalic import scoring
 class Submission(Model):
     def initialize(self):
         self.name = 'covalic_submission'
-        leaderboardIdx = ([('phaseId', 1), ('overallScore', -1)], {})
+        leaderboardIdx = ([
+            ('phaseId', 1), ('overallScore', -1), ('latest', 1)
+        ], {})
         userPhaseIdx = ([('creatorId', 1), ('phaseId', 1)], {})
         self.ensureIndices((leaderboardIdx, userPhaseIdx))
 
@@ -35,12 +37,35 @@ class Submission(Model):
         if doc.get('score') is not None:
             scoring.computeAverageScores(doc['score'])
             doc['overallScore'] = scoring.computeOverallScore(doc['score'])
+            if 'latest' not in doc:
+                doc['latest'] = True
+
+                Model.update(query={
+                    'phaseId': phase['_id'],
+                    'creatorId': creator['_id'],
+                    'latest': True
+                }, update={
+                    '$set': {'latest': False}
+                })
 
         return doc
+
+    def list(self, phase, limit=50, offset=0, sort=None, userFilter=None):
+        q = {'phaseId': phase['_id']}
+
+        if userFilter is not None:
+            q['creatorId'] = userFilter['_id']
+        else:
+            q['latest'] = True
+
+        cursor = self.find(q, limit=limit, offset=offset, sort=sort)
+        for result in cursor:
+            yield result
 
     def createSubmission(self, creator, phase, folder, job=None):
         submission = {
             'creatorId': creator['_id'],
+            'creatorName': creator['firstName'] + ' ' + creator['lastName'],
             'phaseId': phase['_id'],
             'folderId': folder['_id'],
             'created': datetime.datetime.utcnow(),
