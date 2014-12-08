@@ -145,7 +145,7 @@ class Phase(Resource):
         job = jobModel.save(job)
         jobModel.scheduleJob(job)
 
-        return job
+        return submission
     postSubmission.description = (
         Description('Make a submission to the challenge.')
         .param('id', 'The ID of the challenge phase to submit to.',

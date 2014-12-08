@@ -39,7 +39,7 @@ class Submission(Model):
             if 'latest' not in doc:
                 doc['latest'] = True
 
-                Model.update(query={
+                Model.update(self, query={
                     'phaseId': doc['phaseId'],
                     'creatorId': doc['creatorId'],
                     'latest': True
