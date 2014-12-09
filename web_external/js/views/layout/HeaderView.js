@@ -1,7 +1,7 @@
 covalic.views.LayoutHeaderView = covalic.View.extend({
 
     render: function () {
-        this.$el.html(jade.templates.layoutHeader());
+        this.$el.html(covalic.templates.layoutHeader());
 
 
         // TODO this will probably have to be changed from folders and possibly my account

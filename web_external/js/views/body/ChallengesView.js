@@ -17,8 +17,7 @@ covalic.views.ChallengesView = covalic.View.extend({
 
 
     render: function() {
-        console.log(this.collection.models);
-        this.$el.html(jade.templates.challengeList({challenges: this.collection.models}));
+        this.$el.html(covalic.templates.challengeList({challenges: this.collection.models}));
 
         return this;
     }

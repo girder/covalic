@@ -1,7 +1,6 @@
 covalic.views.ChallengeView = covalic.View.extend({
 
     initialize: function (settings) {
-        console.log("ChallengeView init");
         girder.cancelRestRequests('fetch');
         if (settings.challenge) {
             this.model = settings.challenge;
@@ -17,8 +16,7 @@ covalic.views.ChallengeView = covalic.View.extend({
     },
 
     render: function() {
-        console.log("ChallengeView render");
-        this.$el.html(jade.templates.challengePage({
+        this.$el.html(girder.templates.challengePage({
             challenge: this.model
         }));
 

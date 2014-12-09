@@ -1,7 +1,7 @@
 covalic.App = covalic.App.extend({
 
     render: function() {
-        this.$el.html(jade.templates.layout());
+        this.$el.html(girder.templates.layout());
 
         new covalic.views.LayoutHeaderView({
             el: this.$('#g-app-header-container')
