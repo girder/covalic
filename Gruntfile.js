@@ -66,7 +66,10 @@ module.exports = function (grunt) {
         var jsDir = pluginDir + '/' + sourceDir + '/js';
         if (fs.existsSync(jsDir)) {
             var files = {};
-            files[staticDir + '/plugin.min.js'] = [
+            // name this covalic.min.js instead of plugin.min.js
+            // so that girder app won't load covalic, which
+            // should only be loaded as a separate web app running as covalic
+            files[staticDir + '/covalic.min.js'] = [
                 staticDir + '/templates.js',
                 jsDir + '/init.js',
                 jsDir + '/covalic-version.js',
@@ -105,7 +108,7 @@ module.exports = function (grunt) {
             defaultTasks.push('copy:' + pluginName);
         }
 
-   };
+    };
 
     configureCovalic();
     grunt.registerTask('defaultCovalic', defaultTasks);

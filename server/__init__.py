@@ -74,7 +74,7 @@ class CustomAppRoot(object):
         <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
         <script src="${staticRoot}/built/libs.min.js"></script>
         <script src="${staticRoot}/built/app.min.js"></script>
-        <script src="${staticRoot}/built/plugins/covalic/plugin.min.js"></script>
+        <script src="${staticRoot}/built/plugins/covalic/covalic.min.js"></script>
         <script src="${staticRoot}/built/plugins/covalic/main.min.js"></script>
 
       </body>
