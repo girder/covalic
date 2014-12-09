@@ -151,7 +151,7 @@ class Phase(Resource):
         .param('folderId', 'The folder ID containing the submission data.'))
 
     @access.user
-    @loadmodel(model='phase', plugin='challenge'), level=AccessType.ADMIN)
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.ADMIN)
     @loadmodel(map={'submissionId': 'submission'}, model='submission',
                plugin='covalic')
     def postScore(self, phase, submission, params):
