@@ -1,4 +1,4 @@
-covalic.App = covalic.App.extend({
+covalic.App = girder.App.extend({
 
     render: function() {
         this.$el.html(girder.templates.layout());
@@ -28,4 +28,3 @@ covalic.App = covalic.App.extend({
     },
 
 });
-
