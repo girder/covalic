@@ -19,6 +19,6 @@ covalic.views.FrontPageView = girder.views.FrontPageView.extend({
     }
 });
 
-girder.router.route('', 'index', function () {
+covalic.router.route('', 'index', function () {
     girder.events.trigger('g:navigateTo', covalic.views.FrontPageView);
 });
