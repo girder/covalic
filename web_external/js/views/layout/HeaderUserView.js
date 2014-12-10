@@ -36,7 +36,7 @@ covalic.views.LayoutHeaderUserView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(jade.templates.layoutHeaderUser({
+        this.$el.html(covalic.templates.layoutHeaderUser({
             user: girder.currentUser
         }));
         return this;

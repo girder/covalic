@@ -8,7 +8,7 @@ covalic.views.FrontPageView = girder.views.FrontPageView.extend({
     },
 
     render: function () {
-        this.$el.html(jade.templates.frontPage({
+        this.$el.html(covalic.templates.frontPage({
             apiRoot: girder.apiRoot,
             staticRoot: girder.staticRoot,
             currentUser: girder.currentUser,

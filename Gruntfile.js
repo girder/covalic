@@ -42,6 +42,9 @@ module.exports = function (grunt) {
             grunt.config.set('jade.' + pluginName, {
                 files: files
             });
+            grunt.config.set('jade.' + pluginName + '.options', {
+                namespace: 'covalic.templates'
+            });
             grunt.config.set('watch.jade_' + pluginName, {
                 files: [jadeDir + '/**/*.jade'],
                 tasks: ['jade:' + pluginName, 'uglify:' + pluginName]
@@ -66,9 +69,12 @@ module.exports = function (grunt) {
         var jsDir = pluginDir + '/' + sourceDir + '/js';
         if (fs.existsSync(jsDir)) {
             var files = {};
-            files[staticDir + '/plugin.min.js'] = [
-                staticDir + '/templates.js',
+            // name this covalic.min.js instead of plugin.min.js
+            // so that girder app won't load covalic, which
+            // should only be loaded as a separate web app running as covalic
+            files[staticDir + '/covalic.min.js'] = [
                 jsDir + '/init.js',
+                staticDir + '/templates.js',
                 jsDir + '/covalic-version.js',
                 jsDir + '/view.js',
                 jsDir + '/app.js',
@@ -105,7 +111,7 @@ module.exports = function (grunt) {
             defaultTasks.push('copy:' + pluginName);
         }
 
-   };
+    };
 
     configureCovalic();
     grunt.registerTask('defaultCovalic', defaultTasks);

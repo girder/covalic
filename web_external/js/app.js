@@ -1,8 +1,7 @@
-console.log("covalic app.js");
-covalic.App = girder.App.extend({
+covalic.App = covalic.App.extend({
 
     render: function() {
-        this.$el.html(jade.templates.layout());
+        this.$el.html(girder.templates.layout());
 
         new covalic.views.LayoutHeaderView({
             el: this.$('#g-app-header-container')
@@ -12,7 +11,16 @@ covalic.App = girder.App.extend({
             el: this.$('#g-app-body-container')
         }).render();
 
-        this.globalNavView = new covalic.views.LayoutGlobalNavView({
+        this.globalNavView = new girder.views.LayoutGlobalNavView({
+            navItems: [{
+                name: 'Challenges',
+                icon: 'icon-sitemap',
+                target: 'challenges'
+            }, {
+                name: 'Users',
+                icon: 'icon-user',
+                target: 'users'
+            }],
             el: this.$('#g-global-nav-container')
         }).render();
 
