@@ -55,7 +55,7 @@ module.exports = function (grunt) {
         var cssDir = pluginDir + '/' + sourceDir + '/stylesheets';
         if (fs.existsSync(cssDir)) {
             var files = {};
-            files[staticDir + '/plugin.min.css'] = [cssDir + '/**/*.styl'];
+            files[staticDir + '/covalic.min.css'] = [cssDir + '/**/*.styl'];
             grunt.config.set('stylus.' + pluginName, {
                 files: files
             });

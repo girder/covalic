@@ -17,17 +17,11 @@
 #  limitations under the License.
 ###############################################################################
 
-from .rest import phase
-
-
-
-
 import mako
 import os
 
-
-
 from girder import constants
+from .rest import phase
 
 
 class CustomAppRoot(object):
@@ -64,6 +58,8 @@ class CustomAppRoot(object):
               href="${staticRoot}/lib/jqplot/css/jquery.jqplot.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/app.min.css">
+        <link rel="stylesheet"
+              href="${staticRoot}/built/plugins/covalic/covalic.min.css">
         <link rel="icon"
               type="image/png"
               href="${staticRoot}/img/Girder_Favicon.png">
