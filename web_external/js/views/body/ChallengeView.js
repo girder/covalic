@@ -26,7 +26,7 @@ covalic.views.ChallengeView = covalic.View.extend({
 
 covalic.router.route('challenge/:id', 'challenge', function(id, params) {
     // Fetch the challenge by id, then render the view.
-    var challenge = new girder.models.ChallengeModel();
+    var challenge = new covalic.models.ChallengeModel();
     challenge.set({
         _id: id
     }).on('g:fetched', function () {
