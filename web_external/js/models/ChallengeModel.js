@@ -3,7 +3,5 @@
 // covalic.models.ChallengeModel = girder.Model.extend
 // or
 covalic.models.ChallengeModel = girder.Model.extend({
-    resourceName: 'challenge',
-
-
+    resourceName: 'challenge'
 });

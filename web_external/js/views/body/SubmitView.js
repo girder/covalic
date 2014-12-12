@@ -58,9 +58,10 @@ covalic.views.SubmitView = covalic.View.extend({
     },
 
     uploadFinished: function () {
-        this.phase.off('c:submissionPosted').on('c:submissionPosted', function (submission) {
-            console.log(submission);
-        }, this).postSubmission(this.folder.get('_id'))
+        var submission = new covalic.models.SubmissionModel();
+        submission.on('c:submissionPosted', function () {
+            covalic.router.navigate('submission/' + submission.get('_id'), {trigger: true});
+        }, this).postSubmission(this.phase.get('_id'), this.folder.get('_id'));
     }
 });
 
@@ -73,6 +74,6 @@ covalic.router.route('phase/:id/submit', 'phase_submit', function (id, params) {
             phase: phase
         });
     }, this).on('g:error', function () {
-        girder.router.navigate('challenges', {trigger: true});
+        covalic.router.navigate('challenges', {trigger: true});
     }, this).fetch();
 });

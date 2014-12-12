@@ -132,12 +132,13 @@ class task(object):
             update = kwargs['jobUpdate']
             with JobManager(self.logPrint, update['url'], update['method'],
                             update['headers']) as jobMgr:
+                oldCwd = os.getcwd()
+
                 try:
                     self._makeTmpDir(task.request.id, kwargs)
                     kwargs['_localInput'] = utils.fetchInputs(
                         kwargs['_tmpDir'], kwargs.get('input', {}))
                     kwargs['_jobManager'] = jobMgr
-                    oldCwd = os.getcwd()
                     retVal = fn(task, *args, **kwargs)
                     jobMgr.updateStatus(JobStatus.SUCCESS)
                     return retVal
