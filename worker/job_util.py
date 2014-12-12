@@ -82,6 +82,9 @@ class JobManager(object):
         can be called manually and will still perform rate-limited flushing to
         the server.
         """
+        if self.logPrint:
+            self._pipes[0].write(message)
+
         self._buf += message
         if time.time() - self._last > self.interval:
             self._flush()
