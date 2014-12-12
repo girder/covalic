@@ -29,13 +29,18 @@ from girder.constants import AccessType
 from girder.plugins.celery_jobs import getCeleryUser
 
 
-class Phase(Resource):
-    """
-    Contains additional routes for the challenge_phase resource type; they are
-    bound in the load() method for this plugin.
-    """
+class Submission(Resource):
+    def __init__(self):
+        self.resourceName = 'covalic_submission'
+
+        self.route('GET', (), self.listSubmissions)
+        self.route('POST', (), self.postSubmission)
+        self.route('GET', (':id',), self.getSubmission)
+        self.route('POST', (':id', 'score'), self.postScore)
+
     @access.public
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
+    @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='challenge',
+               level=AccessType.READ)
     def listSubmissions(self, phase, params):
         limit, offset, sort = self.getPagingParameters(
             params, 'overallScore', defaultSortDir=pymongo.DESCENDING)
@@ -50,23 +55,24 @@ class Phase(Resource):
             phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter)
         return [self.model('submission', 'covalic').filter(s) for s in results]
     listSubmissions.description = (
-        Description('List submissions to this phase.')
-        .param('id', 'The ID of the phase.', paramType='path')
+        Description('List submissions to a challenge phase.')
+        .param('phaseId', 'The ID of the phase.')
+        .param('userId', 'Show only results for the given user.',
+               required=False)
         .param('limit', "Result set size limit (default=50).", required=False,
                dataType='int')
         .param('offset', "Offset into result set (default=0).", required=False,
                dataType='int')
         .param('sort', 'Field to sort the result list by ('
                'default=overallScore)', required=False)
-        .param('userId', 'Show only results for the given user.',
-               required=False)
         .param('sortdir', "1 for ascending, -1 for descending (default=-1)",
                required=False, dataType='int'))
 
     @access.user
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
-    @loadmodel(map={'folderId': 'folder'}, level=AccessType.ADMIN,
-               model='folder')
+    @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='challenge',
+               level=AccessType.READ)
+    @loadmodel(map={'folderId': 'folder'}, model='folder',
+               level=AccessType.ADMIN)
     def postSubmission(self, phase, folder, params):
         user = self.getCurrentUser()
 
@@ -131,9 +137,8 @@ class Phase(Resource):
             'scoreTarget': {
                 'type': 'http',
                 'method': 'POST',
-                'url': '/'.join((
-                    apiUrl, 'challenge_phase', str(phase['_id']),
-                    'score')) + '?submissionId=' + str(submission['_id']),
+                'url': '/'.join((apiUrl, 'covalic_submission',
+                                 str(submission['_id']), 'score')),
                 'headers': {'Girder-Token': celeryToken['_id']}
             },
             'cleanup': True
@@ -146,15 +151,19 @@ class Phase(Resource):
         return submission
     postSubmission.description = (
         Description('Make a submission to the challenge.')
-        .param('id', 'The ID of the challenge phase to submit to.',
-               paramType='path')
-        .param('folderId', 'The folder ID containing the submission data.'))
+        .param('phaseId', 'The ID of the challenge phase to submit to.')
+        .param('folderId', 'The folder ID containing the submission data.')
+        .errorResponse('You are not a member of the participant group.', 403)
+        .errorResponse('The ID was invalid.'))
 
     @access.user
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.ADMIN)
-    @loadmodel(map={'submissionId': 'submission'}, model='submission',
-               plugin='covalic')
-    def postScore(self, phase, submission, params):
+    @loadmodel(model='submission', plugin='covalic')
+    def postScore(self, submission, params):
+        # Ensure admin access on the containing challenge phase
+        self.model('phase', 'challenge').load(
+            submission['phaseId'], user=self.getCurrentUser(), exc=True,
+            level=AccessType.ADMIN)
+
         submission['score'] = json.loads(cherrypy.request.body.read())
         submission = self.model('submission', 'covalic').save(submission)
 
@@ -164,13 +173,26 @@ class Phase(Resource):
 
         return submission
     postScore.description = (
-        Description('Post a score for this phase.')
+        Description('Post a score for a given submission.')
         .notes('This should only be called by the scoring service, not by '
                'end users.')
-        .param('id', 'The ID of the phase that was submitted to.',
-               paramType='path')
-        .param('submissionId', 'The ID of the submission being scored.')
+        .param('id', 'The ID of the submission being scored.', paramType='path')
         .param('body', 'The JSON object containing the scores for this '
                'submission.', paramType='body')
         .errorResponse('ID was invalid.')
         .errorResponse('Admin access was denied for the challenge phase.', 403))
+
+    @access.public
+    @loadmodel(model='submission', plugin='covalic')
+    def getSubmission(self, submission, params):
+        # Ensure read access on the containing challenge phase
+        self.model('phase', 'challenge').load(
+            submission['phaseId'], user=self.getCurrentUser(), exc=True,
+            level=AccessType.READ)
+
+        return self.model('submission', 'covalic').filter(submission)
+    getSubmission.description = (
+        Description('Retrieve a single submission.')
+        .param('id', 'The ID of the submission.', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read access was denied for the challenge phase.', 403))

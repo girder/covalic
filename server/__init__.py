@@ -21,7 +21,7 @@ import mako
 import os
 
 from girder import constants
-from .rest import phase
+from .rest import submission
 
 
 class CustomAppRoot(object):
@@ -65,14 +65,14 @@ class CustomAppRoot(object):
               href="${staticRoot}/img/Girder_Favicon.png">
 
       </head>
-        <body>
+      <body>
         <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
         <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
         <script src="${staticRoot}/built/libs.min.js"></script>
         <script src="${staticRoot}/built/app.min.js"></script>
+        <script src="${staticRoot}/built/plugins/jobs/plugin.min.js"></script>
         <script src="${staticRoot}/built/plugins/covalic/covalic.min.js"></script>
         <script src="${staticRoot}/built/plugins/covalic/main.min.js"></script>
-
       </body>
     </html>
     """
@@ -106,12 +106,7 @@ class CustomAppRoot(object):
 
 
 def load(info):
-    phaseExt = phase.Phase()
-    phaseEndpoint = info['apiRoot'].challenge_phase
-    phaseEndpoint.route('POST', (':id', 'submission'), phaseExt.postSubmission)
-    phaseEndpoint.route('POST', (':id', 'score'), phaseExt.postScore)
-    phaseEndpoint.route('GET', (':id', 'submission'), phaseExt.listSubmissions)
-
+    info['apiRoot'].covalic_submission = submission.Submission()
     info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
                                                      info['serverRoot'])
     info['serverRoot'].api = info['serverRoot'].girder.api
