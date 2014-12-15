@@ -1,10 +1,14 @@
 covalic.views.LayoutHeaderView = covalic.View.extend({
 
+    events: {
+        'click .g-app-title': function(event) {
+            covalic.router.navigate('/', {trigger: true});
+        },
+    },
+
     render: function () {
         this.$el.html(covalic.templates.layoutHeader());
 
-
-        // TODO this will probably have to be changed from folders and possibly my account
         new covalic.views.LayoutHeaderUserView({
             el: this.$('.g-current-user-wrapper')
         }).render();
