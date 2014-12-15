@@ -82,8 +82,7 @@ class Submission(Resource):
                 phase, user, level=AccessType.WRITE)
 
         title = '{} submission: {}'.format(phase['name'], folder['name'])
-        apiUrl = os.path.dirname(os.path.dirname(os.path.dirname(
-            cherrypy.url())))
+        apiUrl = os.path.dirname(cherrypy.url())
         jobModel = self.model('job', 'jobs')
 
         job = jobModel.createJob(

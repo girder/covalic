@@ -1,0 +1,12 @@
+.c-submission-title Submission results
+.c-submission-subtitle Submitted
+  b  #{created}
+  |  by
+  b  #{submission.get('creatorName')}
+
+if submission.get('overallScore')
+  .c-submission-overall-score-container
+    span.c-pre-text Overall score:
+    span.c-overall-score= Math.round(submission.get('overallScore') * 1000) / 1000
+
+.c-submission-score-detail-container
