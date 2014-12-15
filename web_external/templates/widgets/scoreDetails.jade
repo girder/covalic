@@ -1,0 +1,18 @@
+table.c-submission-score-table
+  thead
+    tr
+      th
+      each metric in metrics
+        th= metric
+  tbody
+    tr.c-stripe(stripe='odd')
+      th Average
+      each average in averages
+        td= average
+    - var i = 0
+    each dataset in datasets
+      - i ++
+      tr.c-stripe(stripe="#{i % 2 ? 'even' : 'odd'}")
+        th= dataset
+        each metric in metrics
+          td= getScoreForCell(metric, dataset)
