@@ -2,6 +2,13 @@
 * View for an individual submission.
 */
 covalic.views.SubmissionView = covalic.View.extend({
+    events: {
+        'click .c-leaderboard-button': function () {
+            covalic.router.navigate('phase/' + this.submission.get('phaseId') +
+               '/leaderboard', {trigger: true});
+        }
+    },
+
     initialize: function (settings) {
         this.submission = settings.submission;
 
