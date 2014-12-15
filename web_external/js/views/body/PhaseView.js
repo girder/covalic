@@ -1,10 +1,10 @@
 covalic.views.PhaseView = covalic.View.extend({
 
     events: {
-        'submit #c-submit-phase-dataset-form': function(event) {
+        'click #c-submit-phase-dataset': function(event) {
             covalic.router.navigate('phase/' + this.model.get('_id') + '/submit', {trigger: true});
         },
-        'submit #c-join-phase-form': function(event) {
+        'click #c-join-phase': function(event) {
             if (!girder.currentUser) {
                 girder.events.trigger('g:loginUi');
             } else {

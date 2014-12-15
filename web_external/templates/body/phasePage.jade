@@ -26,13 +26,11 @@
 
 .c-phase-submit-container
     if (userInChallenge)
-        form#c-submit-phase-dataset-form
-            button#c-submit-phase-dataset.btn.btn-small.btn-primary(type="submit")
-                | Submit a dataset to this phase
+        button#c-submit-phase-dataset.btn.btn-small.btn-primary
+            | Submit a dataset to this phase
     else
-        form#c-join-phase-form
-            button#c-join-phase.btn.btn-small.btn-primary(type="submit")
-                | Join this phase as a participant
+        button#c-join-phase.btn.btn-small.btn-primary
+            | Join this phase as a participant
 
 .c-phase-leaderboard-container
     p leaderboard container
