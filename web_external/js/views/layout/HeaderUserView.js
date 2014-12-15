@@ -2,15 +2,15 @@ covalic.views.LayoutHeaderUserView = covalic.View.extend({
 
 
     events: {
-        'clicka.g-login':function(){
+        'click a.g-login':function(){
             girder.events.trigger('g:loginUi');
         },
 
-        'clicka.g-register':function(){
+        'click a.g-register':function(){
             girder.events.trigger('g:registerUi');
         },
 
-        'clicka.g-logout':function(){
+        'click a.g-logout':function(){
             girder.restRequest({
                 path:'user/authentication',
                 type:'DELETE'
@@ -20,11 +20,7 @@ covalic.views.LayoutHeaderUserView = covalic.View.extend({
             },this));
         },
 
-        'clicka.g-my-folders':function(){
-            girder.router.navigate('user/'+girder.currentUser.get('_id'),{trigger:true});
-        },
-
-        'clicka.g-my-settings':function(){
+        'click a.g-my-settings':function(){
             girder.router.navigate('useraccount/'+girder.currentUser.get('_id')+
                                     '/info',{trigger:true});
         }
