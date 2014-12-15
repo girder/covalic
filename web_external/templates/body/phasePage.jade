@@ -1,0 +1,38 @@
+.c-phase-header
+
+    .c-phase-name.g-body-title
+        a.c-challenge-link(c-challenge-id="#{challenge.get('_id')}")
+            b #{challenge.get('name')}
+        i.icon-angle-right
+        | #{phase.get('name')}
+        .c-phase-properties.pull-right  
+            .c-phase-active
+                if phase.get('active')
+                    i.icon-sun
+                    | Active
+                else
+                    i.icon-moon
+                    | Inactive
+            .c-phase-privacy
+                if phase.get('public')
+                    i.icon-globe
+                    | Public
+                else
+                    i.icon-lock
+                    | Private
+        .c-phase-description.g-body-subtitle #{phase.get('description')}
+        .g-clear-right
+    
+
+.c-phase-submit-container
+    if (userInChallenge)
+        form#c-submit-phase-dataset-form
+            button#c-submit-phase-dataset.btn.btn-small.btn-primary(type="submit")
+                | Submit a dataset to this phase
+    else
+        form#c-join-phase-form
+            button#c-join-phase.btn.btn-small.btn-primary(type="submit")
+                | Join this phase as a participant
+
+.c-phase-leaderboard-container
+    p leaderboard container
