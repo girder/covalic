@@ -1,0 +1,20 @@
+table.c-leaderboard-table
+  thead
+    tr
+      th Rank
+      th User
+      th Score
+  tbody
+    - var i = 0
+    each submission in submissions
+      tr.c-stripe(stripe="#{(i + offset) % 2 ? 'even' : 'odd'}")
+        td= i + offset
+        td
+          a.c-user-link(
+            user-id="#{submission.get('creatorId')}")= submission.get('creatorName')
+        td
+          a.c-score-link(
+            submission-id="#{submission.get('_id')}")= Math.round(submission.get('overallScore') * 1000) / 1000
+      - i ++
+
+.c-leaderboard-pagination
