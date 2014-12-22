@@ -1,1 +1,1 @@
-covalic.View = Backbone.View.extend({});
+covalic.View = girder.View.extend({});
