@@ -21,7 +21,7 @@ import mako
 import os
 
 from girder import constants
-from .rest import submission
+from .rest import submission, phase
 
 
 class CustomAppRoot(object):
@@ -106,7 +106,10 @@ class CustomAppRoot(object):
 
 
 def load(info):
+    phaseExt = phase.PhaseExt()
     info['apiRoot'].covalic_submission = submission.Submission()
+    info['apiRoot'].challenge_phase.route(
+        'GET', (':id', 'groundtruth', 'item'), phaseExt.groundtruthItems)
     info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
                                                      info['serverRoot'])
     info['serverRoot'].api = info['serverRoot'].girder.api
