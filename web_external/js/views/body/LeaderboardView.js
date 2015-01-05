@@ -11,7 +11,8 @@ covalic.views.LeaderboardView = covalic.View.extend({
 
         new covalic.views.SubmissionListWidget({
             el: this.$('.c-leaderboard-container'),
-            phase: this.phase
+            phase: this.phase,
+            parentView: this
         });
     }
 });

@@ -20,10 +20,10 @@ covalic.views.ChallengeView = covalic.View.extend({
             challenge: this.model
         }));
 
-        console.log('CV R');
         new covalic.views.ChallengePhasesView({
             el: this.$('.c-challenge-phase-container'),
-            challenge: this.model
+            challenge: this.model,
+            parentView: this
         }).render();
 
         return this;

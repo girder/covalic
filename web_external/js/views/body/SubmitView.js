@@ -4,6 +4,7 @@
 covalic.views.SubmitView = covalic.View.extend({
     initialize: function (settings) {
         this.phase = settings.phase;
+        this.phase.fetchGroundtruthItems();
         this.render();
     },
 
@@ -17,7 +18,8 @@ covalic.views.SubmitView = covalic.View.extend({
             modal: false,
             noParent: true,
             title: null,
-            overrideStart: true
+            overrideStart: true,
+            parentView: this
         }).render();
 
         this.listenTo(this.uploadWidget, 'g:filesChanged', this.filesSelected);
@@ -25,9 +27,40 @@ covalic.views.SubmitView = covalic.View.extend({
         this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
     },
 
-
+    /**
+     * Called when the user selects or drops files to be uploaded.
+     */
     filesSelected: function (files) {
-       // TODO validate the files
+        var transformName = function (f) {
+            var dotPos = _.indexOf(f.name, '.');
+            if (dotPos === -1) {
+                return f.name;
+            } else {
+                return f.name.substr(0, dotPos);
+            }
+        };
+
+        var matchInfo = this._matchInput(
+            _.map(files, transformName),
+            _.map(this.phase.get('groundtruthItems'), transformName)
+        );
+
+        matchInfo.ok = !(matchInfo.unmatchedGroundtruths.length ||
+                         matchInfo.unmatchedInputs.length);
+
+        this.uploadWidget.setUploadEnabled(matchInfo.ok);
+
+        this.$('.c-submission-mismatch-container').html(covalic.templates.mismatchedInputs({
+            matchInfo: matchInfo
+        }));
+    },
+
+    _matchInput: function (inputs, groundtruths) {
+        return {
+            unmatchedGroundtruths: _.difference(groundtruths, inputs),
+            unmatchedInputs: _.difference(inputs, groundtruths),
+            matched: _.intersection(inputs, groundtruths)
+        };
     },
 
     /**
