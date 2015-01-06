@@ -18,8 +18,6 @@ covalic.views.ChallengePhasesView = covalic.View.extend({
     },
 
     render: function () {
-        console.log("cpv render");
-        console.log(this.collection.models);
         this.$el.html(covalic.templates.challengePhasesPage({
             phases: this.collection.models
         }));

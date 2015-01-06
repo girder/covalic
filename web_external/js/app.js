@@ -4,11 +4,13 @@ covalic.App = girder.App.extend({
         this.$el.html(girder.templates.layout());
 
         new covalic.views.LayoutHeaderView({
-            el: this.$('#g-app-header-container')
+            el: this.$('#g-app-header-container'),
+            parentView: this
         }).render();
 
         new covalic.views.ChallengesView({
-            el: this.$('#g-app-body-container')
+            el: this.$('#g-app-body-container'),
+            parentView: this
         }).render();
 
         this.globalNavView = new girder.views.LayoutGlobalNavView({
@@ -21,7 +23,8 @@ covalic.App = girder.App.extend({
                 icon: 'icon-user',
                 target: 'users'
             }],
-            el: this.$('#g-global-nav-container')
+            el: this.$('#g-global-nav-container'),
+            parentView: this
         }).render();
 
         return this;
