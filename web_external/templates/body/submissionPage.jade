@@ -9,14 +9,14 @@
     |  by
     b  #{submission.get('creatorName')}
 
+.c-submission-display-body
+  if submission.get('overallScore')
+    .c-submission-overall-score-container
+      span.c-pre-text Overall score:
+      span.c-overall-score= Math.round(submission.get('overallScore') * 1000) / 1000
+  else
+    .c-score-pending-container
+      i.icon-spin1.animate-spin
+      .c-text Your submission is being scored, please wait...
 
-if submission.get('overallScore')
-  .c-submission-overall-score-container
-    span.c-pre-text Overall score:
-    span.c-overall-score= Math.round(submission.get('overallScore') * 1000) / 1000
-else
-  .c-score-pending-container
-    i.icon-spin1.animate-spin
-    .c-text Your submission is being scored, please wait...
-
-.c-submission-score-detail-container
+  .c-submission-score-detail-container
