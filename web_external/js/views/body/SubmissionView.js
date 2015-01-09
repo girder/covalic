@@ -47,7 +47,8 @@ covalic.views.SubmissionView = covalic.View.extend({
 
     _progressHandler: function (progress) {
         var status = window.parseInt(progress.data.status);
-        if (status === girder.jobs_JobStatus.SUCCESS) {
+        if (progress.data._id === this.job.get('_id') &&
+                status === girder.jobs_JobStatus.SUCCESS) {
             this.submission.off().on('g:fetched', function () {
                 girder.eventStream.off('g:event.job_status', null, this);
                 this.render();
@@ -62,6 +63,12 @@ covalic.views.SubmissionView = covalic.View.extend({
         this.$('.c-submission-display-body').html(covalic.templates.submissionError({
             job: this.job
         }));
+
+        new girder.views.jobs_JobDetailsWidget({
+            el: this.$('.c-job-details-container'),
+            parentView: this,
+            job: this.job
+        }).render();
     }
 });
 
