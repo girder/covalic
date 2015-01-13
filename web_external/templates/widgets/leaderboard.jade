@@ -5,10 +5,10 @@ table.c-leaderboard-table
       th User
       th Score
   tbody
-    - var i = 0
+    - var i = 1
     each submission in submissions
-      tr.c-stripe(stripe="#{(i + offset) % 2 ? 'even' : 'odd'}")
-        td= i + offset
+      tr.c-stripe(stripe="#{(i + start) % 2 ? 'even' : 'odd'}")
+        td= i + start
         td
           a.c-user-link(
             user-id="#{submission.get('creatorId')}")= submission.get('creatorName')

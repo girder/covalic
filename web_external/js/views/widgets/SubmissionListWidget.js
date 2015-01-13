@@ -14,7 +14,8 @@ covalic.views.SubmissionListWidget = covalic.View.extend({
         this.phase = settings.phase;
 
         new girder.views.LoadingAnimation({
-            el: this.$el
+            el: this.$el,
+            parentView: this
         }).render();
 
         this.collection = new covalic.collections.SubmissionCollection();
@@ -28,13 +29,14 @@ covalic.views.SubmissionListWidget = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.leaderboard({
             submissions: this.collection.models,
-            offset: this.collection.offset,
+            start: this.collection.offset - this.collection.length,
             Math: Math
         }));
 
         new girder.views.PaginateWidget({
             el: this.$('.c-leaderboard-pagination'),
-            collection: this.collection
+            collection: this.collection,
+            parentView: this
         }).render();
     }
 });

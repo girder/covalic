@@ -60,6 +60,8 @@ class CustomAppRoot(object):
               href="${staticRoot}/built/app.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/covalic/covalic.min.css">
+        <link rel="stylesheet"
+              href="${staticRoot}/built/plugins/jobs/plugin.min.css">
         <link rel="icon"
               type="image/png"
               href="${staticRoot}/img/Girder_Favicon.png">
