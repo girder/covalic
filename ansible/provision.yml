@@ -1,0 +1,27 @@
+---
+- name: Girder
+  user: ubuntu
+  hosts: tag_type_girder
+  gather_facts: false
+  roles:
+    - users
+    - common
+    - girder
+
+- name: Mongo
+  user: ubuntu
+  hosts: tag_type_mongo
+  gather_facts: false
+  roles:
+    - users
+    - common
+    - mongodb
+
+- name: Celery
+  user: ubuntu
+  hosts: tag_type_celery
+  gather_facts: false
+  roles:
+    - users
+    - common
+    - celery

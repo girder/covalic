@@ -1,0 +1,42 @@
+---
+- name: Create basic AWS instances for COVALIC
+  hosts: local
+  connection: local
+  gather_facts: false
+  tasks:
+
+    # Provision the web server
+    - local_action:
+        module: ec2
+        key_name: "cpatrick"
+        instance_type: t2.medium
+        image: ami-76e27e1e
+        wait: yes
+        region: us-east-1
+        instance_tags:
+           Name: "dev girder server"
+           type: girder
+
+    # Provision the celery worker
+    - local_action:
+        module: ec2
+        key_name: "cpatrick"
+        instance_type: t2.medium
+        image: ami-76e27e1e
+        wait: yes
+        region: us-east-1
+        instance_tags:
+           Name: "dev celery worker"
+           type: celery
+
+    # Provision the database server
+    - local_action:
+        module: ec2
+        key_name: "cpatrick"
+        instance_type: m3.medium
+        image: ami-76e27e1e
+        wait: yes
+        region: us-east-1
+        instance_tags:
+           Name: "dev mongodb"
+           type: mongo

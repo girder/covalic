@@ -1,0 +1,63 @@
+---
+- name: add nodejs ppa
+  apt_repository: repo='ppa:chris-lea/node.js'
+  sudo: yes
+
+- name: update apt cache
+  apt: update_cache=yes
+  sudo: yes
+
+- name: install package dependencies
+  apt: name={{ item }} state=present
+  sudo: yes
+  with_items:
+    - python-pip
+    - python2.7-dev
+    - build-essential
+    - python-software-properties
+    - libffi-dev
+    - nodejs
+    - nginx
+    - cmake
+    - git
+
+- name: clone girder
+  git: repo=git://github.com/girder/girder.git dest={{ girder_root }} accept_hostkey=yes
+
+- name: install girder requirements
+  pip: requirements={{ girder_root }}/requirements.txt
+  sudo: yes
+
+- name: install grunt and globally
+  npm: name={{ item }} global=yes
+  with_items:
+    - grunt-cli
+  sudo: yes
+
+- name: run npm install
+  npm: path={{ girder_root }}
+
+- name: run grunt init
+  command: grunt init chdir={{ girder_root }}
+
+- name: install girder for development
+  command: python setup.py develop chdir={{ girder_root }}
+  sudo: yes
+
+- name: disable default nginx site
+  command: rm /etc/nginx/sites-enabled/default removes=/etc/nginx/sites-enabled/default
+  sudo: yes
+  notify:
+    - restart nginx
+
+- name: add the girder nginx site
+  template: src=nginx.j2 dest=/etc/nginx/sites-available/girder
+  sudo: yes
+  notify:
+    - restart nginx
+
+- name: enable girder nginx site
+  command: ln -s /etc/nginx/sites-available/girder /etc/nginx/sites-enabled/girder creates=/etc/nginx/sites-enabled/girder
+  sudo: yes
+  notify:
+    - restart nginx

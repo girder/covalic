@@ -1,0 +1,20 @@
+---
+# Install celery and necessary dependencies
+- name: Install celery dependencies
+  sudo: yes
+  apt: name={{ item }} state=present
+  with_items:
+    - rabbitmq-server
+    - python-pip
+    - python-dev
+  tags: celery
+
+- name: Enable rabbitmq-server to survive reboot
+  service: name=rabbitmq-server enabled=yes
+  sudo: yes
+  tags: celery
+
+- name: Install celery
+  pip: name=celery
+  sudo: yes
+  tags: celery
