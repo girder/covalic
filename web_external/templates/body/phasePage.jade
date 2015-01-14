@@ -1,11 +1,10 @@
 .c-phase-header
-
     .c-phase-name.g-body-title
         a.c-challenge-link(c-challenge-id="#{challenge.get('_id')}")
             b #{challenge.get('name')}
         i.icon-angle-right
         | #{phase.get('name')}
-        .c-phase-properties.pull-right  
+        .c-phase-properties.pull-right
             .c-phase-active
                 if phase.get('active')
                     i.icon-sun
@@ -22,15 +21,17 @@
                     | Private
         .c-phase-description.g-body-subtitle #{phase.get('description')}
         .g-clear-right
-    
 
 .c-phase-submit-container
-    if (userInChallenge)
-        button#c-submit-phase-dataset.btn.btn-small.btn-primary
-            | Submit a dataset to this phase
+    if userInChallenge
+        button#c-submit-phase-dataset.btn.btn-lg.btn-success
+            i.icon-upload
+            |  Submit your results
     else
-        button#c-join-phase.btn.btn-small.btn-primary
-            | Join this phase as a participant
+        button#c-join-phase.btn.btn-success
+            i.
+            |  Participate in this phase
 
-.c-phase-leaderboard-container
-    p leaderboard container
+.c-leaderboard-container
+  .c-title Leaderboard
+  .c-leaderboard-widget-container
