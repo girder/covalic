@@ -1,10 +1,10 @@
 covalic.views.PhaseView = covalic.View.extend({
 
     events: {
-        'click #c-submit-phase-dataset': function(event) {
+        'click #c-submit-phase-dataset': function (event) {
             covalic.router.navigate('phase/' + this.model.get('_id') + '/submit', {trigger: true});
         },
-        'click #c-join-phase': function(event) {
+        'click #c-join-phase': function (event) {
             if (!girder.currentUser) {
                 girder.events.trigger('g:loginUi');
             } else {
@@ -21,7 +21,7 @@ covalic.views.PhaseView = covalic.View.extend({
                 }, this));
             }
         },
-        'click a.c-challenge-link': function(event) {
+        'click a.c-challenge-link': function (event) {
             var id = $(event.currentTarget).attr('c-challenge-id');
             covalic.router.navigate('challenge/' + id, {trigger: true});
         }
@@ -48,13 +48,13 @@ covalic.views.PhaseView = covalic.View.extend({
             this.model.set('_id', settings.id);
 
             this.model.on('g:fetched', function() {
-               this.render();
+                this.render();
             }, this).fetch();
         }
 
     },
 
-    isUserInChallenge: function() {
+    isUserInChallenge: function () {
         if (!girder.currentUser) {
             return false;
         }
@@ -69,6 +69,12 @@ covalic.views.PhaseView = covalic.View.extend({
             userInChallenge: this.isUserInChallenge(),
             challenge: this.challenge
         }));
+
+        new covalic.views.LeaderboardWidget({
+            phase: this.model,
+            el: this.$('.c-leaderboard-widget-container'),
+            parentView: this
+        }).render();
 
         return this;
     }

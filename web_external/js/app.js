@@ -8,11 +8,6 @@ covalic.App = girder.App.extend({
             parentView: this
         }).render();
 
-        new covalic.views.ChallengesView({
-            el: this.$('#g-app-body-container'),
-            parentView: this
-        }).render();
-
         this.globalNavView = new girder.views.LayoutGlobalNavView({
             navItems: [{
                 name: 'Challenges',
