@@ -61,14 +61,15 @@ class Submission(Model):
         for result in cursor:
             yield result
 
-    def createSubmission(self, creator, phase, folder, job=None):
+    def createSubmission(self, creator, phase, folder, job=None, title=None):
         submission = {
             'creatorId': creator['_id'],
             'creatorName': creator['firstName'] + ' ' + creator['lastName'],
             'phaseId': phase['_id'],
             'folderId': folder['_id'],
             'created': datetime.datetime.utcnow(),
-            'score': None
+            'score': None,
+            'title': title
         }
 
         if job is not None:

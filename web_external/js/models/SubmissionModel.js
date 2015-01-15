@@ -1,13 +1,14 @@
 covalic.models.SubmissionModel = girder.Model.extend({
     resourceName: 'covalic_submission',
 
-    postSubmission: function (phaseId, folderId) {
+    postSubmission: function (opts) {
         girder.restRequest({
             path: this.resourceName,
             type: 'POST',
             data: {
-                folderId: folderId,
-                phaseId: phaseId
+                folderId: opts.folderId,
+                phaseId: opts.phaseId,
+                title: opts.title
             }
         }).done(_.bind(function (resp) {
             this.set(resp);

@@ -3,6 +3,7 @@ table.c-leaderboard-table
     tr
       th Rank
       th User
+      th Title
       th Date
       th Score
   tbody
@@ -13,6 +14,7 @@ table.c-leaderboard-table
         td
           a.c-user-link(
             user-id="#{submission.get('creatorId')}")= submission.get('creatorName')
+        td= submission.get('title') || '--'
         td(title="#{submission.get('created')}")= girder.formatDate(submission.get('created'), girder.DATE_DAY)
         td
           a.c-score-link(

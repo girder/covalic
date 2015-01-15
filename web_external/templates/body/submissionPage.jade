@@ -3,7 +3,9 @@
     a.c-leaderboard-button
       |  View leaderboard&nbsp;
       i.icon-right-big
-  .c-submission-title Submission results
+  .c-submission-title Submission details
+  if submission.get('title')
+    .c-submission-title-text= submission.get('title')
   .c-submission-subtitle Submitted
     b  #{created}
     |  by

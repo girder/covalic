@@ -76,17 +76,19 @@ class Submission(Resource):
     def postSubmission(self, phase, folder, params):
         user = self.getCurrentUser()
 
+        self.requireParams('title', params)
+
         # Only users in the participant group (or with write access) may submit
         if phase['participantGroupId'] not in user['groups']:
             self.model('phase', 'challenge').requireAccess(
                 phase, user, level=AccessType.WRITE)
 
-        title = '{} submission: {}'.format(phase['name'], folder['name'])
+        jobTitle = '{} submission: {}'.format(phase['name'], folder['name'])
         apiUrl = os.path.dirname(cherrypy.url())
         jobModel = self.model('job', 'jobs')
 
         job = jobModel.createJob(
-            title=title, type='covalic_score', handler='celery', user=user)
+            title=jobTitle, type='covalic_score', handler='celery', user=user)
         jobToken = jobModel.createJobToken(job)
         celeryUser = getCeleryUser()
         celeryToken = self.model('token').createToken(user=celeryUser, days=7)
@@ -96,8 +98,9 @@ class Submission(Resource):
         groundTruth = self.model('folder').load(phase['groundTruthFolderId'],
                                                 force=True)
 
+        title = params['title'].strip()
         submission = self.model('submission', 'covalic').createSubmission(
-            user, phase, folder, job)
+            user, phase, folder, job, title)
 
         if not self.model('phase', 'challenge').hasAccess(
                 phase, user=celeryUser, level=AccessType.ADMIN):
@@ -152,6 +155,7 @@ class Submission(Resource):
         Description('Make a submission to the challenge.')
         .param('phaseId', 'The ID of the challenge phase to submit to.')
         .param('folderId', 'The folder ID containing the submission data.')
+        .param('title', 'Title for the submission')
         .errorResponse('You are not a member of the participant group.', 403)
         .errorResponse('The ID was invalid.'))
 
