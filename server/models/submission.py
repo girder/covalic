@@ -36,16 +36,15 @@ class Submission(Model):
         if doc.get('score') is not None:
             scoring.computeAverageScores(doc['score'])
             doc['overallScore'] = scoring.computeOverallScore(doc['score'])
-            if 'latest' not in doc:
-                doc['latest'] = True
+            doc['latest'] = True
 
-                Model.update(self, query={
-                    'phaseId': doc['phaseId'],
-                    'creatorId': doc['creatorId'],
-                    'latest': True
-                }, update={
-                    '$set': {'latest': False}
-                })
+            Model.update(self, query={
+                'phaseId': doc['phaseId'],
+                'creatorId': doc['creatorId'],
+                'latest': True
+            }, update={
+                '$set': {'latest': False}
+            })
 
         return doc
 
