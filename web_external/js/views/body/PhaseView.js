@@ -4,6 +4,7 @@ covalic.views.PhaseView = covalic.View.extend({
         'click #c-submit-phase-dataset': function (event) {
             covalic.router.navigate('phase/' + this.model.get('_id') + '/submit', {trigger: true});
         },
+
         'click #c-join-phase': function (event) {
             if (!girder.currentUser) {
                 girder.events.trigger('g:loginUi');
@@ -21,9 +22,25 @@ covalic.views.PhaseView = covalic.View.extend({
                 }, this));
             }
         },
+
         'click a.c-challenge-link': function (event) {
             var id = $(event.currentTarget).attr('c-challenge-id');
             covalic.router.navigate('challenge/' + id, {trigger: true});
+        },
+
+        'click a.c-edit-phase': function () {
+            var container = $('#g-dialog-container');
+
+            if (!this.editPhaseWidget) {
+                this.editPhaseWidget = new covalic.views.EditPhaseWidget({
+                    el: container,
+                    model: this.model,
+                    parentView: this
+                }).on('g:saved', function () {
+                    this.render();
+                }, this);
+            }
+            this.editPhaseWidget.render();
         }
     },
 
@@ -66,6 +83,7 @@ covalic.views.PhaseView = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.phasePage({
             phase: this.model,
+            girder: girder,
             userInChallenge: this.isUserInChallenge(),
             challenge: this.challenge
         }));

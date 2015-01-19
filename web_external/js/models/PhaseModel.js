@@ -1,4 +1,4 @@
-covalic.models.PhaseModel = girder.Model.extend({
+covalic.models.PhaseModel = girder.AccessControlledModel.extend({
     resourceName: 'challenge_phase',
 
     fetchGroundtruthItems: function () {
