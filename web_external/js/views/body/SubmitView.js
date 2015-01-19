@@ -2,25 +2,36 @@
  * Page where users upload a submission.
  */
 covalic.views.SubmitView = covalic.View.extend({
+    events: {
+        'input .c-submission-title-input': function () {
+            this.title = this.$('.c-submission-title-input').val().trim();
+            this.uploadWidget.setUploadEnabled(!!this.title && this.filesCorrect);
+        }
+    },
+
     initialize: function (settings) {
         this.phase = settings.phase;
         this.phase.fetchGroundtruthItems();
+        this.filesCorrect = false;
         this.render();
     },
 
     render: function () {
         this.$el.html(covalic.templates.submitPage({
-            phase: this.phase
+            phase: this.phase,
+            maxTitleLength: 80
         }));
 
         this.uploadWidget = new girder.views.UploadWidget({
-            el: this.$('.c-submit-uploader-container'),
+            el: this.$('.c-submit-upload-widget'),
             modal: false,
             noParent: true,
             title: null,
             overrideStart: true,
             parentView: this
         }).render();
+
+        this.$('input.c-submission-title-input').focus();
 
         this.listenTo(this.uploadWidget, 'g:filesChanged', this.filesSelected);
         this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
@@ -48,11 +59,21 @@ covalic.views.SubmitView = covalic.View.extend({
         matchInfo.ok = !(matchInfo.unmatchedGroundtruths.length ||
                          matchInfo.unmatchedInputs.length);
 
-        this.uploadWidget.setUploadEnabled(matchInfo.ok);
+        var titleOk = this.$('input.c-submission-title-input').val().trim().length > 0;
+
+        if (!titleOk) {
+            this.$('input.c-submission-title').focus();
+            this.$('.c-submission-title-error').text(
+                'Please enter a title for your submission.');
+        }
+
+        this.uploadWidget.setUploadEnabled(matchInfo.ok && titleOk);
 
         this.$('.c-submission-mismatch-container').html(covalic.templates.mismatchedInputs({
             matchInfo: matchInfo
         }));
+
+        this.filesCorrect = matchInfo.ok;
     },
 
     _matchInput: function (inputs, groundtruths) {
@@ -94,7 +115,11 @@ covalic.views.SubmitView = covalic.View.extend({
         var submission = new covalic.models.SubmissionModel();
         submission.on('c:submissionPosted', function () {
             covalic.router.navigate('submission/' + submission.get('_id'), {trigger: true});
-        }, this).postSubmission(this.phase.get('_id'), this.folder.get('_id'));
+        }, this).postSubmission({
+            phaseId: this.phase.get('_id'),
+            folderId: this.folder.get('_id'),
+            title: this.title
+        });
     }
 });
 
