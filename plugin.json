@@ -1,5 +1,6 @@
 {
     "name": "COVALIC Challenges",
+    "description": "An application for hosting grand challenges.",
     "version": "0.1.0",
     "dependencies": [
         "challenge",
@@ -8,7 +9,7 @@
     "grunt": {
         "file": "Gruntfile.js",
         "defaultTargets": [
-            "defaultCovalic"
+            "covalic-web"
         ]
     }
 }

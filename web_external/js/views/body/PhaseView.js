@@ -29,11 +29,9 @@ covalic.views.PhaseView = covalic.View.extend({
         },
 
         'click a.c-edit-phase': function () {
-            var container = $('#g-dialog-container');
-
             if (!this.editPhaseWidget) {
                 this.editPhaseWidget = new covalic.views.EditPhaseWidget({
-                    el: container,
+                    el: $('#g-dialog-container'),
                     model: this.model,
                     parentView: this
                 }).on('g:saved', function () {
@@ -41,6 +39,21 @@ covalic.views.PhaseView = covalic.View.extend({
                 }, this);
             }
             this.editPhaseWidget.render();
+        },
+
+        'click .c-phase-access-control': function () {
+            if (!this.accessWidget) {
+                this.accessWidget = new girder.views.AccessWidget({
+                    el: $('#g-dialog-container'),
+                    model: this.model,
+                    modelType: 'challenge_phase',
+                    parentView: this
+                }).on('g:saved', function () {
+                    this.render();
+                }, this);
+            } else {
+                this.accessWidget.render();
+            }
         }
     },
 
