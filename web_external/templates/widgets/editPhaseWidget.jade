@@ -10,14 +10,18 @@
             | Create phase
       .modal-body
         .form-group
-          label.control-label(for="g-name") Name
+          label.control-label(for="c-phase-name") Name
           input.input-sm#c-phase-name.form-control(type="text", placeholder="Enter phase name")
         .form-group
-          label.control-label(for="g-description") Description (optional)
+          label.control-label(for="c-phase-description") Description (optional)
           textarea.input-sm#c-phase-description.form-control(placeholder="Enter phase description")
         .form-group
-          label.control-label(for="g-description") Instructions (optional)
-          textarea.input-sm#c-phase-instructions.form-control(placeholder="Enter phase instructions")
+          label.control-label(for="c-phase-instructions")
+            | Instructions (supports
+            a(target="_blank", href="http://daringfireball.net/projects/markdown")  Markdown
+            |  syntax)
+          textarea.input-sm#c-phase-instructions.form-control(
+            placeholder="Enter phase instructions", rows="4")
         .checkbox
           label
             input#c-phase-active(type="checkbox")

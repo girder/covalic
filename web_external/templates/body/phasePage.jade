@@ -31,6 +31,10 @@
         .c-phase-description.g-body-subtitle #{phase.get('description')}
         .g-clear-right
 
+if phase.get('instructions')
+  .c-phase-instructions-container
+    .c-phase-instructions
+
 .c-phase-submit-container
     if userInChallenge
         button#c-submit-phase-dataset.btn.btn-lg.btn-success
