@@ -110,9 +110,8 @@ module.exports = function (grunt) {
             });
             defaultTasks.push('copy:' + pluginName);
         }
-
     };
 
     configureCovalic();
-    grunt.registerTask('defaultCovalic', defaultTasks);
+    grunt.registerTask('covalic-web', defaultTasks);
 };

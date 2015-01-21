@@ -4,6 +4,7 @@ covalic.views.PhaseView = covalic.View.extend({
         'click #c-submit-phase-dataset': function (event) {
             covalic.router.navigate('phase/' + this.model.get('_id') + '/submit', {trigger: true});
         },
+
         'click #c-join-phase': function (event) {
             if (!girder.currentUser) {
                 girder.events.trigger('g:loginUi');
@@ -21,9 +22,38 @@ covalic.views.PhaseView = covalic.View.extend({
                 }, this));
             }
         },
+
         'click a.c-challenge-link': function (event) {
             var id = $(event.currentTarget).attr('c-challenge-id');
             covalic.router.navigate('challenge/' + id, {trigger: true});
+        },
+
+        'click a.c-edit-phase': function () {
+            if (!this.editPhaseWidget) {
+                this.editPhaseWidget = new covalic.views.EditPhaseWidget({
+                    el: $('#g-dialog-container'),
+                    model: this.model,
+                    parentView: this
+                }).on('g:saved', function () {
+                    this.render();
+                }, this);
+            }
+            this.editPhaseWidget.render();
+        },
+
+        'click .c-phase-access-control': function () {
+            if (!this.accessWidget) {
+                this.accessWidget = new girder.views.AccessWidget({
+                    el: $('#g-dialog-container'),
+                    model: this.model,
+                    modelType: 'challenge_phase',
+                    parentView: this
+                }).on('g:saved', function () {
+                    this.render();
+                }, this);
+            } else {
+                this.accessWidget.render();
+            }
         }
     },
 
@@ -66,9 +96,15 @@ covalic.views.PhaseView = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.phasePage({
             phase: this.model,
+            girder: girder,
             userInChallenge: this.isUserInChallenge(),
             challenge: this.challenge
         }));
+
+        if (this.model.get('instructions')) {
+            girder.renderMarkdown(
+                this.model.get('instructions'), this.$('.c-phase-instructions'));
+        }
 
         new covalic.views.LeaderboardWidget({
             phase: this.model,
