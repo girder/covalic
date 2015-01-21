@@ -22,7 +22,9 @@ covalic.views.SubmissionListWidget = covalic.View.extend({
         this.collection.on('g:changed', function () {
             this.render();
         }, this).fetch({
-            phaseId: this.phase.get('_id')
+            phaseId: this.phase.get('_id'),
+            sort: 'overallScore',
+            sortdir: girder.SORT_DESC
         });
     },
 

@@ -29,13 +29,14 @@ class PhaseExt(Resource):
                level=AccessType.READ)
     def groundtruthItems(self, phase, params):
         user = self.getCurrentUser()
+        # All participants can see the names of the ground truth items in
+        # order to validate their submissions, even if they don't have
+        # read access to the folder.
         folder = self.model('folder').load(
-            phase['groundTruthFolderId'], level=AccessType.READ,
-            user=user, exc=True)
+            phase['groundTruthFolderId'], force=True)
 
         results = self.model('folder').childItems(folder, limit=0)
-        itemModel = self.model('item')
-        return [itemModel.filter(i) for i in results]
+        return [{'name': item['name']} for item in results]
     groundtruthItems.description = (
-        Description('List all ground truth items for a challenge phase.')
+        Description('List all ground truth item names for a challenge phase.')
         .param('id', 'The ID of the phase.', paramType='path'))
