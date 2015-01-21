@@ -5,6 +5,7 @@ covalic.views.SubmitView = covalic.View.extend({
     events: {
         'input .c-submission-title-input': function () {
             this.title = this.$('.c-submission-title-input').val().trim();
+            this.$('.c-submission-title-error').empty();
             this.uploadWidget.setUploadEnabled(!!this.title && this.filesCorrect);
         }
     },

@@ -17,7 +17,7 @@ covalic.views.SubmissionView = covalic.View.extend({
             girder.eventStream.on('g:event.job_status', this._progressHandler, this);
 
             if (girder.currentUser && (
-                    girder.currentUser.get('_id') === this.submission.get('userId') ||
+                    girder.currentUser.get('_id') === this.submission.get('creatorId') ||
                     girder.currentUser.get('admin'))) {
                 this.job = new girder.models.JobModel({
                     _id: this.submission.get('jobId')
