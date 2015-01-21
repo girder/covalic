@@ -7,7 +7,11 @@
     - region: us-east-1
     - pub_key_name: "covalic_admin"
     - ami: ami-76e27e1e
-    - ec2_instance_type: t2.medium
+    - mq_port: 5672
+    - mongo_port: 27107
+    - ec2_webserver_instance_type: t2.medium
+    - ec2_celeryworker_instance_type: t2.medium
+    - ec2_mongodb_instance_type: m3.medium
 
   tasks:
 
@@ -15,44 +19,85 @@
       fail: msg="You did not define a pod name to manage all resources. Example definition | -e 'pod=dev'"
       when: pod is not defined
 
-    # Provision the web server
-    - local_action:
-        module: ec2
+    - name: Create an AWS security group for the webserver instances
+      ec2_group:
+        name: "webserver_{{ pod }}"
+        description: security group for covalic webserver machines
+        region: "{{ region }}"
+        rules:
+            # HTTP from everywhere
+            - proto: tcp
+              from_port: 80
+              to_port: 80
+              cidr_ip: 0.0.0.0/0
+            # HTTPS from everywhere
+            - proto: tcp
+              from_port: 443
+              to_port: 443
+              cidr_ip: 0.0.0.0/0
+            # SSH from everywhere
+            - proto: tcp
+              from_port: 22
+              to_port: 22
+              cidr_ip: 0.0.0.0/0
+
+    - name: Create an AWS security group for the internal instances
+      ec2_group:
+        name: "backend_{{ pod }}"
+        description: security group for covalic backend machines
+        region: "{{ region }}"
+        rules:
+            # SSH from everywhere
+            - proto: tcp
+              from_port: 22
+              to_port: 22
+              cidr_ip: 0.0.0.0/0
+            # mq connections from webserver security group
+            - proto: tcp
+              from_port: "{{ mq_port }}"
+              to_port: "{{ mq_port }}" 
+              group_name: "webserver_{{ pod }}"
+            # mongo connections from webserver security group
+            - proto: tcp
+              from_port: "{{ mongo_port }}"
+              to_port: "{{ mongo_port }}" 
+              group_name: "webserver_{{ pod }}"
+
+    - name: Create the web server
+      ec2:
         key_name: "{{ pub_key_name }}"
-        instance_type: "{{ ec2_instance_type }}"
+        instance_type: "{{ ec2_webserver_instance_type }}"
         image: "{{ ami }}"
         region: "{{ region }}"
         wait: yes
+        group: "webserver_{{ pod }}"
         instance_tags:
            Name: "{{ pod }} girder server"
            type: girder
            pod: "{{ pod }}"
-  
-     #Provision the celery worker
-     - local_action:
-        module: ec2
+
+    - name: Create the celery worker
+      ec2:
         key_name: "{{ pub_key_name }}"
-        instance_type: "{{ ec2_instance_type }}"
+        instance_type: "{{ ec2_celeryworker_instance_type }}"
         image: "{{ ami }}"
         region: "{{ region }}"
         wait: yes
+        group: "backend_{{ pod }}"
         instance_tags:
            Name: "{{ pod }} celery worker"
            type: celery
            pod: "{{ pod }}"
 
-     #Provision the database server
-     - local_action:
-        module: ec2
+    - name: Create the mongodb worker
+      ec2:
         key_name: "{{ pub_key_name }}"
-        instance_type: "{{ ec2_instance_type }}"
+        instance_type: "{{ ec2_mongodb_instance_type }}"
         image: "{{ ami }}"
         region: "{{ region }}"
         wait: yes
+        group: "backend_{{ pod }}"
         instance_tags:
            Name: "{{ pod }} mongodb"
-           type: mongo
+           type: mongodb
            pod: "{{ pod }}"
-
-
-
