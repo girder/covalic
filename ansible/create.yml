@@ -3,40 +3,56 @@
   hosts: local
   connection: local
   gather_facts: false
+  vars:
+    - region: us-east-1
+    - pub_key_name: "covalic_admin"
+    - ami: ami-76e27e1e
+    - ec2_instance_type: t2.medium
+
   tasks:
+
+    - name: User message
+      fail: msg="You did not define a pod name to manage all resources. Example definition | -e 'pod=dev'"
+      when: pod is not defined
 
     # Provision the web server
     - local_action:
         module: ec2
-        key_name: "cpatrick"
-        instance_type: t2.medium
-        image: ami-76e27e1e
+        key_name: "{{ pub_key_name }}"
+        instance_type: "{{ ec2_instance_type }}"
+        image: "{{ ami }}"
+        region: "{{ region }}"
         wait: yes
-        region: us-east-1
         instance_tags:
-           Name: "dev girder server"
+           Name: "{{ pod }} girder server"
            type: girder
-
-    # Provision the celery worker
-    - local_action:
+           pod: "{{ pod }}"
+  
+     #Provision the celery worker
+     - local_action:
         module: ec2
-        key_name: "cpatrick"
-        instance_type: t2.medium
-        image: ami-76e27e1e
+        key_name: "{{ pub_key_name }}"
+        instance_type: "{{ ec2_instance_type }}"
+        image: "{{ ami }}"
+        region: "{{ region }}"
         wait: yes
-        region: us-east-1
         instance_tags:
-           Name: "dev celery worker"
+           Name: "{{ pod }} celery worker"
            type: celery
+           pod: "{{ pod }}"
 
-    # Provision the database server
-    - local_action:
+     #Provision the database server
+     - local_action:
         module: ec2
-        key_name: "cpatrick"
-        instance_type: m3.medium
-        image: ami-76e27e1e
+        key_name: "{{ pub_key_name }}"
+        instance_type: "{{ ec2_instance_type }}"
+        image: "{{ ami }}"
+        region: "{{ region }}"
         wait: yes
-        region: us-east-1
         instance_tags:
-           Name: "dev mongodb"
+           Name: "{{ pod }} mongodb"
            type: mongo
+           pod: "{{ pod }}"
+
+
+
