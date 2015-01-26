@@ -11,6 +11,10 @@
           a.c-edit-challenge(role="menuitem")
             i.icon-edit
             | Edit info
+        li(role="presentation")
+          a.c-create-phase(role="menuitem")
+            i.icon-plus
+            | Create new phase
         if (challenge.getAccessLevel() >= girder.AccessType.ADMIN)
           li.divider(role="presentation")
           li(role="presentation")
@@ -22,8 +26,8 @@
               i.icon-trash
               | Delete challenge
 
-  .c-challenge-title #{challenge.get('name')}
-  .c-challenge-description #{challenge.get('description')}
+  .c-challenge-title= challenge.get('name')
+  .c-challenge-description= challenge.get('description')
 
 .c-challenge-instructions-container
 
