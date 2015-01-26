@@ -23,6 +23,18 @@ covalic.views.ChallengeView = covalic.View.extend({
             } else {
                 this.accessWidget.render();
             }
+        },
+
+        'click .c-create-phase': function () {
+            new covalic.views.EditPhaseWidget({
+                el: $('#g-dialog-container'),
+                challenge: this.model,
+                parentView: this
+            }).on('g:saved', function () {
+                this.phasesView.initialize({
+                    challenge: this.model
+                });
+            }, this).render();
         }
     },
 
@@ -30,15 +42,24 @@ covalic.views.ChallengeView = covalic.View.extend({
         girder.cancelRestRequests('fetch');
         if (settings.challenge) {
             this.model = settings.challenge;
+            this._initWidgets();
             this.render();
         } else if (settings.id) {
             this.model = new girder.models.ChallengeModel();
             this.model.set('_id', settings.id);
 
             this.model.on('g:fetched', function() {
-               this.render();
+                this._initWidgets();
+                this.render();
             }, this).fetch();
         }
+    },
+
+    _initWidgets: function () {
+        this.phasesView = new covalic.views.ChallengePhasesView({
+            challenge: this.model,
+            parentView: this
+        });
     },
 
     render: function () {
@@ -56,11 +77,7 @@ covalic.views.ChallengeView = covalic.View.extend({
             instructionsContainer.hide();
         }
 
-        new covalic.views.ChallengePhasesView({
-            el: this.$('.c-challenge-phase-container'),
-            challenge: this.model,
-            parentView: this
-        }).render();
+        this.phasesView.setElement(this.$('.c-challenge-phase-container')).render();
 
         return this;
     }

@@ -16,7 +16,9 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
             if (this.model) {
                 this.updatePhase(fields);
             } else {
-                this.createPhase(fields);
+                this.createPhase(_.extend({
+                    'challengeId': this.challenge.get('_id')
+                }, fields));
             }
 
             this.$('button.c-save-phase').addClass('disabled');
@@ -26,6 +28,7 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
 
     initialize: function (settings) {
         this.model = settings.model || null;
+        this.challenge = settings.challenge || null;
     },
 
     render: function () {
