@@ -1,4 +1,15 @@
 covalic.views.ChallengeView = covalic.View.extend({
+    events: {
+        'click a.c-edit-challenge': function () {
+            new covalic.views.EditChallengeWidget({
+                el: $('#g-dialog-container'),
+                model: this.model,
+                parentView: this
+            }).on('g:saved', function (challenge) {
+                this.render();
+            }, this).render();
+        }
+    },
 
     initialize: function (settings) {
         girder.cancelRestRequests('fetch');
@@ -17,8 +28,18 @@ covalic.views.ChallengeView = covalic.View.extend({
 
     render: function () {
         this.$el.html(covalic.templates.challengePage({
-            challenge: this.model
+            challenge: this.model,
+            girder: girder
         }));
+
+        var instructionsContainer = this.$('.c-challenge-instructions-container');
+        if (this.model.get('instructions')) {
+            girder.renderMarkdown(this.model.get('instructions'),
+                                  instructionsContainer);
+            instructionsContainer.show();
+        } else {
+            instructionsContainer.hide();
+        }
 
         new covalic.views.ChallengePhasesView({
             el: this.$('.c-challenge-phase-container'),
