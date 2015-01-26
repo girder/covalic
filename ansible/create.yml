@@ -8,7 +8,7 @@
     - pub_key_name: "covalic_admin"
     - ami: ami-76e27e1e
     - mq_port: 5672
-    - mongo_port: 27107
+    - mongo_port: 27017
     - ec2_webserver_instance_type: t2.medium
     - ec2_celeryworker_instance_type: t2.medium
     - ec2_mongodb_instance_type: m3.medium
@@ -25,6 +25,21 @@
         description: security group for covalic webserver machines
         region: "{{ region }}"
         rules:
+            # SSH from KHQ
+            - proto: tcp
+              from_port: 22
+              to_port: 22
+              cidr_ip: 66.194.253.20/32
+            # SSH from KRS
+            - proto: tcp
+              from_port: 22
+              to_port: 22
+              cidr_ip: 97.65.130.163/32
+            # SSH from KSW
+            - proto: tcp
+              from_port: 22
+              to_port: 22
+              cidr_ip: 23.31.117.189/32
             # HTTP from everywhere
             - proto: tcp
               from_port: 80
@@ -35,23 +50,40 @@
               from_port: 443
               to_port: 443
               cidr_ip: 0.0.0.0/0
-            # SSH from everywhere
-            - proto: tcp
-              from_port: 22
-              to_port: 22
+        rules_egress:
+            # egress to everywhere
+            - proto: all
+              from_port: all
+              to_port: all
               cidr_ip: 0.0.0.0/0
 
+ 
     - name: Create an AWS security group for the internal instances
       ec2_group:
         name: "backend_{{ pod }}"
         description: security group for covalic backend machines
         region: "{{ region }}"
         rules:
-            # SSH from everywhere
+            # Ping from webserver
+            - proto: ICMP
+              from_port: -1
+              to_port: -1
+              group_name: "webserver_{{ pod }}"
+            # SSH from KHQ
             - proto: tcp
               from_port: 22
               to_port: 22
-              cidr_ip: 0.0.0.0/0
+              cidr_ip: 66.194.253.20/32
+            # SSH from KRS
+            - proto: tcp
+              from_port: 22
+              to_port: 22
+              cidr_ip: 97.65.130.163/32
+            # SSH from KSW
+            - proto: tcp
+              from_port: 22
+              to_port: 22
+              cidr_ip: 23.31.117.189/32
             # mq connections from webserver security group
             - proto: tcp
               from_port: "{{ mq_port }}"
@@ -62,19 +94,41 @@
               from_port: "{{ mongo_port }}"
               to_port: "{{ mongo_port }}" 
               group_name: "webserver_{{ pod }}"
+        rules_egress:
+            # egress to everywhere
+            - proto: all
+              from_port: all
+              to_port: all
+              cidr_ip: 0.0.0.0/0
+
 
     - name: Create the web server
       ec2:
         key_name: "{{ pub_key_name }}"
         instance_type: "{{ ec2_webserver_instance_type }}"
         image: "{{ ami }}"
-        region: "{{ region }}"
         wait: yes
         group: "webserver_{{ pod }}"
+        region: "{{ region }}"
         instance_tags:
            Name: "{{ pod }} girder server"
            type: girder
            pod: "{{ pod }}"
+      register: girder_webserver  
+
+    - name: create assetstore ebs volume for girder web server
+      ec2_vol:
+        instance: "{{ item.id }}"
+        region: "{{ region }}"
+        volume_size: 512
+        device_name: /dev/xvdb
+        with_items: girder_webserver.instances
+      tags: ebs
+
+    - name: associate new elastic IP with girder webserver
+      ec2_eip: "instance_id={{ item }} region={{ region }}"
+      with_items: girder_webserver.instance_ids
+      register: eip
 
     - name: Create the celery worker
       ec2:
