@@ -1,5 +1,4 @@
 covalic.views.ChallengePhasesView = covalic.View.extend({
-
     events: {
         'click a.c-phase-link': function (event) {
             var cid = $(event.currentTarget).attr('c-phase-cid');
