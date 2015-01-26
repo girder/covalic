@@ -2,10 +2,12 @@
 - name: add nodejs ppa
   apt_repository: repo='ppa:chris-lea/node.js'
   sudo: yes
+  tags: girder
 
 - name: update apt cache
   apt: update_cache=yes
   sudo: yes
+  tags: girder
 
 - name: install package dependencies
   apt: name={{ item }} state=present
@@ -20,44 +22,177 @@
     - nginx
     - cmake
     - git
+  tags: girder
 
 - name: clone girder
   git: repo=git://github.com/girder/girder.git dest={{ girder_root }} accept_hostkey=yes
+  tags: girder
+
+- name: clone covalic plugin
+  git: repo=git://github.com/girder/covalic.git dest={{ girder_root }}/plugins/covalic accept_hostkey=yes
+  tags: girder
+
+- name: clone challenge plugin
+  git: repo=git://github.com/girder/challenge.git dest={{ girder_root }}/plugins/challenge accept_hostkey=yes
+  tags: girder
 
 - name: install girder requirements
   pip: requirements={{ girder_root }}/requirements.txt
   sudo: yes
+  tags: girder
 
-- name: install grunt and globally
+- name: install celery_jobs plugin requirements
+  pip: requirements={{ girder_root }}/plugins/celery_jobs/requirements.txt
+  sudo: yes
+  tags: girder
+
+- name: install grunt globally
   npm: name={{ item }} global=yes
   with_items:
     - grunt-cli
   sudo: yes
+  tags: girder
 
 - name: run npm install
   npm: path={{ girder_root }}
+  tags: girder
 
 - name: run grunt init
   command: grunt init chdir={{ girder_root }}
+  tags: girder
+
+# run grunt to build covalic as an external web app
+- name: run grunt
+  command: grunt chdir={{ girder_root }}
+  tags: girder
 
 - name: install girder for development
   command: python setup.py develop chdir={{ girder_root }}
   sudo: yes
+  tags: girder
+
+# as things stand, this probably won't work with multiple pods
+# or with multiple mongodb servers as it will just take the first mongodb
+# server of any with tag type=mongodb
+- name: set the mongodb server ip in girder local config
+  lineinfile:
+    dest: /opt/covalic/girder/girder/conf/girder.local.cfg
+    state: present
+    regexp: 'mongodb://(.*):27017'
+    line: "uri: \"mongodb://{{hostvars[groups.tag_type_mongodb[0]].ec2_private_ip_address}}:27017/girder\""
+  tags: girder
+
+- name: install Girder as a service
+  copy: src=girder.conf dest=/etc/init/girder.conf mode=644 owner=root
+  sudo: yes
+  tags: girder
+
+- name: Start Girder as a service
+  service: name=girder state=restarted enabled=yes
+  sudo: yes
+  tags: girder
+
+- name: add www-data to developers so nginx can serve static content
+  user: name=www-data state=present groups=developers append=yes
+  sudo: yes
+  tags: girder
 
 - name: disable default nginx site
   command: rm /etc/nginx/sites-enabled/default removes=/etc/nginx/sites-enabled/default
   sudo: yes
-  notify:
-    - restart nginx
+  tags: girder
 
 - name: add the girder nginx site
   template: src=nginx.j2 dest=/etc/nginx/sites-available/girder
   sudo: yes
-  notify:
-    - restart nginx
+  tags: girder
 
 - name: enable girder nginx site
   command: ln -s /etc/nginx/sites-available/girder /etc/nginx/sites-enabled/girder creates=/etc/nginx/sites-enabled/girder
   sudo: yes
-  notify:
-    - restart nginx
+  tags: girder
+
+# force a restart of nginx to pick up any changes in girder
+- name: Restart nginx service
+  service: name=nginx state=restarted enabled=yes
+  sudo: yes
+  tags: girder
+
+- name: Log in as covalic admin
+  shell: "curl -u {{girder_admin_user}}:{{girder_admin_password}} http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user/authentication"
+  register: token_response
+  tags: girder
+
+- name: Create admin covalic user if there is no token returned from login
+  shell: "curl --data \"login={{girder_admin_user}}&firstName=covalic&lastName=admin&password={{girder_admin_password}}&email={{girder_admin_email}}\" http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user"
+  register: admin_user_response
+  tags: girder
+  when: (token_response.stdout|from_json).authToken is not defined
+
+# logging in again to ensure that we have a valid token regardless of previous steps
+- name: Log in as covalic admin after registering an admin user
+  shell: "curl -u {{girder_admin_user}}:{{girder_admin_password}} http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user/authentication"
+  register: token_response
+  tags: girder
+
+- name: Enable grits plugin
+  shell: "curl -X PUT --data 'plugins={{girder_plugins|to_json}}&token={{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/system/plugins"
+  register: plugin_response
+  tags: girder
+
+- name: Search for the celery user
+  shell: "curl -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user?text={{girder_celery_user}}"
+  register: celery_user_search_response
+  tags: girder
+
+- name: Create celery covalic user if no such user exists
+  shell: "curl --data \"login={{girder_celery_user}}&firstName=covalic&lastName=celery&password={{girder_celery_password}}&email={{girder_celery_email}}\" http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user"
+  tags: girder
+  when: (celery_user_search_response.stdout|from_json)[0]._id is not defined
+
+- name: Search for the celery user even if we just created one, to get the id
+  shell: "curl -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user?text={{girder_celery_user}}"
+  register: celery_user_search_response
+  tags: girder
+
+# set celery_jobs girder plugin config params
+
+- name: Set config for the celery_jobs plugin broker_url
+  shell: "curl -X PUT --data 'key=celery_jobs.broker_url&value=amqp://guest@{{hostvars[groups.tag_type_celery[0]].ec2_private_ip_address}}//' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
+  tags: girder
+
+- name: Set config for the celery_jobs plugin app_main
+  shell: "curl -X PUT --data 'key=celery_jobs.app_main&value=girder_celery' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
+  tags: girder
+
+- name: Set config for the celery_jobs plugin app_main
+  shell: "curl -X PUT --data 'key=celery_jobs.celery_user_id&value={{(celery_user_search_response.stdout|from_json)[0]._id}}' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
+  tags: girder
+
+# setup local filesystem assetstore
+# probably should be broken out at some point
+# assumes an ebs volume mounted at /dev/xvdb
+
+- name: format filesystem for assetstore
+  sudo: yes
+  filesystem: force=no fstype=ext4 dev=/dev/xvdb
+  tags: girder
+
+- name: create local mountpoint
+  sudo: yes
+  file: dest=/opt/covalic/assetstore mode=755 owner=www-data group=developers state=directory
+  tags: girder
+ 
+- name: Mount assetstore volume
+  sudo: yes
+  mount: name=/opt/covalic/assetstore src=/dev/xvdb fstype=ext4 state=mounted opts=defaults,nofail,nobootwait dump=0 passno=2
+  tags: girder
+
+- name: enforce ownership of assetstore
+  sudo: yes
+  file: dest=/opt/covalic/assetstore mode=755 owner=www-data group=developers state=directory recurse=yes
+  tags: girder
+
+- name: Set the default assetstore to the EBS volume mountpoint
+  shell: "curl --data 'name=default&type=0&root=/opt/covalic/assetstore' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/assetstore"
+  tags: girder
