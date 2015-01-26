@@ -28,7 +28,6 @@ class PhaseExt(Resource):
     @loadmodel(map={'id': 'phase'}, model='phase', plugin='challenge',
                level=AccessType.READ)
     def groundtruthItems(self, phase, params):
-        user = self.getCurrentUser()
         # All participants can see the names of the ground truth items in
         # order to validate their submissions, even if they don't have
         # read access to the folder.

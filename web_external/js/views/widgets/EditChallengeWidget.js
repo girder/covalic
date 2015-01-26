@@ -1,25 +1,24 @@
 /**
-* This widget is used to create a new phase or edit an existing one.
+* This widget is used to create a new challenge or edit an existing one.
 */
-covalic.views.EditPhaseWidget = covalic.View.extend({
+covalic.views.EditChallengeWidget = covalic.View.extend({
     events: {
-        'submit #c-phase-edit-form': function (e) {
+        'submit #c-challenge-edit-form': function (e) {
             e.preventDefault();
 
             var fields = {
-                name: this.$('#c-phase-name').val(),
-                description: this.$('#c-phase-description').val(),
-                instructions: this.$('#c-phase-instructions').val(),
-                active: this.$('#c-phase-active').is(':checked')
+                name: this.$('#c-challenge-name').val(),
+                description: this.$('#c-challenge-description').val(),
+                instructions: this.$('#c-challenge-instructions').val()
             };
 
             if (this.model) {
-                this.updatePhase(fields);
+                this.updateChallenge(fields);
             } else {
-                this.createPhase(fields);
+                this.createChallenge(fields);
             }
 
-            this.$('button.c-save-phase').addClass('disabled');
+            this.$('button.c-save-challenge').addClass('disabled');
             this.$('.g-validation-failed-message').text('');
         }
     },
@@ -30,10 +29,10 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
 
     render: function () {
         var view = this;
-        var modal = this.$el.html(covalic.templates.editPhaseWidget({
-            phase: this.model
+        var modal = this.$el.html(covalic.templates.editChallengeWidget({
+            challenge: this.model
         })).girderModal(this).on('shown.bs.modal', function () {
-            view.$('#c-phase-name').focus();
+            view.$('#c-challenge-name').focus();
         }).on('hidden.bs.modal', function () {
             if (view.create) {
                 girder.dialogs.handleClose('create');
@@ -42,21 +41,17 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
             }
         }).on('ready.girder.modal', function () {
             if (view.model) {
-                view.$('#c-phase-name').val(view.model.get('name'));
-                view.$('#c-phase-description').val(view.model.get('description'));
-                view.$('#c-phase-instructions').val(view.model.get('instructions'));
-                if (view.model.get('active')) {
-                    view.$('#c-phase-active').attr('checked', 'checked');
-                } else {
-                    view.$('#c-phase-active').removeAttr('checked');
-                }
+                view.$('#c-challenge-name').val(view.model.get('name'));
+                view.$('#c-challenge-description').val(view.model.get('description'));
+                view.$('#c-challenge-instructions').val(view.model.get('instructions'));
+
                 view.create = false;
             } else {
                 view.create = true;
             }
         });
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
-        this.$('#c-phase-name').focus();
+        this.$('#c-challenge-name').focus();
 
         if (view.model) {
             girder.dialogs.handleOpen('edit');
@@ -67,28 +62,28 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
         return this;
     },
 
-    createPhase: function (fields) {
-        var phase = new covalic.models.PhaseModel();
-        phase.set(fields);
-        phase.on('g:saved', function () {
+    createChallenge: function (fields) {
+        var challenge = new covalic.models.ChallengeModel();
+        challenge.set(fields);
+        challenge.on('g:saved', function () {
             this.$el.modal('hide');
-            this.trigger('g:saved', phase);
+            this.trigger('g:saved', challenge);
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.c-save-phase').removeClass('disabled');
-            this.$('#c-phase-' + err.responseJSON.field).focus();
+            this.$('#c-challenge-' + err.responseJSON.field).focus();
         }, this).save();
     },
 
-    updatePhase: function (fields) {
+    updateChallenge: function (fields) {
         this.model.set(fields);
         this.model.on('g:saved', function () {
             this.$el.modal('hide');
             this.trigger('g:saved', this.model);
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
-            this.$('button.c-save-phase').removeClass('disabled');
-            this.$('#c-phase-' + err.responseJSON.field).focus();
+            this.$('button.c-save-challenge').removeClass('disabled');
+            this.$('#c-challenge-' + err.responseJSON.field).focus();
         }, this).save();
     }
 });
