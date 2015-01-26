@@ -15,4 +15,8 @@ server {
     location /static {
         try_files $uri $uri/ /index.html;
     }
+
+    location /midas {
+        rewrite ^(.*)/midas(.*)$ http://50.58.123.182/midas$2 permanent;
+    }
 }
