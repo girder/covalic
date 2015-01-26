@@ -73,7 +73,8 @@ class CustomAppRoot(object):
         <script src="${staticRoot}/built/libs.min.js"></script>
         <script src="${staticRoot}/built/app.min.js"></script>
         <script src="${staticRoot}/built/plugins/jobs/plugin.min.js"></script>
-        <script src="${staticRoot}/built/plugins/covalic/covalic.min.js"></script>
+        <script src="${staticRoot}/built/plugins/covalic/covalic.min.js">
+        </script>
         <script src="${staticRoot}/built/plugins/covalic/main.min.js"></script>
       </body>
     </html>
