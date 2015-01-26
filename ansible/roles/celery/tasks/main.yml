@@ -7,6 +7,7 @@
     - rabbitmq-server
     - python-pip
     - python-dev
+    - git
   tags: celery
 
 - name: Enable rabbitmq-server to survive reboot
@@ -16,5 +17,25 @@
 
 - name: Install celery
   pip: name=celery
+  sudo: yes
+  tags: celery
+
+- name: clone covalic plugin
+  sudo: yes
+  git: repo=git://github.com/girder/covalic.git dest=/opt/covalic accept_hostkey=yes
+  tags: celery
+
+- name: change ownership of covalic to www-data
+  sudo: yes
+  file: dest=/opt/covalic mode=755 owner=www-data group=www-data state=directory recurse=yes
+  tags: celery
+
+- name: install Celery worker as a service
+  copy: src=celery_worker.conf dest=/etc/init/celery_worker.conf mode=644 owner=root
+  sudo: yes
+  tags: celery
+
+- name: Start celery worker as a service
+  service: name=celery_worker state=restarted enabled=yes
   sudo: yes
   tags: celery
