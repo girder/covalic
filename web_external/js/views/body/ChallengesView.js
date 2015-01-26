@@ -25,8 +25,16 @@ covalic.views.ChallengesView = covalic.View.extend({
         this.searchWidget = new girder.views.SearchFieldWidget({
             placeholder: 'Search challenges...',
             types: ['challenge_challenge'],
+            getInfoCallback: function (type, obj) {
+                if (type === 'challenge_challenge') {
+                    return {
+                        text: obj.name,
+                        icon: 'flag-checkered'
+                    };
+                }
+            },
             parentView: this
-        }).on('g:resultClicked', this._gotoCollection, this);
+        }).on('g:resultClicked', this._gotoChallenge, this);
     },
 
     render: function () {
@@ -49,7 +57,11 @@ covalic.views.ChallengesView = covalic.View.extend({
             girder.router.navigate('challenge/' + challenge.get('_id'), {
                 trigger: true
             });
-    }, this).render();
+        }, this).render();
+    },
+
+    _gotoChallenge: function (challenge) {
+        girder.router.navigate('challenge/' + challenge.id, {trigger: true});
     }
 });
 
