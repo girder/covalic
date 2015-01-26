@@ -1,3 +1,3 @@
-covalic.models.ChallengeModel = girder.Model.extend({
+covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
     resourceName: 'challenge'
 });

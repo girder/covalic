@@ -8,6 +8,21 @@ covalic.views.ChallengeView = covalic.View.extend({
             }).on('g:saved', function (challenge) {
                 this.render();
             }, this).render();
+        },
+
+        'click .c-challenge-access-control': function () {
+            if (!this.accessWidget) {
+                this.accessWidget = new girder.views.AccessWidget({
+                    el: $('#g-dialog-container'),
+                    model: this.model,
+                    modelType: 'challenge',
+                    parentView: this
+                }).on('g:saved', function () {
+                    this.render();
+                }, this);
+            } else {
+                this.accessWidget.render();
+            }
         }
     },
 
