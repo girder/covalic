@@ -3,6 +3,18 @@
   user: ubuntu
   hosts: tag_type_girder
   gather_facts: false
+  vars:
+    girder_admin_user: covalic
+    # need to pass this in externally
+    #girder_admin_password:
+    girder_admin_email: covalic-aws@kitware.com
+    girder_socket_host: localhost
+    girder_socket_port: 8080
+    girder_plugins: ['celery_jobs', 'challenge', 'covalic', 'jobs']
+    girder_celery_user: celery
+    # need to pass this in externally
+    #girder_celery_password:
+    girder_celery_email: covalic-celery@kitware.com
   roles:
     - users
     - common
@@ -10,7 +22,7 @@
 
 - name: Mongo
   user: ubuntu
-  hosts: tag_type_mongo
+  hosts: tag_type_mongodb
   gather_facts: false
   roles:
     - users
