@@ -108,7 +108,7 @@ class Submission(Resource):
                 phase, user=celeryUser, level=AccessType.ADMIN, save=True)
 
         if not self.model('folder').hasAccess(
-                folder, user=celeryUser, level=AccessType.READ):
+                groundTruth, user=celeryUser, level=AccessType.READ):
             self.model('folder').setUserAccess(
                 groundTruth, user=celeryUser, level=AccessType.READ,
                 save=True)
