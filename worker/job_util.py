@@ -147,8 +147,9 @@ class task(object):
                     return retVal
                 except:
                     t, val, tb = sys.exc_info()
-                    msg = '{}: {}\n{}'.format(t.__name__, val,
-                                              traceback.extract_tb(tb))
+                    msg = '{}: {}\n{}'.format(
+                        t.__name__, val, ''.join(traceback.format_tb(tb)))
+
                     jobMgr.write(msg)
                     jobMgr.updateStatus(JobStatus.ERROR)
                     raise  # Raise so that celery also sees the exception
