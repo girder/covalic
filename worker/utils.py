@@ -27,7 +27,12 @@ def fetchHttpInput(tmpDir, spec):
         raise Exception('No URL specified for HTTP input.')
 
     request = requests.get(spec['url'], headers=spec.get('headers', {}))
-    request.raise_for_status()
+    try:
+        request.raise_for_status()
+    except:
+        print 'HTTP fetch failed (%s). Response: %s' % \
+            (spec['url'], request.text)
+        raise
 
     filename = spec.get('filename', _readFilenameFromResponse(request))
     path = os.path.join(tmpDir, filename)
