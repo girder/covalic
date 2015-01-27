@@ -54,6 +54,31 @@ covalic.views.PhaseView = covalic.View.extend({
             } else {
                 this.accessWidget.render();
             }
+        },
+
+        'click .c-delete-phase': function () {
+            girder.confirm({
+                text: 'Are you sure you want to delete the phase <b>' +
+                      this.model.escape('name') + '</b>?',
+                yesText: 'Delete',
+                escapedHtml: true,
+                confirmCallback: _.bind(function () {
+                    this.model.destroy({
+                        progress: true
+                    }).on('g:deleted', function () {
+                        girder.events.trigger('g:alert', {
+                            icon: 'ok',
+                            text: 'Phase deleted.',
+                            type: 'success',
+                            timeout: 4000
+                        });
+                        girder.router.navigate(
+                            'challenge/' + this.model.get('challengeId'), {
+                                trigger: true
+                        });
+                    }, this);
+                }, this)
+            });
         }
     },
 
