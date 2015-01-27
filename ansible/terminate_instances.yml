@@ -1,0 +1,20 @@
+- name: Terminate instances
+  hosts: "tag_pod_{{pod}}"
+  connection: local
+  vars:
+    - region: us-east-1
+  vars_prompt:
+    - name: "confirm"
+      prompt: "Are you sure you want to terminate the instances in this pod? (yes/no)"
+      default: "no"
+      private: no
+
+  tasks:
+    - name: Terminate instance
+      local_action:
+        module: ec2
+        region: "{{ region }}"
+        state: absent
+        instance_ids: "{{hostvars[item]['ec2_id']}}"
+      with_items: "groups.tag_pod_{{pod}}"
+      when: confirm == 'yes'

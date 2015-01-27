@@ -1,0 +1,29 @@
+- name: upgrade all safe packages
+  apt: upgrade=safe
+  sudo: yes
+  tags: common
+
+- name: install unattended upgrades
+  apt: pkg=unattended-upgrades state=installed
+  sudo: yes
+  tags: common
+
+- name: install ntp
+  apt: pkg=ntp
+  sudo: yes
+  tags: common
+
+- name: be sure ntpd is running and enabled
+  service: name=ntp state=running enabled=yes
+  sudo: yes
+  tags: common
+
+- name: give ownership of /opt/covalic to developers
+  file: path=/opt/covalic
+        owner=ubuntu
+        group=developers
+        mode=0770
+        state=directory
+        recurse=no
+  sudo: yes
+  tags: common
