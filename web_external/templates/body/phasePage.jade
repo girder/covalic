@@ -37,9 +37,14 @@ if phase.get('instructions')
 
 .c-phase-submit-container
     if userInChallenge
-        button#c-submit-phase-dataset.btn.btn-lg.btn-success
-            i.icon-upload-cloud
-            |  Submit your results
+        if phase.get('active')
+            button#c-submit-phase-dataset.btn.btn-lg.btn-success
+                i.icon-upload-cloud
+                |  Submit your results
+        else
+            button#c-submit-phase-disabled.disabled.btn.btn-lg
+                i.icon-upload-cloud
+                |  Submissions disabled currently
     else
         button#c-join-phase.btn.btn-lg.btn-primary
             i.icon-thumbs-up-alt

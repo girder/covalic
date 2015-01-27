@@ -26,6 +26,7 @@ from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
 from girder.constants import AccessType
+from girder.models.model_base import ValidationException
 from girder.plugins.celery_jobs import getCeleryUser
 
 
@@ -75,6 +76,10 @@ class Submission(Resource):
                level=AccessType.ADMIN)
     def postSubmission(self, phase, folder, params):
         user = self.getCurrentUser()
+
+        if not phase.get('active') and (not user or not user.get('admin')):
+            raise ValidationException('You may not submit to this phase '
+                                      'because it is not currently active.')
 
         self.requireParams('title', params)
 
