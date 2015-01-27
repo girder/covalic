@@ -20,7 +20,8 @@
 import mako
 import os
 
-from girder import constants
+from girder import constants, events
+from girder.utility.model_importer import ModelImporter
 from .rest import submission, phase
 
 
@@ -108,6 +109,22 @@ class CustomAppRoot(object):
         self.indexHtml = None
 
 
+def deleteSubmissions(event):
+    """
+    Hook into deletion of a challenge phase and delete all corresponding
+    submissions.
+    """
+    phase = event.info['document']
+    subModel = ModelImporter.model('submission', 'covalic')
+
+    submissions = subModel.find({
+        'phaseId': phase['_id']
+    }, limit=0, timeout=False)
+
+    for sub in submissions:
+        subModel.remove(sub)
+
+
 def load(info):
     phaseExt = phase.PhaseExt()
     info['apiRoot'].covalic_submission = submission.Submission()
@@ -116,3 +133,6 @@ def load(info):
     info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
                                                      info['serverRoot'])
     info['serverRoot'].api = info['serverRoot'].girder.api
+
+    events.bind('model.challenge_phase.remove_with_kwargs', 'covalic',
+                deleteSubmissions)

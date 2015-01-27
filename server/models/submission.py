@@ -21,6 +21,7 @@ import datetime
 
 from girder.models.model_base import Model
 from girder.plugins.covalic import scoring
+from girder.utility.progress import noProgress
 
 
 class Submission(Model):
@@ -47,6 +48,10 @@ class Submission(Model):
             })
 
         return doc
+
+    def remove(self, doc, progress=noProgress):
+        # TODO delete folders and stuff...?
+        Model.remove(self, doc, progress=progress)
 
     def list(self, phase, limit=50, offset=0, sort=None, userFilter=None):
         q = {'phaseId': phase['_id']}
