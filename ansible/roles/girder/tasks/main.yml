@@ -135,7 +135,7 @@
   register: token_response
   tags: girder
 
-- name: Enable grits plugin
+- name: Enable covalic plugins
   shell: "curl -X PUT --data 'plugins={{girder_plugins|to_json}}&token={{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/system/plugins"
   register: plugin_response
   tags: girder
@@ -144,11 +144,10 @@
   shell: "curl -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user?text={{girder_celery_user}}"
   register: celery_user_search_response
   tags: girder
-
-- name: Create celery covalic user if no such user exists
+  
+- name: Create celery covalic user regardless if such a user exists
   shell: "curl --data \"login={{girder_celery_user}}&firstName=covalic&lastName=celery&password={{girder_celery_password}}&email={{girder_celery_email}}\" http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user"
   tags: girder
-  when: (celery_user_search_response.stdout|from_json)[0]._id is not defined
 
 - name: Search for the celery user even if we just created one, to get the id
   shell: "curl -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user?text={{girder_celery_user}}"
@@ -196,3 +195,16 @@
 - name: Set the default assetstore to the EBS volume mountpoint
   shell: "curl --data 'name=default&type=0&root=/opt/covalic/assetstore' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/assetstore"
   tags: girder
+
+- name: Restart Girder as a service to have Covalic be the webapp
+  service: name=girder state=restarted enabled=yes
+  sudo: yes
+  tags: girder
+
+# force a restart of nginx to pick up any changes in girder
+- name: Restart nginx service
+  service: name=nginx state=restarted enabled=yes
+  sudo: yes
+  tags: girder
+
+
