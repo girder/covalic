@@ -1,4 +1,15 @@
 ---
+# Mongo needs to be running before Girder or else Girder fails to start
+- name: Mongo
+  user: ubuntu
+  hosts: tag_type_mongodb
+  gather_facts: false
+  roles:
+    - users
+    - common
+    - mongodb
+
+
 - name: Girder
   user: ubuntu
   hosts: tag_type_girder
@@ -19,15 +30,6 @@
     - users
     - common
     - girder
-
-- name: Mongo
-  user: ubuntu
-  hosts: tag_type_mongodb
-  gather_facts: false
-  roles:
-    - users
-    - common
-    - mongodb
 
 - name: Celery
   user: ubuntu
