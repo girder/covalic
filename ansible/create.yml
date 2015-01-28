@@ -65,7 +65,7 @@
         region: "{{ region }}"
         rules:
             # Ping from webserver
-            - proto: ICMP
+            - proto: icmp
               from_port: -1
               to_port: -1
               group_name: "webserver_{{ pod }}"
@@ -101,34 +101,38 @@
               to_port: all
               cidr_ip: 0.0.0.0/0
 
-
-    - name: Create the web server
-      ec2:
+    - local_action:
+        module: ec2
         key_name: "{{ pub_key_name }}"
         instance_type: "{{ ec2_webserver_instance_type }}"
         image: "{{ ami }}"
         wait: yes
         group: "webserver_{{ pod }}"
         region: "{{ region }}"
+        exact_count: 1
+        volumes:
+        - device_name: /dev/xvdb
+          volume_size: 512
+          device_type: gp2
+          delete_on_termination: true
+        count_tag:
+           Name: covalic-girder-{{pod}}
+        id: covalic-girder-{{pod}}
         instance_tags:
-           Name: "{{ pod }} girder server"
+           Name: covalic-girder-{{pod}}
            type: girder
            pod: "{{ pod }}"
-      register: girder_webserver  
+      register: girder_webserver
 
-    - name: create assetstore ebs volume for girder web server
-      ec2_vol:
-        instance: "{{ item.id }}"
-        region: "{{ region }}"
-        volume_size: 512
-        device_name: /dev/xvdb
-        with_items: girder_webserver.instances
-      tags: ebs
-
-    - name: associate new elastic IP with girder webserver
-      ec2_eip: "instance_id={{ item }} region={{ region }}"
-      with_items: girder_webserver.instance_ids
+    - name: associate new elastic IP with girder webserver for non-production
+      ec2_eip: "instance_id={{ girder_webserver.tagged_instances[0].id }} region={{ region }}"
       register: eip
+      when: pod != 'prod'
+
+    - name: associate DNS mapped elastic IP with girder prod webserver
+      ec2_eip: "instance_id={{ girder_webserver.tagged_instances[0].id }} region={{ region }} ip=54.208.189.152"
+      register: eip
+      when: pod == 'prod'
 
     - name: Create the celery worker
       ec2:
