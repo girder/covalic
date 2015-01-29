@@ -4,7 +4,8 @@
     "version": "0.1.0",
     "dependencies": [
         "challenge",
-        "celery_jobs"
+        "celery_jobs",
+        "gravatar"
     ],
     "grunt": {
         "file": "Gruntfile.js",
