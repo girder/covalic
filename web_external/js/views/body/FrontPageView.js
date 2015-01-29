@@ -1,5 +1,8 @@
 covalic.views.FrontPageView = girder.views.FrontPageView.extend({
     events: {
+        'click .c-participate-button': function () {
+            covalic.router.navigate('challenges', {trigger: true});
+        }
     },
 
     initialize: function () {

@@ -1,0 +1,56 @@
+$headerHeight = 54px
+$portraitHeight = 36px
+
+.c-header-wrapper
+  height $headerHeight
+  padding-right 20px
+  padding-left 20px
+  background-color rgba(255, 255, 255, 0.85)
+  border-bottom 1px solid #eee
+  transition background-color 0.4s ease-in-out
+  position fixed
+  top 0
+  width 100%
+  z-index 10
+
+  &:hover
+    background-color white
+
+  .c-user-link
+    color #444
+    font-size 16px
+
+    &:hover
+      color #66a
+
+  .c-login-link-wrapper
+    font-size 16px
+
+  .c-user-link-wrapper
+    display inline-block
+
+  .c-portrait-wrapper
+    border-radius 50%
+    display inline-block
+    margin-right 10px
+    background-color #d6d6d6
+    height $portraitHeight
+    width $portraitHeight
+    background-size $portraitHeight $portraitHeight
+    background-image url(https://cdn2.iconfinder.com/data/icons/windows-8-metro-style/128/user.png)
+
+  .c-current-user-text > *
+    vertical-align middle
+    line-height $headerHeight
+
+  .c-current-user-wrapper
+    float right
+
+#g-app-body-container
+  margin 0
+  margin-top $headerHeight
+  padding 0
+  min-height 0
+
+  .c-body-wrapper
+    padding 12px 15px

@@ -10,7 +10,7 @@ covalic.views.LayoutHeaderView = covalic.View.extend({
         this.$el.html(covalic.templates.layoutHeader());
 
         new covalic.views.LayoutHeaderUserView({
-            el: this.$('.g-current-user-wrapper'),
+            el: this.$('.c-current-user-wrapper'),
             parentView: this
         }).render();
     }
