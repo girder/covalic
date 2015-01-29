@@ -30,6 +30,6 @@
 
 - name: MongoDB | Run mongo daemon
   sudo: yes
-  service: name=mongodb state=restarted
+  service: name=mongod state=restarted
   tags: mongodb
   

@@ -1,4 +1,9 @@
 ---
+- name: update apt cache
+  apt: update_cache=yes
+  sudo: yes
+  tags: celery
+
 # Install celery and necessary dependencies
 - name: Install celery dependencies
   sudo: yes
