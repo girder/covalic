@@ -1,56 +1,55 @@
-.c-body-wrapper
-  .c-phase-header
-      .c-phase-name.g-body-title
-          a.c-challenge-link(c-challenge-id="#{challenge.get('_id')}")
-              b #{challenge.get('name')}
-          i.icon-angle-right
-          | #{phase.get('name')}
-          .c-phase-properties.pull-right
-              if (phase.getAccessLevel() >= girder.AccessType.WRITE)
-                  .btn-group.pull-right
-                      button.c-phase-actions-button.btn.btn-default.dropdown-toggle(
-                              data-toggle="dropdown", title="Phase actions")
-                          i.icon-menu
-                          |  Actions
-                          i.icon-down-dir
-                      ul.c-phase-actions-menu.dropdown-menu.pull-right(role="menu")
-                          li(role="presentation")
-                              a.c-edit-phase(role="menuitem")
-                                  i.icon-edit
-                                  | Edit phase
-                          if (phase.getAccessLevel() >= girder.AccessType.ADMIN)
-                              li.divider(role="presentation")
-                              li(role="presentation")
-                                  a.c-phase-access-control(role="menuitem")
-                                      i.icon-lock
-                                      | Access control
-                              li(role="presentation")
-                                  a.c-delete-phase(role="menuitem")
-                                      i.icon-trash
-                                      | Delete phase
+.c-phase-header
+    .c-phase-name.g-body-title
+        a.c-challenge-link(c-challenge-id="#{challenge.get('_id')}")
+            b #{challenge.get('name')}
+        i.icon-angle-right
+        | #{phase.get('name')}
+        .c-phase-properties.pull-right
+            if (phase.getAccessLevel() >= girder.AccessType.WRITE)
+                .btn-group.pull-right
+                    button.c-phase-actions-button.btn.btn-default.dropdown-toggle(
+                            data-toggle="dropdown", title="Phase actions")
+                        i.icon-menu
+                        |  Actions
+                        i.icon-down-dir
+                    ul.c-phase-actions-menu.dropdown-menu.pull-right(role="menu")
+                        li(role="presentation")
+                            a.c-edit-phase(role="menuitem")
+                                i.icon-edit
+                                | Edit phase
+                        if (phase.getAccessLevel() >= girder.AccessType.ADMIN)
+                            li.divider(role="presentation")
+                            li(role="presentation")
+                                a.c-phase-access-control(role="menuitem")
+                                    i.icon-lock
+                                    | Access control
+                            li(role="presentation")
+                                a.c-delete-phase(role="menuitem")
+                                    i.icon-trash
+                                    | Delete phase
 
-          .c-phase-description.g-body-subtitle #{phase.get('description')}
-          .g-clear-right
+        .c-phase-description.g-body-subtitle #{phase.get('description')}
+        .g-clear-right
 
-  if phase.get('instructions')
-    .c-phase-instructions-container
-      .c-phase-instructions
+if phase.get('instructions')
+  .c-phase-instructions-container
+    .c-phase-instructions
 
-  .c-phase-submit-container
-      if userInChallenge
-          if phase.get('active')
-              button#c-submit-phase-dataset.btn.btn-lg.btn-success
-                  i.icon-upload-cloud
-                  |  Submit your results
-          else
-              button#c-submit-phase-disabled.disabled.btn.btn-lg
-                  i.icon-upload-cloud
-                  |  Submissions disabled currently
-      else
-          button#c-join-phase.btn.btn-lg.btn-primary
-              i.icon-thumbs-up-alt
-              | Participate in this phase
+.c-phase-submit-container
+    if userInChallenge
+        if phase.get('active')
+            button#c-submit-phase-dataset.btn.btn-lg.btn-success
+                i.icon-upload-cloud
+                |  Submit your results
+        else
+            button#c-submit-phase-disabled.disabled.btn.btn-lg
+                i.icon-upload-cloud
+                |  Submissions disabled currently
+    else
+        button#c-join-phase.btn.btn-lg.btn-primary
+            i.icon-thumbs-up-alt
+            | Participate in this phase
 
-  .c-leaderboard-container
-    .c-title Leaderboard
-    .c-leaderboard-widget-container
+.c-leaderboard-container
+  .c-title Leaderboard
+  .c-leaderboard-widget-container
