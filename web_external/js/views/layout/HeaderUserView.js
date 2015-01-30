@@ -38,8 +38,8 @@ covalic.views.LayoutHeaderUserView = covalic.View.extend({
 
         if (girder.currentUser) {
             this.$('.c-portrait-wrapper').css(
-                'background-image', 'url(' + girder.apiRoot + '/user/' +
-                girder.currentUser.get('_id') + '/gravatar?size=36)');
+                'background-image', 'url(' +
+                girder.currentUser.getGravatarUrl(36) + ')');
         }
         return this;
     }
