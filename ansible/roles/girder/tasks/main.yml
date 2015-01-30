@@ -26,25 +26,35 @@
 
 - name: clone girder
   git: repo=git://github.com/girder/girder.git dest={{ girder_root }} accept_hostkey=yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 - name: clone covalic plugin
   git: repo=git://github.com/girder/covalic.git dest={{ girder_root }}/plugins/covalic accept_hostkey=yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 - name: clone challenge plugin
   git: repo=git://github.com/girder/challenge.git dest={{ girder_root }}/plugins/challenge accept_hostkey=yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 - name: install girder requirements
   pip: requirements={{ girder_root }}/requirements.txt
   sudo: yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 - name: install celery_jobs plugin requirements
   pip: requirements={{ girder_root }}/plugins/celery_jobs/requirements.txt
   sudo: yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 - name: install grunt globally
   npm: name={{ item }} global=yes
@@ -55,21 +65,29 @@
 
 - name: run npm install
   npm: path={{ girder_root }}
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 - name: run grunt init
   command: grunt init chdir={{ girder_root }}
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 # run grunt to build covalic as an external web app
 - name: run grunt
   command: grunt chdir={{ girder_root }}
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 - name: install girder for development
   command: python setup.py develop chdir={{ girder_root }}
   sudo: yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 # as things stand, this probably won't work with multiple pods
 # or with multiple mongodb servers as it will just take the first mongodb
@@ -116,7 +134,9 @@
 - name: Restart nginx service
   service: name=nginx state=restarted enabled=yes
   sudo: yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 - name: Log in as covalic admin
   shell: "curl -u {{girder_admin_user}}:{{girder_admin_password}} http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user/authentication"
@@ -144,7 +164,7 @@
   shell: "curl -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user?text={{girder_celery_user}}"
   register: celery_user_search_response
   tags: girder
-  
+
 - name: Create celery covalic user regardless if such a user exists
   shell: "curl --data \"login={{girder_celery_user}}&firstName=covalic&lastName=celery&password={{girder_celery_password}}&email={{girder_celery_email}}\" http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user"
   tags: girder
@@ -181,7 +201,7 @@
   sudo: yes
   file: dest=/opt/covalic/assetstore mode=755 owner=www-data group=developers state=directory
   tags: girder
- 
+
 - name: Mount assetstore volume
   sudo: yes
   mount: name=/opt/covalic/assetstore src=/dev/xvdb fstype=ext4 state=mounted opts=defaults,nofail,nobootwait dump=0 passno=2
@@ -199,12 +219,12 @@
 - name: Restart Girder as a service to have Covalic be the webapp
   service: name=girder state=restarted enabled=yes
   sudo: yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
 
 # force a restart of nginx to pick up any changes in girder
 - name: Restart nginx service
   service: name=nginx state=restarted enabled=yes
   sudo: yes
   tags: girder
-
-
