@@ -1,3 +1,5 @@
+@import 'nib'
+
 $headerHeight = 54px
 $portraitHeight = 38px
 
@@ -44,6 +46,23 @@ $portraitHeight = 38px
 
   .c-current-user-wrapper
     float right
+
+  .c-icons-wrapper
+    display inline
+    line-height $headerHeight
+    font-size 21px
+
+    &>a
+      color #444
+      margin-right 4px
+      border 1px solid transparent
+      border-radius 3px
+      padding 3px
+
+      &:hover
+        color #44c
+        border 1px solid #e2e2e2
+        background linear-gradient(top, white 60%, #f6f6f6 100%)
 
 #g-app-body-container
   margin 0
