@@ -35,8 +35,9 @@ class Submission(Resource):
         self.resourceName = 'covalic_submission'
 
         self.route('GET', (), self.listSubmissions)
-        self.route('POST', (), self.postSubmission)
         self.route('GET', (':id',), self.getSubmission)
+        self.route('GET', ('unscored',), self.getUnscoredSubmissions)
+        self.route('POST', (), self.postSubmission)
         self.route('POST', (':id', 'score'), self.postScore)
 
     @access.public
@@ -204,3 +205,13 @@ class Submission(Resource):
         .param('id', 'The ID of the submission.', paramType='path')
         .errorResponse('ID was invalid.')
         .errorResponse('Read access was denied for the challenge phase.', 403))
+
+    @access.user
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.ADMIN)
+    def getUnscoredSubmissions(self, params):
+        pass
+    getUnscoredSubmissions.description = (
+        Description('List unscored submissions for a given phase.')
+        .param('phaseId', 'The ID of the phase.')
+        .errorResponse('Phase ID was invalid.')
+        .errorResponse('Admin access was denied for the challenge phase.', 403))
