@@ -31,7 +31,8 @@ class Submission(Model):
             ('phaseId', 1), ('overallScore', -1), ('latest', 1)
         ], {})
         userPhaseIdx = ([('creatorId', 1), ('phaseId', 1)], {})
-        self.ensureIndices((leaderboardIdx, userPhaseIdx, 'folderId'))
+        self.ensureIndices((leaderboardIdx, userPhaseIdx, 'folderId',
+                            'overallScore'))
 
     def validate(self, doc):
         if doc.get('score') is not None:

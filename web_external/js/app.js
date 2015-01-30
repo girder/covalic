@@ -1,28 +1,18 @@
 covalic.App = girder.App.extend({
 
     render: function() {
-        this.$el.html(girder.templates.layout());
+        this.$el.html(covalic.templates.layout());
 
         new covalic.views.LayoutHeaderView({
-            el: this.$('#g-app-header-container'),
-            parentView: this
-        }).render();
-
-        this.globalNavView = new girder.views.LayoutGlobalNavView({
-            navItems: [{
-                name: 'Challenges',
-                icon: 'icon-sitemap',
-                target: 'challenges'
-            }, {
-                name: 'Users',
-                icon: 'icon-user',
-                target: 'users'
-            }],
-            el: this.$('#g-global-nav-container'),
+            el: this.$('#c-app-header-container'),
             parentView: this
         }).render();
 
         return this;
     },
 
+    navigateTo: function (view, settings) {
+        this.$('#g-app-body-container').removeClass('c-body-nopad');
+        return girder.App.prototype.navigateTo.apply(this, arguments)
+    }
 });

@@ -1,5 +1,8 @@
 covalic.views.FrontPageView = girder.views.FrontPageView.extend({
     events: {
+        'click .c-participate-button': function () {
+            covalic.router.navigate('challenges', {trigger: true});
+        }
     },
 
     initialize: function () {
@@ -8,6 +11,8 @@ covalic.views.FrontPageView = girder.views.FrontPageView.extend({
     },
 
     render: function () {
+        this.$el.addClass('c-body-nopad');
+
         this.$el.html(covalic.templates.frontPage({
             apiRoot: girder.apiRoot,
             staticRoot: girder.staticRoot,
