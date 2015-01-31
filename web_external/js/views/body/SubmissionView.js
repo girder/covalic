@@ -43,6 +43,11 @@ covalic.views.SubmissionView = covalic.View.extend({
                 submission: this.submission,
                 parentView: this
             }).render();
+
+            var userModel = new girder.models.UserModel();
+            userModel.set('_id', this.submission.get('creatorId'));
+            this.$('.c-user-portrait').css('background-image', 'url(' +
+                userModel.getGravatarUrl(64) + ')');
         }
     },
 
