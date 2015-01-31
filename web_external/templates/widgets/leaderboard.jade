@@ -1,7 +1,7 @@
 table.c-leaderboard-table
   thead
     tr
-      th Rank
+      th.c-rank Rank
       th User
       th Title
       th Date
@@ -10,7 +10,7 @@ table.c-leaderboard-table
     - var i = 1
     each submission in submissions
       tr.c-stripe(stripe="#{(i + start) % 2 ? 'even' : 'odd'}")
-        td= i + start
+        td.c-rank= i + start
         td
           a.c-user-link(
             user-id="#{submission.get('creatorId')}")= submission.get('creatorName')

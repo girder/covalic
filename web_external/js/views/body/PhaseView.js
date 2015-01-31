@@ -137,6 +137,10 @@ covalic.views.PhaseView = covalic.View.extend({
             parentView: this
         }).render();
 
+        this.$('button[title]').tooltip({
+            placement: 'left'
+        });
+
         return this;
     }
 });

@@ -3,14 +3,25 @@
 
   thead>tr
     color #333
-    font-variant small-caps
+    text-transform uppercase
     font-size 15px
-    border-bottom 1px solid #ccc
+    border-bottom 1px solid #ddd
+    padding 0 3px
     &>th
       padding 3px 0
+    &>th.c-rank
+      padding-left 4px
+
+  tbody>tr
+    padding 0 px
+    &>td
+      font-size 15px
+      padding 5px 0
+    &>td.c-rank
+      padding-left 4px
 
   tr.c-stripe[stripe="odd"]
-    background-color #eee
+    background-color #f2f2f2
 
 .c-leaderboard-pagination
   margin-top 10px
