@@ -17,7 +17,6 @@
 module.exports = function (grunt) {
 
     var fs = require('fs');
-    var jade = require('jade');
     var defaultTasks = [];
 
     // Since this is an external web app in a plugin,
