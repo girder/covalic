@@ -17,6 +17,8 @@
 #  limitations under the License.
 ###############################################################################
 
+from collections import defaultdict
+
 
 class MetricScore(object):
     """
@@ -80,15 +82,26 @@ class MetricScore(object):
 
 def computeAverageScores(score):
     """
-    Compute the average score for each metric and add it as the _avg key
-    under each metric in the score dict.
+    Compute the average score for each metric and add it to the score list
+    under the special "_avg" dataset name.
 
-    :param score: The score object (metric-major, dataset-minor grouping)
-    :type score: dict
+    :param score: The score object to compute the average of. The result of
+        computation is appended to this list.
+    :type score: list
     """
-    for metric in score:
-        scores = [d['value'] for d in metric['datasets']]
-        metric['_avg'] = sum(scores) / float(len(scores))
+    sums = defaultdict(float)
+
+    for dataset in score:
+        for metric in dataset['metrics']:
+            sums[metric['name']] += float(metric['value'])
+
+    n = float(len(score))
+    metrics = [{'name': k, 'value': s / n} for k, s in sums.iteritems()]
+
+    score.append({
+        'dataset': '_avg',
+        'metrics': metrics
+    })
 
 
 def computeOverallScore(score):
@@ -100,4 +113,5 @@ def computeOverallScore(score):
     :param score: The score object (metric-major, dataset-minor grouping)
     :type score: dict
     """
-    return reduce(lambda x, y: x + MetricScore.score(y), score, 0)
+    return 123
+    #return reduce(lambda x, y: x + MetricScore.score(y), score, 0)
