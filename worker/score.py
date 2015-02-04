@@ -1,3 +1,4 @@
+import json
 import os
 import requests
 import subprocess
@@ -53,7 +54,7 @@ def runScoring(truth, test):
 
 
 @app.task(name='covalic_score', bind=True)
-@job_util.task(logPrint=True)
+@job_util.task(logPrint=True, progress=True)
 def covalic_score(*args, **kwargs):
     localDirs = {}
     jobMgr = kwargs['_jobManager']
@@ -78,8 +79,9 @@ def covalic_score(*args, **kwargs):
         prefix, input = matchInputFile(gt, localDirs['submission'])
         truth = os.path.join(localDirs['ground_truth'], gt)
 
-        jobMgr.updateProgress(current=current, message='Scoring dataset %d / %d'
-                              % (current, total), forceFlush=(current == 1))
+        jobMgr.updateProgress(
+            current=current, message='Scoring dataset %d of %d'
+            % (current, total), forceFlush=(current == 1))
 
         scores.append({
             'dataset': gt,
@@ -92,6 +94,11 @@ def covalic_score(*args, **kwargs):
     httpMethod = getattr(requests, scoreTarget['method'].lower())
     req = httpMethod(scoreTarget['url'], headers=scoreTarget.get('headers'),
                      data=json.dumps(scores))
-    req.raise_for_status()
+    try:
+        req.raise_for_status()
+    except:
+        print 'Posting score failed (%s). Response: %s' % \
+            (scoreTarget['url'], req.text)
+        raise
 
     jobMgr.updateProgress(message='Done')

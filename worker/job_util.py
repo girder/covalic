@@ -150,16 +150,20 @@ class task(object):
     writing to the job's log, automatic job status updates, creation and cleanup
     of the temp directory, and downloading of input files.
     """
-    def __init__(self, logPrint=True, tmpDir=True):
+    def __init__(self, logPrint=True, tmpDir=True, progress=False):
         """
         :param logPrint: Whether print statements that occur within the inner
             function should be written to the Girder job log.
         :type logPrint: bool
         :param tmpDir: Whether a temp directory should be made for this task.
         :type tmpDir: bool
+        :param progress: Whether progress is recorded on this job. If so, sends
+            progress events while fetching input data.
+        :type proress: bool
         """
         self.logPrint = logPrint
         self.tmpDir = tmpDir
+        self.progress = progress
 
     def _makeTmpDir(self, uuid, kwargs):
         if self.tmpDir:
@@ -184,6 +188,12 @@ class task(object):
 
                 try:
                     self._makeTmpDir(task.request.id, kwargs)
+
+                    if self.progress:
+                        jobMgr.updateProgress(
+                            total=-1, message='Fetching input data',
+                            forceFlush=True)
+
                     kwargs['_localInput'] = utils.fetchInputs(
                         kwargs['_tmpDir'], kwargs.get('input', {}))
                     kwargs['_jobManager'] = jobMgr
