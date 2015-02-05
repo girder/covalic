@@ -83,10 +83,10 @@ class MetricScore(object):
 def computeAverageScores(score):
     """
     Compute the average score for each metric and add it to the score list
-    under the special "_avg" dataset name.
+    under the name "Average".
 
-    :param score: The score object to compute the average of. The result of
-        computation is appended to this list.
+    :param score: The score object to compute the average of. The result of the
+        computation is placed at the head of the list.
     :type score: list
     """
     sums = defaultdict(float)
@@ -98,8 +98,8 @@ def computeAverageScores(score):
     n = float(len(score))
     metrics = [{'name': k, 'value': s / n} for k, s in sums.iteritems()]
 
-    score.append({
-        'dataset': '_avg',
+    score.insert(0, {
+        'dataset': 'Average',
         'metrics': metrics
     })
 
