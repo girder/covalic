@@ -41,6 +41,24 @@
   file: dest=/opt/covalic mode=755 owner=www-data group=www-data state=directory recurse=yes
   tags: celery
 
+- name: Create Docker group
+  group: name=docker state=present
+  tags: celery
+
+- name: Add www-data to Docker group
+  user: shell=/bin/bash
+        name=www-data
+        groups=docker
+        append=yes
+  sudo: yes
+  tags: celery
+
+- name: Restart docker daemon
+  service: name=docker.io state=restarted enabled=yes
+  sudo: yes
+  tags: celery
+
+
 - name: Install Celery worker as a service
   copy: src=celery_worker.conf dest=/etc/init/celery_worker.conf mode=644 owner=root
   sudo: yes
