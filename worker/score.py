@@ -22,22 +22,34 @@ def matchInputFile(gt, inputDir):
     raise Exception('No matching input file for prefix: ' + prefix)
 
 
-def runScoring(truth, test):
+def runScoring(truth, test, tmpDir):
     """
     Call our scoring executable on a single truth/input pair. Returns the
     resulting parsed metric values as a list of dicts containing "name" and
     "value" pairs.
     """
-    command = (
-        os.path.abspath(config.get('covalic', 'score_executable')), truth, test)
+    if config.getboolean('covalic', 'docker_container_scoring'):
+        volumeMap = '%s:%s' % (os.path.abspath(tmpDir), '/data')
+        command = (
+            'docker', 'run', '-v', volumeMap, 'girder/covalic-metrics',
+            '/data/ground_truth/' + os.path.basename(truth),
+            '/data/submission/' + os.path.basename(test)
+        )
+    else:
+        command = (
+            os.path.abspath(config.get('covalic', 'alt_score_exe')),
+            truth, test
+        )
+
     p = subprocess.Popen(args=command, stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
 
     if p.returncode != 0:
-        print 'Error scoring %s:' % truth
-        print 'STDOUT: ' + stdout
-        print 'STDERR: ' + stderr
+        print('Error scoring %s:' % truth)
+        print('Command: ' + ' '.join(command))
+        print('STDOUT: ' + stdout)
+        print('STDERR: ' + stderr)
 
         raise Exception('Scoring subprocess returned error code {}'.format(
             p.returncode))
@@ -85,7 +97,7 @@ def covalic_score(*args, **kwargs):
 
         scores.append({
             'dataset': gt,
-            'metrics': runScoring(truth, input)
+            'metrics': runScoring(truth, input, kwargs['_tmpDir'])
         })
 
     jobMgr.updateProgress(message='Sending scores to server')
