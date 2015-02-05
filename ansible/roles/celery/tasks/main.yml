@@ -1,11 +1,11 @@
 ---
-- name: update apt cache
+- name: Update apt cache
   apt: update_cache=yes
   sudo: yes
   tags: celery
 
 # Install celery and necessary dependencies
-- name: Install celery dependencies
+- name: Install worker dependencies
   sudo: yes
   apt: name={{ item }} state=present
   with_items:
@@ -13,6 +13,7 @@
     - python-pip
     - python-dev
     - git
+    - docker.io
   tags: celery
 
 - name: Enable rabbitmq-server to survive reboot
@@ -20,22 +21,27 @@
   sudo: yes
   tags: celery
 
+- name: Pull latest covalic metrics Docker image
+  sudo: yes
+  command: docker pull girder/covalic-metrics:latest
+  tags: celery
+
 - name: Install celery
   pip: name=celery
   sudo: yes
   tags: celery
 
-- name: clone covalic plugin
+- name: Clone covalic plugin
   sudo: yes
   git: repo=git://github.com/girder/covalic.git dest=/opt/covalic accept_hostkey=yes
   tags: celery
 
-- name: change ownership of covalic to www-data
+- name: Change ownership of covalic to www-data
   sudo: yes
   file: dest=/opt/covalic mode=755 owner=www-data group=www-data state=directory recurse=yes
   tags: celery
 
-- name: install Celery worker as a service
+- name: Install Celery worker as a service
   copy: src=celery_worker.conf dest=/etc/init/celery_worker.conf mode=644 owner=root
   sudo: yes
   tags: celery
