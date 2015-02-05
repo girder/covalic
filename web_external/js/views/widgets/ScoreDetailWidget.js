@@ -3,35 +3,30 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
         this.submission = settings.submission;
         this.score = this.submission.get('score');
 
-        this.metrics = _.map(this.score, function (col) {
-            return col.metric;
+        this.metrics = _.map(this.score[0].metrics, function (metric) {
+            return metric.name;
         });
 
-        this.averages = _.map(this.score, function (col) {
-            return Math.round(col._avg * 1000) / 1000;
-        });
-
-        this.datasets = _.map(this.score[0].datasets, function (dataset) {
-            return dataset.name;
+        this.datasets = _.map(this.score, function (dataset) {
+            return dataset.dataset;
         });
     },
 
     render: function () {
         this.$el.html(covalic.templates.scoreDetails({
-            averages: this.averages,
             datasets: this.datasets,
             metrics: this.metrics,
             getScoreForCell: _.bind(this.getScoreForCell, this)
         }));
     },
 
-    getScoreForCell: function (metric, dataset) {
+    getScoreForCell: function (dataset, metric) {
         var score;
-        _.every(this.score, function (m) {
-            if (m.metric === metric) {
-                _.every(m.datasets, function (d) {
-                    if (d.name === dataset) {
-                        score = d.value;
+        _.every(this.score, function (d) {
+            if (d.dataset === dataset) {
+                _.every(d.metrics, function (m) {
+                    if (m.name === metric) {
+                        score = m.value;
                         return false;
                     }
                     return true;
@@ -40,6 +35,11 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
             }
             return true;
         });
-        return Math.round(score * 1000) / 1000;
+
+        if (score < 0.0001) {
+            return Number(score).toExponential(2);
+        } else {
+            return Number(score).toPrecision(4);
+        }
     }
 });

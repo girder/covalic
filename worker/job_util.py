@@ -45,6 +45,9 @@ class JobManager(object):
 
         self._last = time.time()
         self._buf = ''
+        self._progressTotal = None
+        self._progressCurrent = None
+        self._progressMessage = None
 
         if logPrint:
             self._pipes = sys.stdout, sys.stderr
@@ -69,24 +72,36 @@ class JobManager(object):
         If there are contents in the buffer, send them up to the server. If the
         buffer is empty, this is a no-op.
         """
-        if len(self._buf):
+        if len(self._buf) or self._progressTotal or self._progressMessage or \
+                self._progressCurrent is not None:
             httpMethod = getattr(requests, self.method.lower())
 
-            httpMethod(self.url, headers=self.headers, data={'log': self._buf})
+            httpMethod(self.url, headers=self.headers, data={
+                'log': self._buf,
+                'progressTotal': self._progressTotal,
+                'progressCurrent': self._progressCurrent,
+                'progressMessage': self._progressMessage
+            })
             self._buf = ''
 
-    def write(self, message):
+    def write(self, message, forceFlush=False):
         """
         Append a message to the log for this job. If logPrint is enabled, this
         will be called whenever stdout or stderr is printed to. Otherwise it
         can be called manually and will still perform rate-limited flushing to
         the server.
+
+        :param message: The message to append to the job log.
+        :type message: str
+        :param forceFlush: Whether to force the write of this event to the
+            server. Useful if you don't expect another update for some time.
+        :type forceFlush: bool
         """
         if self.logPrint:
             self._pipes[0].write(message)
 
         self._buf += message
-        if time.time() - self._last > self.interval:
+        if forceFlush or time.time() - self._last > self.interval:
             self._flush()
             self._last = time.time()
 
@@ -101,22 +116,54 @@ class JobManager(object):
         httpMethod(self.url, headers=self.headers, data={'status': status})
 
 
+    def updateProgress(self, total=None, current=None, message=None,
+                       forceFlush=False):
+        """
+        Update the progress information about a job.
+
+        :param total: The total progress value, or None to leave the same.
+        :type total: int, float, or None
+        :param current: The current progress value, or None to leave the same.
+        :type current: int, float, or None
+        :param message: Progress message to set, or None to leave the same.
+        :type message: str or None
+        :param forceFlush: Whether to force the write of this event to the
+            server. Useful if you don't expect another update for some time.
+        :type forceFlush: bool
+        """
+        if total is not None:
+            self._progressTotal = total
+        if current is not None:
+            self._progressCurrent = current
+        if message is not None:
+            self._progressMessage = message
+
+        if forceFlush or time.time() - self._last > self.interval:
+            self._flush()
+            self._last = time.time()
+
+
+
 class task(object):
     """
     This decorator will perform many common job tasks including stdout/stderr
     writing to the job's log, automatic job status updates, creation and cleanup
     of the temp directory, and downloading of input files.
     """
-    def __init__(self, logPrint=True, tmpDir=True):
+    def __init__(self, logPrint=True, tmpDir=True, progress=False):
         """
         :param logPrint: Whether print statements that occur within the inner
             function should be written to the Girder job log.
         :type logPrint: bool
         :param tmpDir: Whether a temp directory should be made for this task.
         :type tmpDir: bool
+        :param progress: Whether progress is recorded on this job. If so, sends
+            progress events while fetching input data.
+        :type proress: bool
         """
         self.logPrint = logPrint
         self.tmpDir = tmpDir
+        self.progress = progress
 
     def _makeTmpDir(self, uuid, kwargs):
         if self.tmpDir:
@@ -135,10 +182,18 @@ class task(object):
             update = kwargs['jobUpdate']
             with JobManager(self.logPrint, update['url'], update['method'],
                             update['headers']) as jobMgr:
+                jobMgr.updateStatus(JobStatus.RUNNING)
+
                 oldCwd = os.getcwd()
 
                 try:
                     self._makeTmpDir(task.request.id, kwargs)
+
+                    if self.progress:
+                        jobMgr.updateProgress(
+                            total=-1, message='Fetching input data',
+                            forceFlush=True)
+
                     kwargs['_localInput'] = utils.fetchInputs(
                         kwargs['_tmpDir'], kwargs.get('input', {}))
                     kwargs['_jobManager'] = jobMgr
