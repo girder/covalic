@@ -5,3 +5,4 @@ tmp
 .*.swo
 *.local.cfg
 .worker_pids
+*~
