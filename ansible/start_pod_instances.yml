@@ -1,12 +1,12 @@
 ---
-- name: Start instances for a specific pod value, depends on pod_instance_ids/{{pod}}
+- name: Start instances for a specific pod value, depends on pod_static_vars/{{pod}}_instance_ids
   hosts: all
   connection: local
   gather_facts: false
   vars:
     - region: us-east-1
   vars_files:
-    - pod_instance_ids/{{pod}}
+    - pod_static_vars/{{pod}}_instance_ids
 
   tasks:
 
