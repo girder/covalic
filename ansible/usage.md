@@ -10,8 +10,8 @@ at current time is
 
 The following two environment variables need to be set with your AWS access credentials
 
-    export AWS_ACCESS_KEY_ID=your_id
-    export AWS_SECRET_ACCESS_KEY=your_key
+  1. export AWS_ACCESS_KEY_ID=your_id
+  2. export AWS_SECRET_ACCESS_KEY=your_key
 
 ## Pod lifecycle control
 
@@ -52,17 +52,17 @@ The first step is to build a pod inventory so that it can be targeted.
 This will create files that will be used by provisioning steps, these should not
 be added to Git
 
-    # pod_inventory/dev_<POD>
-    # pod_dynamic_vars/<POD>_vars.yml
+  1. pod_inventory/<POD>_pod
+  2. pod_dynamic_vars/<POD>_vars.yml
 
 #### Create an S3 Assetstore
 
 You will probably only need to do this once at the start of working with a given pod.
 Calling this script will create
 
-    # S3 bucket with the name `covalic-<POD>-assetstore`
-    # IAM user that can use the S3 bucket
-    # file at path `pod_static_vars/<POD>_s3_assetstore.yml`
+  1. S3 bucket with the name `covalic-<POD>-assetstore`
+  2. IAM user that can use the S3 bucket
+  3. file at path `pod_static_vars/<POD>_s3_assetstore.yml`
 
 The file created will have variables holding everything needed to create an S3
 assetstore in Girder and will allow Girder to communicate with S3.
@@ -70,3 +70,13 @@ assetstore in Girder and will allow Girder to communicate with S3.
 TODO: investigate holding this info in a vault so it can be checked into Git.
 For now do not check it in.
 
+#### full provision TODO
+#### update girder TODO
+
+#### Rewire a pod
+
+After bringing a pod back up, and building the pod inventory and refreshing the
+pod variables, you can rewire the services together.
+# TODO store the girder_admin_password in a vault
+
+    ./utils/rewire.sh <POD> <girder_admin_password>

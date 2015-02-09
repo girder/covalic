@@ -1,2 +1,4 @@
 ---
 girder_root: /opt/covalic/girder
+girder_assetstore_type: s3
+girder_assetstore_name: s3_default

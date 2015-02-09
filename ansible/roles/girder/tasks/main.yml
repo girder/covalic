@@ -1,4 +1,14 @@
 ---
+- name: Require girder_admin_password to be defined
+  fail: msg="You did not define environment variable girder_admin_password. Example definition | -e 'pod=dev'"
+  when: girder_admin_password is not defined
+  tags: girder
+
+- name: Require girder_celery_password to be defined
+  fail: msg="You did not define environment variable girder_celery_password. Example definition | -e 'pod=dev'"
+  when: girder_celery_password is not defined
+  tags: girder
+
 - name: add nodejs ppa
   apt_repository: repo='ppa:chris-lea/node.js'
   sudo: yes
@@ -89,16 +99,16 @@
     - girder
     - girder-update
 
-# as things stand, this probably won't work with multiple pods
-# or with multiple mongodb servers as it will just take the first mongodb
-# server of any with tag type=mongodb
+# TODO this will probably have to be reworked or at least tested for multiple mongo ips
 - name: set the mongodb server ip in girder local config
   lineinfile:
     dest: /opt/covalic/girder/girder/conf/girder.local.cfg
     state: present
     regexp: 'mongodb://(.*):27017'
-    line: "uri: \"mongodb://{{hostvars[groups.tag_type_mongodb[0]].ec2_private_ip_address}}:27017/girder\""
-  tags: girder
+    line: "uri: \"mongodb://{{mongo_private_ip}}:27017/girder\""
+  tags:
+    - girder
+    - rewire
 
 - name: install Girder as a service
   copy: src=girder.conf dest=/etc/init/girder.conf mode=644 owner=root
@@ -108,7 +118,9 @@
 - name: Start Girder as a service
   service: name=girder state=restarted enabled=yes
   sudo: yes
-  tags: girder
+  tags:
+    - girder
+    - rewire
 
 - name: add www-data to developers so nginx can serve static content
   user: name=www-data state=present groups=developers append=yes
@@ -153,7 +165,10 @@
 - name: Log in as covalic admin after registering an admin user
   shell: "curl -u {{girder_admin_user}}:{{girder_admin_password}} http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user/authentication"
   register: token_response
-  tags: girder
+  tags:
+    - girder
+    - girder-assetstore
+    - rewire
 
 - name: Enable covalic plugins
   shell: "curl -X PUT --data 'plugins={{girder_plugins|to_json}}&token={{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/system/plugins"
@@ -172,49 +187,91 @@
 - name: Search for the celery user even if we just created one, to get the id
   shell: "curl -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user?text={{girder_celery_user}}"
   register: celery_user_search_response
-  tags: girder
+  tags:
+    - girder
 
 # set celery_jobs girder plugin config params
 
 - name: Set config for the celery_jobs plugin broker_url
-  shell: "curl -X PUT --data 'key=celery_jobs.broker_url&value=amqp://guest@{{hostvars[groups.tag_type_celery[0]].ec2_private_ip_address}}//' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
-  tags: girder
+  shell: "curl -X PUT --data 'key=celery_jobs.broker_url&value=amqp://guest@{{mq_private_ip}}//' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
+  tags:
+    - girder
+    - rewire
 
 - name: Set config for the celery_jobs plugin app_main
   shell: "curl -X PUT --data 'key=celery_jobs.app_main&value=girder_celery' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
   tags: girder
 
-- name: Set config for the celery_jobs plugin app_main
+- name: Set config for the celery_jobs plugin girder celery user
   shell: "curl -X PUT --data 'key=celery_jobs.celery_user_id&value={{(celery_user_search_response.stdout|from_json)[0]._id}}' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
   tags: girder
 
-# setup local filesystem assetstore
-# probably should be broken out at some point
-# assumes an ebs volume mounted at /dev/xvdb
+# set up assetstore
+
+# s3 assetsore branch
+
+- name: Require assetstore_bucketname to be defined, proxy for all assetstore vars
+  fail: msg="Environment variable assetstore_bucketname undefined, should be set up as part of an s3 assetstore definition."
+  when: girder_assetstore_type == 's3' and assetstore_bucketname is not defined
+  tags:
+    - girder
+    - girder-assetstore
+
+- name: Set the S3 Assetstore properties
+  shell: "curl -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' -F 'accessKeyId={{iam_assetstore_access_key_id}}' -F 'secret={{iam_assetstore_secret_access_key}}' -F 'service=s3.amazonaws.com' -F 'name={{girder_assetstore_name}}' -F 'bucket={{assetstore_bucketname}}'  -F 'type=2' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/assetstore"
+  register: assetstore_response
+  when: girder_assetstore_type == 's3'
+  tags:
+    - girder
+    - girder-assetstore
+
+# local EBS filesystem branch
+
+- name: Require assetstore_devicename to be defined
+  fail: msg="Environment variable assetstore_devicename undefined, should be set up as part of a filesystem assetstore definition."
+  when: girder_assetstore_type == 'filesystem' and assetstore_devicename is not defined
+  tags:
+    - girder
+    - girder-assetstore
 
 - name: format filesystem for assetstore
   sudo: yes
-  filesystem: force=no fstype=ext4 dev=/dev/xvdb
-  tags: girder
+  filesystem: force=no fstype=ext4 dev={{assetstore_devicename}}
+  when: girder_assetstore_type == 'filesystem'
+  tags:
+    - girder
+    - girder-assetstore
 
 - name: create local mountpoint
   sudo: yes
   file: dest=/opt/covalic/assetstore mode=755 owner=www-data group=developers state=directory
-  tags: girder
+  when: girder_assetstore_type == 'filesystem'
+  tags:
+    - girder
+    - girder-assetstore
 
 - name: Mount assetstore volume
   sudo: yes
-  mount: name=/opt/covalic/assetstore src=/dev/xvdb fstype=ext4 state=mounted opts=defaults,nofail,nobootwait dump=0 passno=2
-  tags: girder
+  mount: name=/opt/covalic/assetstore src={{assetstore_devicename}} fstype=ext4 state=mounted opts=defaults,nofail,nobootwait dump=0 passno=2
+  when: girder_assetstore_type == 'filesystem'
+  tags:
+    - girder
+    - girder-assetstore
 
 - name: enforce ownership of assetstore
   sudo: yes
   file: dest=/opt/covalic/assetstore mode=755 owner=www-data group=developers state=directory recurse=yes
-  tags: girder
+  when: girder_assetstore_type == 'filesystem'
+  tags:
+    - girder
+    - girder-assetstore
 
 - name: Set the default assetstore to the EBS volume mountpoint
   shell: "curl --data 'name=default&type=0&root=/opt/covalic/assetstore' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/assetstore"
-  tags: girder
+  when: girder_assetstore_type == 'filesystem'
+  tags:
+    - girder
+    - girder-assetstore
 
 - name: Restart Girder as a service to have Covalic be the webapp
   service: name=girder state=restarted enabled=yes
@@ -222,6 +279,7 @@
   tags:
     - girder
     - girder-update
+    - rewire
 
 # force a restart of nginx to pick up any changes in girder
 - name: Restart nginx service

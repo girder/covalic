@@ -1,5 +1,4 @@
 ---
-# playbook for installing mongodb
 - name: MongoDB | Fetch GPG key
   sudo: yes
   command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
@@ -9,12 +8,12 @@
   sudo: yes
   shell:
     echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/10gen.list creates=/etc/apt/sources.list.d/10gen.list
+  tags: mongodb
 
 - name: MongoDB | Install latest mongodb
   sudo: yes
   apt: pkg=mongodb-org-server update-cache=yes
   tags: mongodb
-
 
 # TODO this will have to be redone for clustered mongo
 # change the mongodb from listening only on the local ip to the internal ip
@@ -24,12 +23,14 @@
     dest: /etc/mongod.conf
     state: present
     regexp: 'bind_ip = (.*)'
-    line: "bind_ip = {{hostvars[groups.tag_type_mongodb[0]].ec2_private_ip_address}}"
-  tags: mongodb
-
+    line: "bind_ip = {{mongo_private_ip}}"
+  tags:
+    - mongodb
+    - rewire
 
 - name: MongoDB | Run mongo daemon
   sudo: yes
   service: name=mongod state=restarted
-  tags: mongodb
-  
+  tags:
+    - mongodb
+    - rewire
