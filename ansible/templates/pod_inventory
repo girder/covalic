@@ -1,0 +1,8 @@
+[webserver]
+{% for group in groups %}{% if pod in group and 'covalic-girder-' in group %}{{ hostvars[groups[group][0]]['ec2_public_dns_name'] }}{% endif %}{% endfor %} ansible_ssh_user=ubuntu ansible_ssh_private_key_file={{path_to_covalic_admin_key}}
+
+[mongo]
+{% for group in groups %}{% if pod in group and 'tag_Name_' in group and '_mongodb' in group %}{{ hostvars[groups[group][0]]['ec2_public_dns_name'] }}{% endif %}{% endfor %} ansible_ssh_user=ubuntu ansible_ssh_private_key_file={{path_to_covalic_admin_key}}
+
+[celery]
+{% for group in groups %}{% if pod in group and 'tag_Name_' in group and '_celery' in group %}{{ hostvars[groups[group][0]]['ec2_public_dns_name'] }}{% endif %}{% endfor %} ansible_ssh_user=ubuntu ansible_ssh_private_key_file={{path_to_covalic_admin_key}}
