@@ -57,19 +57,16 @@ be added to Git
 
 #### Create an S3 Assetstore
 
-You will probably only need to do this once at the beggining of working with a given pod.
+You will probably only need to do this once at the start of working with a given pod.
+Calling this script will create
 
-This script:wTODO
+    # S3 bucket with the name `covalic-<POD>-assetstore`
+    # IAM user that can use the S3 bucket
+    # file at path `pod_static_vars/<POD>_s3_assetstore.yml`
 
-Fully provision your pod
+The file created will have variables holding everything needed to create an S3
+assetstore in Girder and will allow Girder to communicate with S3.
 
-To run the full provisioning
-
-
-Then you can either fully provision your pod
-
-
-or refresh your pod with whatever
-values have changed by restarting the EC2 instances.
-
+TODO: investigate holding this info in a vault so it can be checked into Git.
+For now do not check it in.
 
