@@ -71,8 +71,12 @@ assetstore in Girder and will allow Girder to communicate with S3.  The file
 will also be encrypted (double check this before committing) so that it can be
 safely added to GitHub.
 
-#### full provision TODO
-#### update girder TODO
+#### Fully provision a pod
+
+To provision a pod fully after creating the pod and the S3 assetstore, or in case
+there are large scale changes to update
+
+    ./utils/provision.sh <POD>
 
 #### Rewire a pod
 

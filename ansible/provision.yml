@@ -27,12 +27,6 @@
     - common
     - mongodb
 
-- user: ubuntu
-  hosts: tag_type_girder:webserver
-  tasks:
-
-    - action: debug var=hostvars
-      tags: girder
 
 - name: Girder
   user: ubuntu
