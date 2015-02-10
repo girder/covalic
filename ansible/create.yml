@@ -110,11 +110,6 @@
         group: "webserver_{{ pod }}"
         region: "{{ region }}"
         exact_count: 1
-        volumes:
-        - device_name: /dev/xvdb
-          volume_size: 512
-          device_type: gp2
-          delete_on_termination: true
         count_tag:
            Name: covalic-girder-{{pod}}
         id: covalic-girder-{{pod}}
@@ -146,6 +141,7 @@
            Name: "{{ pod }} celery worker"
            type: celery
            pod: "{{ pod }}"
+      register: mq_server
 
     - name: Create the mongodb worker
       ec2:
@@ -159,3 +155,7 @@
            Name: "{{ pod }} mongodb"
            type: mongodb
            pod: "{{ pod }}"
+      register: mongodb_server
+
+    - name: create {{pod}}_instance_ids file
+      template: src=templates/pod_instance_ids dest=pod_static_vars/{{pod}}_instance_ids
