@@ -35,13 +35,13 @@
   tags: girder
 
 - name: clone girder
-  git: repo=git://github.com/girder/girder.git dest={{ girder_root }} accept_hostkey=yes
+  git: repo=git://github.com/girder/girder.git dest={{ girder_root }} accept_hostkey=yes version={{ girder_version }}
   tags:
     - girder
     - girder-update
 
 - name: clone covalic plugin
-  git: repo=git://github.com/girder/covalic.git dest={{ girder_root }}/plugins/covalic accept_hostkey=yes
+  git: repo=git://github.com/girder/covalic.git dest={{ girder_root }}/plugins/covalic accept_hostkey=yes version={{ covalic_version }}
   tags:
     - girder
     - girder-update
