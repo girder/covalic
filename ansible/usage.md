@@ -77,6 +77,17 @@ For now do not check it in.
 
 After bringing a pod back up, and building the pod inventory and refreshing the
 pod variables, you can rewire the services together.
-# TODO store the girder_admin_password in a vault
+
+
+TODO store the girder_admin_password in a vault
 
     ./utils/rewire.sh <POD> <girder_admin_password>
+
+#### Update a pod with the latest codebase
+
+To update a pod with the latest codebase from the repos
+
+    ./utils/update.sh <POD>
+
+TODO update the celery worker(s) at the same time as the girder instance
+

@@ -148,7 +148,6 @@
   sudo: yes
   tags:
     - girder
-    - girder-update
 
 - name: Log in as covalic admin
   shell: "curl -u {{girder_admin_user}}:{{girder_admin_password}} http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user/authentication"
@@ -285,4 +284,7 @@
 - name: Restart nginx service
   service: name=nginx state=restarted enabled=yes
   sudo: yes
-  tags: girder
+  tags:
+    - girder
+    - girder-update
+    - rewire
