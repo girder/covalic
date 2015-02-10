@@ -55,6 +55,11 @@ def backup_assetstore_file(assetstore_file_path):
         import shutil
         shutil.move(assetstore_file_path, backup_path)
 
+def encrypt_assetstore_file(assetstore_file_path):
+    cmd = ['ansible-vault', 'encrypt', assetstore_file_path, '--vault-password-file', 'vault-password.txt']
+    import subprocess
+    subprocess.call(cmd)
+
 def create_assetstore_file(pod, username, access_key_id, secret_access_key):
     assetstore_file_path = 'pod_static_vars/%s_s3_assetstore.yml' % pod
     backup_assetstore_file(assetstore_file_path)
@@ -69,6 +74,10 @@ iam_assetstore_secret_access_key: %s
     f = open(assetstore_file_path, 'w')
     f.write(pod_assetstore_vars)
     f.close()
+
+    encrypt_assetstore_file(assetstore_file_path)
+
+
 
 if __name__ == '__main__':
     import sys

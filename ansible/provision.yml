@@ -40,19 +40,16 @@
   gather_facts: false
   vars:
     girder_admin_user: covalic
-    # need to pass this in externally
-    #girder_admin_password:
     girder_admin_email: covalic-aws@kitware.com
     girder_socket_host: localhost
     girder_socket_port: 8080
     girder_plugins: ['celery_jobs', 'challenge', 'covalic', 'jobs']
     girder_celery_user: celery
-    # need to pass this in externally
-    #girder_celery_password:
     girder_celery_email: covalic-celery@kitware.com
   vars_files:
     - pod_dynamic_vars/{{pod}}_vars.yml
     - pod_static_vars/{{pod}}_s3_assetstore.yml
+    - pod_static_vars/{{pod}}_girder_passwords.yml
   roles:
     - users
     - common

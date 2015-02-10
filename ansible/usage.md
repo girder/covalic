@@ -57,6 +57,8 @@ be added to Git
 
 #### Create an S3 Assetstore
 
+    python utils/create_pod_s3_assetstore.py test
+
 You will probably only need to do this once at the start of working with a given pod.
 Calling this script will create
 
@@ -65,10 +67,9 @@ Calling this script will create
   3. file at path `pod_static_vars/<POD>_s3_assetstore.yml`
 
 The file created will have variables holding everything needed to create an S3
-assetstore in Girder and will allow Girder to communicate with S3.
-
-TODO: investigate holding this info in a vault so it can be checked into Git.
-For now do not check it in.
+assetstore in Girder and will allow Girder to communicate with S3.  The file
+will also be encrypted (double check this before committing) so that it can be
+safely added to GitHub.
 
 #### full provision TODO
 #### update girder TODO
@@ -78,10 +79,7 @@ For now do not check it in.
 After bringing a pod back up, and building the pod inventory and refreshing the
 pod variables, you can rewire the services together.
 
-
-TODO store the girder_admin_password in a vault
-
-    ./utils/rewire.sh <POD> <girder_admin_password>
+    ./utils/rewire.sh <POD>
 
 #### Update a pod with the latest codebase
 
@@ -91,3 +89,21 @@ To update a pod with the latest codebase from the repos
 
 TODO update the celery worker(s) at the same time as the girder instance
 
+
+### Using Ansible vault for sensitive data
+
+This presupposes you have access to the shared `vault-password.txt` file, which should
+be placed in the `ansible` dir.
+
+#### Encrypting a file
+
+Create a standard Ansible yaml variable file and then encrypt it before checking
+into the Git repo.  **Warning**: this will encrypt the file in place.
+
+    ansible-vault encrypt <PATH_TO_SENSITIVE_FILE> --vault-password-file vault-password.txt
+
+#### Using the encrypted data in an Ansible command
+
+The scripts in the `utils` dir make use of encrypted variable files like
+
+    ansible-playbook provision.yml -i <INVENTORY> -e pod=<POD> -t <TAG> --vault-password-file vault-password.txt
