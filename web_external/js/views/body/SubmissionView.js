@@ -81,6 +81,8 @@ covalic.views.SubmissionView = covalic.View.extend({
 
     _progressHandler: function (progress) {
         if (this.job.get('progress')) {
+            var percentText = '0%';
+
             if (progress._id === this.job.get('progress').notificationId) {
                 if (progress.data.state === 'active') {
                     var barClass = [], progressClass = [];

@@ -21,6 +21,8 @@ import mako
 import os
 
 from girder import constants, events
+from girder.plugins.jobs.constants import JobStatus
+from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
 from .rest import submission, phase
 
@@ -127,6 +129,21 @@ def deleteSubmissions(event):
         subModel.remove(sub)
 
 
+def onJobUpdate(event):
+    """
+    Hook into job update event so we can look for job failure events and email
+    administrators accordingly.
+    """
+    if (event.info['job']['type'] == 'covalic_score' and
+            'status' in event.info['params'] and
+            int(event.info['params']['status']) == JobStatus.ERROR):
+        html = mail_utils.renderTemplate('covalic.submissionError.mako', {
+            'submissionId': event.info['job']['covalicSubmissionId']
+        })
+        mail_utils.sendEmail(
+            toAdmins=True, subject='Submission processing error', text=html)
+
+
 def load(info):
     phaseExt = phase.PhaseExt()
     info['apiRoot'].covalic_submission = submission.Submission()
@@ -138,3 +155,4 @@ def load(info):
 
     events.bind('model.challenge_phase.remove_with_kwargs', 'covalic',
                 deleteSubmissions)
+    events.bind('jobs.job.update', 'covalic', onJobUpdate)
