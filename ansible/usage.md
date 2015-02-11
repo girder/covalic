@@ -13,6 +13,31 @@ The following two environment variables need to be set with your AWS access cred
   1. export AWS_ACCESS_KEY_ID=your_id
   2. export AWS_SECRET_ACCESS_KEY=your_key
 
+## Common workflows
+
+Below are detailed descriptions of individual steps, but here are listed likely
+common workflows.
+
+### Create a new pod and provision it
+
+    python utils/create_pod_s3_assetstore.py <POD>
+    ./utils/create.sh <POD>
+    ./utils/provision.sh <POD>
+
+### Start and update a stopped pod
+
+    ./utils/start_pod.sh <POD>
+    ./utils/build_pod_inventory.sh <POD> <PATH_TO covalic_admin.pem>
+    ./utils/rewire.sh <POD>
+    ./utils/update.sh <POD>
+   
+### Start and update a stopped pod with specific repo versions
+ 
+    ./utils/start_pod.sh <POD>
+    ./utils/build_pod_inventory.sh <POD> <PATH_TO covalic_admin.pem>
+    ./utils/rewire.sh <POD>
+    ansible-playbook provision.yml -i pod_inventory/`<POD>`_pod -e pod=`<POD>` -e covalic_version=`<VERSION>` -t deploy-update --vault-password vault-password.txt
+
 ## Pod lifecycle control
 
 These depend on having a valid `pod_static_vars/<POD>_instance_ids` file, which is a static
@@ -77,7 +102,7 @@ be added to Git
 
 #### Create an S3 Assetstore
 
-    python utils/create_pod_s3_assetstore.py test
+    python utils/create_pod_s3_assetstore.py <POD>
 
 You will probably only need to do this once at the start of working with a given pod.
 Calling this script will create
@@ -112,20 +137,17 @@ To update a pod with the latest codebase from the repos
     ./utils/update.sh <POD>
 
 To update a pod with a specific version of a repo, set an environment variable
-for any of the following.  The default value for each is `master`.
+for any of the following.  The default value for each is `master`, except for 
+`covalic_metrics_version`, which defaults to `latest`.
 
     challenge_version
     covalic_version
     girder_version
+    covalic_metrics_version
 
 Then run the update like
 
-
-    ansible-playbook provision.yml -i pod_inventory/<POD>_pod -e pod=<POD> -e girder_version=<VERSION> -t girder-update --vault-password vault-password.txt
-
-
-TODO update the celery worker(s) at the same time as the girder instance
-
+    ansible-playbook provision.yml -i pod_inventory/`<POD>`_pod -e pod=`<POD>` -e covalic_version=`<VERSION>` -t deploy-update --vault-password vault-password.txt
 
 ### Using Ansible vault for sensitive data
 

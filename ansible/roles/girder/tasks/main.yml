@@ -38,33 +38,33 @@
   git: repo=git://github.com/girder/girder.git dest={{ girder_root }} accept_hostkey=yes version={{ girder_version }}
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 - name: clone covalic plugin
   git: repo=git://github.com/girder/covalic.git dest={{ girder_root }}/plugins/covalic accept_hostkey=yes version={{ covalic_version }}
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 - name: clone challenge plugin
   git: repo=git://github.com/girder/challenge.git dest={{ girder_root }}/plugins/challenge accept_hostkey=yes version={{ challenge_version }}
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 - name: install girder requirements
   pip: requirements={{ girder_root }}/requirements.txt
   sudo: yes
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 - name: install celery_jobs plugin requirements
   pip: requirements={{ girder_root }}/plugins/celery_jobs/requirements.txt
   sudo: yes
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 - name: install grunt globally
   npm: name={{ item }} global=yes
@@ -77,27 +77,27 @@
   npm: path={{ girder_root }}
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 - name: run grunt init
   command: grunt init chdir={{ girder_root }}
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 # run grunt to build covalic as an external web app
 - name: run grunt
   command: grunt chdir={{ girder_root }}
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 - name: install girder for development
   command: python setup.py develop chdir={{ girder_root }}
   sudo: yes
   tags:
     - girder
-    - girder-update
+    - deploy-update
 
 # TODO this will probably have to be reworked or at least tested for multiple mongo ips
 - name: set the mongodb server ip in girder local config
@@ -277,7 +277,7 @@
   sudo: yes
   tags:
     - girder
-    - girder-update
+    - deploy-update
     - rewire
 
 # force a restart of nginx to pick up any changes in girder
@@ -286,5 +286,5 @@
   sudo: yes
   tags:
     - girder
-    - girder-update
+    - deploy-update
     - rewire
