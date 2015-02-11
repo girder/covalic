@@ -111,6 +111,19 @@ To update a pod with the latest codebase from the repos
 
     ./utils/update.sh <POD>
 
+To update a pod with a specific version of a repo, set an environment variable
+for any of the following.  The default value for each is `master`.
+
+    challenge_version
+    covalic_version
+    girder_version
+
+Then run the update like
+
+
+    ansible-playbook provision.yml -i pod_inventory/`<POD>`_pod -e pod=`<POD>` -e girder_version=`<VERSION>` -t girder-update --vault-password vault-password.txt
+
+
 TODO update the celery worker(s) at the same time as the girder instance
 
 

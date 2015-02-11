@@ -4,3 +4,4 @@ girder_assetstore_type: s3
 girder_assetstore_name: s3_default
 girder_version: master
 covalic_version: master
+challenge_version: master

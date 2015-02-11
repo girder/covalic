@@ -47,7 +47,7 @@
     - girder-update
 
 - name: clone challenge plugin
-  git: repo=git://github.com/girder/challenge.git dest={{ girder_root }}/plugins/challenge accept_hostkey=yes
+  git: repo=git://github.com/girder/challenge.git dest={{ girder_root }}/plugins/challenge accept_hostkey=yes version={{ challenge_version }}
   tags:
     - girder
     - girder-update
