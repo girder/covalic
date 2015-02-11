@@ -51,6 +51,10 @@
   group: name=docker state=present
   tags: celery
 
+- name: Create Docker group
+  group: name=docker state=present
+  tags: celery
+
 - name: Add www-data to Docker group
   user: shell=/bin/bash
         name=www-data
