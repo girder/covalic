@@ -3,6 +3,17 @@
 */
 covalic.views.SubmissionView = covalic.View.extend({
     events: {
+        'click .c-restart-error-submission-button': function () {
+            // create a new submission with the same properties
+            var submission = new covalic.models.SubmissionModel();
+            submission.on('c:submissionPosted', function () {
+                covalic.router.navigate('submission/' + submission.get('_id'), {trigger: true});
+            }, this).postSubmission({
+                phaseId: this.submission.get('phaseId'),
+                folderId: this.submission.get('folderId'),
+                title: this.submission.get('title')
+            });
+        },
         'click .c-leaderboard-button': function () {
             covalic.router.navigate('phase/' + this.submission.get('phaseId'), {
                 trigger: true
