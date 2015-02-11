@@ -62,8 +62,9 @@
 - name: Restart docker daemon
   service: name=docker.io state=restarted enabled=yes
   sudo: yes
-  tags: celery
-
+  tags:
+    - celery
+    - deploy-update
 
 - name: Install Celery worker as a service
   copy: src=celery_worker.conf dest=/etc/init/celery_worker.conf mode=644 owner=root
