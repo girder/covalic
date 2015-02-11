@@ -120,7 +120,8 @@ covalic.views.SubmissionView = covalic.View.extend({
     // If an error occurred during processing, we'll display error info.
     _renderProcessingError: function () {
         this.$('.c-submission-display-body').html(covalic.templates.submissionError({
-            job: this.job
+            job: this.job,
+            adminUser: (girder.currentUser && girder.currentUser.get('admin'))
         }));
 
         new girder.views.jobs_JobDetailsWidget({
