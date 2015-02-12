@@ -1,7 +1,8 @@
 <%include file="_header.mako"/>
 
 <p>
-An error occurred while scoring the submission with ID <b>${submissionId}</b>.
+An error occurred while scoring the submission
+<a href="${host}/#submission/${submissionId}">${submissionId}</a>.
 </p>
 
 <p>

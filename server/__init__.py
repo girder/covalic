@@ -19,6 +19,7 @@
 
 import mako
 import os
+import posixpath
 
 from girder import constants, events
 from girder.plugins.jobs.constants import JobStatus
@@ -137,8 +138,10 @@ def onJobUpdate(event):
     if (event.info['job']['type'] == 'covalic_score' and
             'status' in event.info['params'] and
             int(event.info['params']['status']) == JobStatus.ERROR):
+        covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
         html = mail_utils.renderTemplate('covalic.submissionError.mako', {
-            'submissionId': event.info['job']['covalicSubmissionId']
+            'submissionId': event.info['job']['covalicSubmissionId'],
+            'host': covalicHost
         })
         mail_utils.sendEmail(
             toAdmins=True, subject='Submission processing error', text=html)
