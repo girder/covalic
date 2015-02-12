@@ -1,0 +1,6 @@
+---
+mq_instance_id: {{ mq_server.instance_ids[0] }}
+
+girder_instance_id: {{ girder_webserver.tagged_instances[0].id }}
+
+mongo_instance_id: {{ mongodb_server.instance_ids[0] }}

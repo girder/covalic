@@ -1,0 +1,36 @@
+---
+- name: Start instances for a specific pod value, depends on pod_static_vars/{{pod}}_instance_ids
+  hosts: all
+  connection: local
+  gather_facts: false
+  vars:
+    - region: us-east-1
+  vars_files:
+    - pod_static_vars/{{pod}}_instance_ids
+
+  tasks:
+
+    - name: Require pod to be defined
+      fail: msg="You did not define a pod name to manage all resources. Example definition | -e 'pod=dev'"
+      when: pod is not defined
+  
+    - name: Start girder instances for pod '{{pod}}'
+      local_action:
+        module: ec2
+        state: running
+        region: "{{ region }}"
+        instance_ids: "{{ girder_instance_ids }}"
+
+    - name: Start mq instances for pod '{{pod}}'
+      local_action:
+        module: ec2
+        state: running
+        region: "{{ region }}"
+        instance_ids: "{{ mq_instance_ids }}"
+
+    - name: Start mongo instances for pod '{{pod}}'
+      local_action:
+        module: ec2
+        state: running
+        region: "{{ region }}"
+        instance_ids: "{{ mongo_instance_ids }}"
