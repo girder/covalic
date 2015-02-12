@@ -36,7 +36,7 @@ common workflows.
     ./utils/start_pod.sh <POD>
     ./utils/build_pod_inventory.sh <POD> <PATH_TO covalic_admin.pem>
     ./utils/rewire.sh <POD>
-    ansible-playbook provision.yml -i pod_inventory/`<POD>`_pod -e pod=`<POD>` -e covalic_version=`<VERSION>` -t deploy-update --vault-password vault-password.txt
+    ansible-playbook provision.yml -i pod_inventory/<POD>_pod -e pod=<POD> -e covalic_version=<VERSION> -t deploy-update --vault-password vault-password.txt
 
 ## Pod lifecycle control
 
@@ -147,7 +147,7 @@ for any of the following.  The default value for each is `master`, except for
 
 Then run the update like
 
-    ansible-playbook provision.yml -i pod_inventory/`<POD>`_pod -e pod=`<POD>` -e covalic_version=`<VERSION>` -t deploy-update --vault-password vault-password.txt
+    ansible-playbook provision.yml -i pod_inventory/<POD>_pod -e pod=<POD> -e covalic_version=<VERSION> -t deploy-update --vault-password vault-password.txt
 
 ### Using Ansible vault for sensitive data
 
