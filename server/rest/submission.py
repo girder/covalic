@@ -20,6 +20,7 @@
 import cherrypy
 import json
 import os
+import posixpath
 import pymongo
 
 from girder.api import access
@@ -28,6 +29,7 @@ from girder.api.rest import Resource, loadmodel
 from girder.constants import AccessType
 from girder.models.model_base import ValidationException
 from girder.plugins.celery_jobs import getCeleryUser
+from girder.utility import mail_utils
 
 
 class Submission(Resource):
@@ -169,7 +171,7 @@ class Submission(Resource):
     @loadmodel(model='submission', plugin='covalic')
     def postScore(self, submission, params):
         # Ensure admin access on the containing challenge phase
-        self.model('phase', 'challenge').load(
+        phase = self.model('phase', 'challenge').load(
             submission['phaseId'], user=self.getCurrentUser(), exc=True,
             level=AccessType.ADMIN)
 
@@ -179,6 +181,20 @@ class Submission(Resource):
         # Delete the celery user's job token since the job is now complete.
         token = self.getCurrentToken()
         self.model('token').remove(token)
+
+        user = self.model('user').load(submission['creatorId'], force=True)
+        challenge = self.model('challenge', 'challenge').load(
+            phase['challengeId'], force=True)
+        covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
+        html = mail_utils.renderTemplate('covalic.submissionComplete.mako', {
+            'phase': phase,
+            'challenge': challenge,
+            'submission': submission,
+            'host': covalicHost
+        })
+        mail_utils.sendEmail(
+            to=user['email'], subject='Your submission has been scored',
+            text=html)
 
         return submission
     postScore.description = (
