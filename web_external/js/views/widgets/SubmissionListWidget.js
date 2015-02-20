@@ -3,13 +3,6 @@
  * leaderboard but can be sorted in other ways as well.
  */
 covalic.views.SubmissionListWidget = covalic.View.extend({
-    events: {
-        'click .c-score-link': function (e) {
-            var id = $(e.currentTarget).attr('submission-id');
-            covalic.router.navigate('submission/' + id, {trigger: true});
-        }
-    },
-
     initialize: function (settings) {
         this.phase = settings.phase;
 

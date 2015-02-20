@@ -18,7 +18,7 @@ table.c-leaderboard-table
         td(title="#{submission.get('created')}")= girder.formatDate(submission.get('created'), girder.DATE_DAY)
         td
           a.c-score-link(
-            submission-id="#{submission.get('_id')}")= Math.round(submission.get('overallScore') * 1000) / 1000
+            href="#submission/#{submission.get('_id')}")= Math.round(submission.get('overallScore') * 1000) / 1000
       - i ++
 
 .c-leaderboard-pagination

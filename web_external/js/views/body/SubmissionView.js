@@ -13,11 +13,6 @@ covalic.views.SubmissionView = covalic.View.extend({
                 folderId: this.submission.get('folderId'),
                 title: this.submission.get('title')
             });
-        },
-        'click .c-leaderboard-button': function () {
-            covalic.router.navigate('phase/' + this.submission.get('phaseId'), {
-                trigger: true
-            });
         }
     },
 
