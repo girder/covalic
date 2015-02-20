@@ -25,8 +25,7 @@ from girder.constants import AccessType
 
 class PhaseExt(Resource):
     @access.public
-    @loadmodel(map={'id': 'phase'}, model='phase', plugin='challenge',
-               level=AccessType.READ)
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
     def groundtruthItems(self, phase, params):
         # All participants can see the names of the ground truth items in
         # order to validate their submissions, even if they don't have
@@ -39,3 +38,26 @@ class PhaseExt(Resource):
     groundtruthItems.description = (
         Description('List all ground truth item names for a challenge phase.')
         .param('id', 'The ID of the phase.', paramType='path'))
+
+    @access.user
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.WRITE)
+    def setMetrics(self, phase, params):
+        phaseModel = self.model('phase', 'challenge')
+        user = self.getCurrentUser()
+
+        if 'copyFrom' in params:
+            srcPhase = self.model('phase', 'challenge').load(
+                params['copyFrom'], level=AccessType.READ, exc=True, user=user)
+
+            phase['metrics'] = srcPhase.get('metrics', {})
+        else:
+            phase['metrics'] = self.getBodyJson()
+
+        return phaseModel.filter(phaseModel.save(phase), user)
+    setMetrics.description = (
+        Description('Set the metric information set for this phase.')
+        .param('id', 'ID of the phase to set metric info on.', paramType='path')
+        .param('copyFrom', 'To copy the metric info from another phase, set '
+               'this parameter to the ID of that phase.', required=False)
+        .param('metrics', 'A JSON object representing the set of metrics for '
+               'the challenge.', required=False, paramType='body'))
