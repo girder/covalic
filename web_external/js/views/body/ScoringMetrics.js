@@ -11,12 +11,18 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
                     if (!this.model.has('metrics') || !this.model.get('metrics')) {
                         this.model.set('metrics', {});
                     }
-                    this.model.get('metrics')[metric.id] = {
-                        title: '',
-                        weight: 0,
-                        description: ''
-                    };
-                    this.render();
+
+                    var metrics = this._getMetricsState();
+
+                    if (metrics) {
+                        this.model.set('metrics', metrics)
+                        this.model.get('metrics')[metric.id] = {
+                            title: '',
+                            weight: 0,
+                            description: ''
+                        };
+                        this.render();
+                    }
                 }, this);
             }
             this.addMetricWidget.render();
@@ -24,44 +30,58 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
 
         'click .c-save-metrics': function () {
             this.$('.g-validation-failed-message').empty();
-            var metrics = {};
-            _.each(this.$('.c-metric-container'), function (el) {
-                el = $(el);
-                var idInput = el.find('.c-metric-id');
-                var metricId = idInput.val().trim();
-                if (!metricId) {
-                    this.$('.g-validation-failed-message').text(
-                        'Metric identifier field must not be empty.');
-                    idInput.focus();
-                    return;
-                }
-                if (_.has(metrics, metricId)) {
-                    this.$('.g-validation-failed-message').text(
-                        'Duplicate metric identifier: ' + metricId + '.');
-                    idInput.focus();
-                    return;
-                }
+            var metrics = this._getMetricsState();
 
-                metrics[metricId] = {
-                    title: el.find('.c-metric-title').val().trim(),
-                    description: el.find('.c-metric-description').val().trim(),
-                    weight: window.Number(el.find('.c-metric-weight').val() || 0)
-                }
-
-                this.model.set('metrics', metrics).once('g:saved', function () {
-                    girder.events.trigger('c:metricsSaved', {
+            if (metrics) {
+                this.model.set('metrics', metrics).once('c:metricsSaved', function () {
+                    girder.events.trigger('g:alert', {
                         type: 'success',
                         icon: 'ok',
                         text: 'Metrics saved.'
                     });
                 }, this).saveMetrics();
-            }, this);
+            }
         },
 
         'click .c-metric-remove-button': function (e) {
             $(e.currentTarget).parents('.c-metric-container').fadeOut(400, function () {
                 $(this).remove();
             });
+        }
+    },
+
+    _getMetricsState: function () {
+        var metrics = {};
+        var ok = _.every(this.$('.c-metric-container'), function (el) {
+            el = $(el);
+            var idInput = el.find('.c-metric-id');
+            var metricId = idInput.val().trim();
+            if (!metricId) {
+                this.$('.g-validation-failed-message').text(
+                    'Metric identifier field must not be empty.');
+                idInput.focus();
+                return false;
+            }
+            if (_.has(metrics, metricId)) {
+                this.$('.g-validation-failed-message').text(
+                    'Duplicate metric identifier: ' + metricId + '.');
+                idInput.focus();
+                return false;
+            }
+
+            metrics[metricId] = {
+                title: el.find('.c-metric-title').val().trim(),
+                description: el.find('.c-metric-description').val().trim(),
+                weight: window.Number(el.find('.c-metric-weight').val() || 0)
+            };
+
+            return true;
+        }, this);
+
+        if (ok) {
+            return metrics;
+        } else {
+            return false;
         }
     },
 

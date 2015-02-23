@@ -34,10 +34,10 @@ if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
           | Description (supports
           a(target="_blank", href="http://daringfireball.net/projects/markdown")  Markdown
           |  syntax)
-        textarea.form-control.input-sm.c-metric-description(rows="4")
+        textarea.form-control.input-sm.c-metric-description(rows="4")= metric.description
         .c-metric-info-label
           | Numeric weighting factor
-        input.form-control.c-metric-weight(type="number", value="#{metric.weight}")
+        input.form-control.input-sm.c-metric-weight(type="number", value="#{metric.weight}")
 
   .g-validation-failed-message
   button.c-save-metrics.btn.btn-primary(type="submit")
