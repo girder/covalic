@@ -56,6 +56,8 @@ class PhaseExt(Resource):
         return phaseModel.filter(phaseModel.save(phase), user)
     setMetrics.description = (
         Description('Set the metric information set for this phase.')
+        .notes('If the metrics have changed, this will recompute all of the '
+               'overall scores for this phase.')
         .param('id', 'ID of the phase to set metric info on.', paramType='path')
         .param('copyFrom', 'To copy the metric info from another phase, set '
                'this parameter to the ID of that phase.', required=False)
