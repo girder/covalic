@@ -20,6 +20,48 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
                 }, this);
             }
             this.addMetricWidget.render();
+        },
+
+        'click .c-save-metrics': function () {
+            this.$('.g-validation-failed-message').empty();
+            var metrics = {};
+            _.each(this.$('.c-metric-container'), function (el) {
+                el = $(el);
+                var idInput = el.find('.c-metric-id');
+                var metricId = idInput.val().trim();
+                if (!metricId) {
+                    this.$('.g-validation-failed-message').text(
+                        'Metric identifier field must not be empty.');
+                    idInput.focus();
+                    return;
+                }
+                if (_.has(metrics, metricId)) {
+                    this.$('.g-validation-failed-message').text(
+                        'Duplicate metric identifier: ' + metricId + '.');
+                    idInput.focus();
+                    return;
+                }
+
+                metrics[metricId] = {
+                    title: el.find('.c-metric-title').val().trim(),
+                    description: el.find('.c-metric-description').val().trim(),
+                    weight: window.Number(el.find('.c-metric-weight').val() || 0)
+                }
+
+                this.model.set('metrics', metrics).once('g:saved', function () {
+                    girder.events.trigger('c:metricsSaved', {
+                        type: 'success',
+                        icon: 'ok',
+                        text: 'Metrics saved.'
+                    });
+                }, this).saveMetrics();
+            }, this);
+        },
+
+        'click .c-metric-remove-button': function (e) {
+            $(e.currentTarget).parents('.c-metric-container').fadeOut(400, function () {
+                $(this).remove();
+            });
         }
     },
 
@@ -48,7 +90,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
             _: _
         }));
 
-        this.$('button[title]').tooltip({
+        this.$('button[title],.c-metric-remove-button').tooltip({
             placement: 'left'
         });
 

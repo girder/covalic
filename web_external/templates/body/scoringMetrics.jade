@@ -25,6 +25,7 @@ if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
   .c-metric-list
     each metric, id in phase.get('metrics')
       .c-metric-container
+        .c-metric-remove-button(title="Remove metric"): i.icon-cancel
         .c-metric-info-label Short identifier
         input.form-control.input-sm.c-metric-id(value="#{id}")
         .c-metric-info-label Full metric name
@@ -34,8 +35,12 @@ if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
           a(target="_blank", href="http://daringfireball.net/projects/markdown")  Markdown
           |  syntax)
         textarea.form-control.input-sm.c-metric-description(rows="4")
+        .c-metric-info-label
+          | Numeric weighting factor
+        input.form-control.c-metric-weight(type="number", value="#{metric.weight}")
 
-  button.btn.btn-primary(type="submit")
+  .g-validation-failed-message
+  button.c-save-metrics.btn.btn-primary(type="submit")
     i.icon-ok
     | Save
 else
