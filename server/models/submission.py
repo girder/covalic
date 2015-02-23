@@ -40,13 +40,11 @@ class Submission(Model):
         ))
 
     def validate(self, doc):
-        if doc.get('score') is not None:
+        if doc.get('score') is not None and doc.get('overallScore') is None:
             scoring.computeAverageScores(doc['score'])
             phase = self.model('phase', 'challenge').load(
                 doc['phaseId'], force=True)
             doc['overallScore'] = scoring.computeOverallScore(doc, phase)
-            # TODO we shouldn't necessarily make this marked as latest. We
-            # need to add some controls for that.
             doc['latest'] = True
 
             Model.update(self, query={
