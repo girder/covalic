@@ -60,6 +60,7 @@ def computeOverallScore(submission, phase):
 
     for metric in averages:
         if metric['name'] in metricInfo:
-            total += float(metric['value']) * float(metricInfo.get('weight', 0))
+            total += float(metric['value']) * \
+                     float(metricInfo[metric['name']].get('weight', 0))
 
     return total
