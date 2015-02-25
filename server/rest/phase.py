@@ -45,6 +45,8 @@ class PhaseExt(Resource):
         phaseModel = self.model('phase', 'challenge')
         user = self.getCurrentUser()
 
+        oldMetrics = phase.get('metrics', {})
+
         if 'copyFrom' in params:
             srcPhase = self.model('phase', 'challenge').load(
                 params['copyFrom'], level=AccessType.READ, exc=True, user=user)
@@ -52,6 +54,21 @@ class PhaseExt(Resource):
             phase['metrics'] = srcPhase.get('metrics', {})
         else:
             phase['metrics'] = self.getBodyJson()
+
+        # Determine if metrics IDs or weights changed at all
+        newMetrics = phase['metrics']
+        changed = set(oldMetrics.keys()) != set(newMetrics.keys())
+        if not changed:
+            for key in oldMetrics.iterkeys():
+                if oldMetrics[key].get('weight') != \
+                        newMetrics[key].get('weight'):
+                    changed = True
+                    break
+
+        # If they have changed, recompute all scores using the new weights
+        if changed:
+            # TODO progress context
+            self.model('submission', 'covalic').recomputeOverallScores(phase)
 
         return phaseModel.filter(phaseModel.save(phase), user)
     setMetrics.description = (
