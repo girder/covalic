@@ -33,8 +33,18 @@
 .c-submission-score-table
   width 100%
 
+  .c-metric-heading
+    cursor pointer
+    color #222
+
+    &:hover
+      color #77e
+
   tr.c-stripe[stripe="even"]
     background-color #eee
+
+  tr.c-stripe:nth-of-type(1)
+    background-color #bfdcf7
 
 .c-submission-right-buttons
   margin-top 10px
@@ -102,3 +112,6 @@
   .c-task-progress-message
     color #777
     font-size 14px
+
+.c-metric-description-container:first-child
+  margin-top 0 !important

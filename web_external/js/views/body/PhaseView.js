@@ -1,10 +1,6 @@
 covalic.views.PhaseView = covalic.View.extend({
 
     events: {
-        'click #c-submit-phase-dataset': function (event) {
-            covalic.router.navigate('phase/' + this.model.get('_id') + '/submit', {trigger: true});
-        },
-
         'click #c-join-phase': function (event) {
             if (!girder.currentUser) {
                 girder.events.trigger('g:loginUi');
@@ -18,14 +14,9 @@ covalic.views.PhaseView = covalic.View.extend({
                 }).done(_.bind(function (resp) {
                     var participantGroupId = this.model.get('participantGroupId');
                     girder.currentUser.addToGroup(participantGroupId);
-                    girder.events.trigger('c:joinPhase');
+                    this.trigger('c:joinPhase');
                 }, this));
             }
-        },
-
-        'click a.c-challenge-link': function (event) {
-            var id = $(event.currentTarget).attr('c-challenge-id');
-            covalic.router.navigate('challenge/' + id, {trigger: true});
         },
 
         'click a.c-edit-phase': function () {
@@ -83,7 +74,7 @@ covalic.views.PhaseView = covalic.View.extend({
     },
 
     initialize: function (settings) {
-        girder.events.on('c:joinPhase', this.render, this);
+        this.on('c:joinPhase', this.render, this);
         girder.cancelRestRequests('fetch');
         if (settings.phase) {
             this.model = settings.phase;

@@ -1,6 +1,6 @@
 .c-phase-header
     .c-phase-name.g-body-title
-        a.c-challenge-link(c-challenge-id="#{challenge.get('_id')}")
+        a.c-challenge-link(href="#challenge/#{challenge.get('_id')}")
             b #{challenge.get('name')}
         i.icon-angle-right
         | #{phase.get('name')}
@@ -16,6 +16,10 @@
                             a.c-edit-phase(role="menuitem")
                                 i.icon-edit
                                 | Edit phase
+                        li(role="presentation")
+                            a.c-edit-metrics(role="menuitem", href="#phase/#{phase.get('_id')}/metrics")
+                                i.icon-chart-bar
+                                | Scoring metrics
                         if (phase.getAccessLevel() >= girder.AccessType.ADMIN)
                             li.divider(role="presentation")
                             li(role="presentation")
@@ -37,7 +41,8 @@ if phase.get('instructions')
 .c-phase-submit-container
     if userInChallenge
         if phase.get('active')
-            button#c-submit-phase-dataset.btn.btn-lg.btn-success
+            a#c-submit-phase-dataset.btn.btn-lg.btn-success(
+              href="#phase/#{phase.get('_id')}/submit")
                 i.icon-upload-cloud
                 |  Submit your results
         else

@@ -19,6 +19,7 @@
 
 import datetime
 
+from girder.constants import AccessType
 from girder.models.model_base import Model
 from girder.plugins.covalic import scoring
 from girder.utility.progress import noProgress
@@ -33,11 +34,17 @@ class Submission(Model):
         userPhaseIdx = ([('creatorId', 1), ('phaseId', 1)], {})
         self.ensureIndices((leaderboardIdx, userPhaseIdx, 'folderId',
                             'overallScore'))
+        self.exposeFields(level=AccessType.READ, fields=(
+            '_id', 'creatorId', 'creatorName', 'phaseId', 'folderId', 'created',
+            'score', 'title', 'latest', 'overallScore', 'jobId'
+        ))
 
     def validate(self, doc):
-        if doc.get('score') is not None:
+        if doc.get('score') is not None and doc.get('overallScore') is None:
             scoring.computeAverageScores(doc['score'])
-            doc['overallScore'] = scoring.computeOverallScore(doc['score'])
+            phase = self.model('phase', 'challenge').load(
+                doc['phaseId'], force=True)
+            doc['overallScore'] = scoring.computeOverallScore(doc, phase)
             doc['latest'] = True
 
             Model.update(self, query={
@@ -51,7 +58,10 @@ class Submission(Model):
         return doc
 
     def remove(self, doc, progress=noProgress):
-        # TODO delete folders and stuff...?
+        folder = self.model('folder').load(doc['folderId'], force=True)
+        if folder:
+            self.model('folder').remove(folder)
+
         Model.remove(self, doc, progress=progress)
 
     def list(self, phase, limit=50, offset=0, sort=None, userFilter=None):
@@ -81,7 +91,3 @@ class Submission(Model):
             submission['jobId'] = job['_id']
 
         return self.save(submission)
-
-    def filter(self, submission, user=None):
-        # TODO filter
-        return submission

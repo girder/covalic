@@ -20,66 +20,6 @@
 from collections import defaultdict
 
 
-class MetricScore(object):
-    """
-    For each metric being scored, call the score method of this class. It will
-    call into the per-metric scoring implementation, which is passed both the
-    average score as well as all of the individual dataset scores.
-    """
-    @classmethod
-    def score(cls, metric):
-        """
-        Compute the score value for the given metric. A higher score is better.
-        """
-        fn = metric['metric'].replace(' ', '').lower()
-
-        if not hasattr(cls, fn):
-            raise Exception('Invalid metric: {} ({}).'.format(
-                            metric['metric'], fn))
-
-        return getattr(cls, fn)(metric['_avg'], metric['datasets'])
-
-    @staticmethod
-    def dice1(avg, datasets):
-        return avg
-
-    @staticmethod
-    def dice2(avg, datasets):
-        return avg
-
-    @staticmethod
-    def adb1(avg, datasets):
-        return avg
-
-    @staticmethod
-    def adb2(avg, datasets):
-        return avg
-
-    @staticmethod
-    def hdb1(avg, datasets):
-        return avg
-
-    @staticmethod
-    def hdb2(avg, datasets):
-        return avg
-
-    @staticmethod
-    def sens1(avg, datasets):
-        return avg
-
-    @staticmethod
-    def sens2(avg, datasets):
-        return avg
-
-    @staticmethod
-    def spec1(avg, datasets):
-        return avg
-
-    @staticmethod
-    def spec2(avg, datasets):
-        return avg
-
-
 def computeAverageScores(score):
     """
     Compute the average score for each metric and add it to the score list
@@ -104,14 +44,23 @@ def computeAverageScores(score):
     })
 
 
-def computeOverallScore(score):
+def computeOverallScore(submission, phase):
     """
-    Compute the overall score based on the matrix of individual scores. The
-    computed value will be used to define the total ordering of submissions
-    to a given phase.
+    Compute the overall score based on the matrix of individual scores. This
+    computes the scalar product of the weighting vector defined by the challenge
+    administrators and the average scores in those metrics, using a weight of
+    0 for metrics that are not defined by the admins.
 
-    :param score: The score object (metric-major, dataset-minor grouping)
-    :type score: dict
+    :param submission: The submission to compute the overall score on.
+    :param phase: The challenge phase that was submitted to.
     """
-    return 123
-    #return reduce(lambda x, y: x + MetricScore.score(y), score, 0)
+    total = 0
+    metricInfo = phase.get('metrics', {})
+    averages = submission['score'][0]['metrics']
+
+    for metric in averages:
+        if metric['name'] in metricInfo:
+            total += float(metric['value']) * \
+                     float(metricInfo[metric['name']].get('weight', 0))
+
+    return total

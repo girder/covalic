@@ -1,6 +1,6 @@
 .c-submission-header-bar
   .c-submission-right-buttons.pull-right
-    a.c-leaderboard-button
+    a.c-leaderboard-button(href="#phase/#{submission.get('phaseId')}")
       |  View leaderboard&nbsp;
       i.icon-right-big
 
@@ -15,7 +15,7 @@
         b  #{submission.get('creatorName')}
 
 .c-submission-display-body
-  if submission.get('overallScore')
+  if submission.has('overallScore')
     .c-submission-overall-score-container
       .c-pre-text Overall score:
       .c-overall-score= Math.round(submission.get('overallScore') * 1000) / 1000

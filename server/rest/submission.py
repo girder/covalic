@@ -225,9 +225,16 @@ class Submission(Resource):
     @access.user
     @loadmodel(model='phase', plugin='challenge', level=AccessType.ADMIN)
     def getUnscoredSubmissions(self, params):
+        # TODO implement
         pass
     getUnscoredSubmissions.description = (
         Description('List unscored submissions for a given phase.')
         .param('phaseId', 'The ID of the phase.')
+        .param('limit', "Result set size limit (default=50).", required=False,
+               dataType='int')
+        .param('offset', "Offset into result set (default=0).", required=False,
+               dataType='int')
+        .param('sort', 'Field to sort the result list by (default=created)',
+               required=False)
         .errorResponse('Phase ID was invalid.')
         .errorResponse('Admin access was denied for the challenge phase.', 403))

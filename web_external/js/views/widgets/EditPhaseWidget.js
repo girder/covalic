@@ -1,6 +1,6 @@
 /**
-* This widget is used to create a new phase or edit an existing one.
-*/
+ * This widget is used to create a new phase or edit an existing one.
+ */
 covalic.views.EditPhaseWidget = covalic.View.extend({
     events: {
         'submit #c-phase-edit-form': function (e) {

@@ -150,8 +150,14 @@ def onJobUpdate(event):
 def load(info):
     phaseExt = phase.PhaseExt()
     info['apiRoot'].covalic_submission = submission.Submission()
-    info['apiRoot'].challenge_phase.route(
+
+    # Extend challenge_phase resource
+    phaseResource = info['apiRoot'].challenge_phase
+    phaseResource.route(
         'GET', (':id', 'groundtruth', 'item'), phaseExt.groundtruthItems)
+    phaseResource.route('PUT', (':id', 'metrics'), phaseExt.setMetrics)
+
+    # Move girder app to /girder, serve covalic app from /
     info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
                                                      info['serverRoot'])
     info['serverRoot'].api = info['serverRoot'].girder.api
@@ -159,3 +165,7 @@ def load(info):
     events.bind('model.challenge_phase.remove_with_kwargs', 'covalic',
                 deleteSubmissions)
     events.bind('jobs.job.update', 'covalic', onJobUpdate)
+
+    # Expose extended fields on models
+    ModelImporter.model('phase', 'challenge').exposeFields(
+        level=constants.AccessType.READ, fields='metrics')

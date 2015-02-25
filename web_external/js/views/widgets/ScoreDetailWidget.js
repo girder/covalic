@@ -1,6 +1,7 @@
 covalic.views.ScoreDetailWidget = covalic.View.extend({
     initialize: function (settings) {
         this.submission = settings.submission;
+        this.phase = settings.phase;
         this.score = this.submission.get('score');
 
         this.metrics = _.map(this.score[0].metrics, function (metric) {
@@ -18,6 +19,29 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
             metrics: this.metrics,
             getScoreForCell: _.bind(this.getScoreForCell, this)
         }));
+
+        var metricsInfo = this.phase.get('metrics') || {};
+        _.each(this.$('.c-metric-heading'), function (heading) {
+            var el = $(heading),
+                metricId = el.attr('metric'),
+                metricInfo = metricsInfo[metricId] || {},
+                title = metricInfo.title || metricId,
+                description = metricInfo.description ?
+                    markdown.toHTML(metricInfo.description) : null,
+                weight = metricInfo.weight || 0;
+
+            el.popover({
+                title: title,
+                container: this.$el,
+                trigger: 'focus',
+                placement: 'auto',
+                content: covalic.templates.metricInfo({
+                    description: description,
+                    weight: weight
+                }),
+                html: true
+            });
+        }, this);
     },
 
     getScoreForCell: function (dataset, metric) {
