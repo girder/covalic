@@ -37,7 +37,7 @@ if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
         textarea.form-control.input-sm.c-metric-description(rows="4")= metric.description
         .c-metric-info-label
           | Numeric weighting factor
-        input.form-control.input-sm.c-metric-weight(type="number", value="#{metric.weight}")
+        input.form-control.input-sm.c-metric-weight(type="text", value="#{metric.weight}")
 
   .g-validation-failed-message
   button.c-save-metrics.btn.btn-primary(type="submit")

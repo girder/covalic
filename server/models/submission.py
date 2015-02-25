@@ -57,6 +57,34 @@ class Submission(Model):
 
         return doc
 
+    def getAllSubmissions(self, phase, filter=None):
+        """
+        Return a cursor of all submissions to a given phase.
+
+        :param phase: The phase.
+        :param filter: Any additional filtering rules for the result set.
+        :type filter: dict
+        """
+        if filter is None:
+            filter = {}
+        filter['phaseId'] = phase['_id']
+
+        return self.find(filter, limit=0)
+
+    def recomputeOverallScores(self, phase):
+        """
+        Recompute all of the overall score values for the submissions of a
+        given phase. This might be fairly expensive, so it should only be done
+        if the metric identifiers or weighting values actually change.
+
+        :param phase: The phase to recompute all submissions on.
+        """
+        for submission in self.getAllSubmissions(phase):
+            if submission.get('score'):
+                submission['overallScore'] = scoring.computeOverallScore(
+                    submission, phase)
+                self.save(submission, validate=False)
+
     def remove(self, doc, progress=noProgress):
         folder = self.model('folder').load(doc['folderId'], force=True)
         if folder:
