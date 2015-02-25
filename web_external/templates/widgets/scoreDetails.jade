@@ -3,7 +3,8 @@ table.c-submission-score-table
     tr
       th
       each metric in metrics
-        th= metric
+        th
+          a.c-metric-heading(metric="#{metric}", tabindex="0")= metric
   tbody
     - var i = 0
     each dataset in datasets

@@ -37,7 +37,12 @@ covalic.views.SubmissionView = covalic.View.extend({
                 }, this).fetch();
             }
         }
-        this.render();
+
+        this.phase = new covalic.models.PhaseModel({
+            _id: this.submission.get('phaseId')
+        }).on('g:fetched', function () {
+            this.render();
+        }, this).fetch();
     },
 
     render: function () {
@@ -55,6 +60,7 @@ covalic.views.SubmissionView = covalic.View.extend({
             new covalic.views.ScoreDetailWidget({
                 el: this.$('.c-submission-score-detail-container'),
                 submission: this.submission,
+                phase: this.phase,
                 parentView: this
             }).render();
         }
