@@ -32,7 +32,8 @@ if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
             a(data-toggle="collapse" data-parent=".c-metric-list"
               href="#c-metric-#{i}")= id
           .c-metric-remove-button(title="Remove metric"): i.icon-cancel
-        .c-metric-panel.panel-collapse.collapse(id="c-metric-#{i}" role="tabpanel")
+        .c-metric-panel.panel-collapse.collapse(
+            id="c-metric-#{i}" role="tabpanel" class="#{id === openMetric ? 'in' : ''}")
           .panel-body
             .c-metric-info-label Short identifier
             input.form-control.input-sm.c-metric-id(value="#{id}")
