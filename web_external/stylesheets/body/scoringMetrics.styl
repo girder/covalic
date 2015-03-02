@@ -11,23 +11,26 @@
   color #666
   font-style italic
 
-.c-metric-container
-  border 1px solid #eee
-  padding 4px 15px 15px 15px
-  margin-bottom 10px
-  background-color #f9f8f8
+.c-metric-list
+  margin-bottom 15px
 
-  >.c-metric-info-label
-    margin-top 11px
+.c-metric-container
+  .panel-title
+    display inline-block
+
+  .c-metric-info-label:not(.c-first)
+    margin-top 13px
 
   .c-metric-remove-button
     display inline-block
     float right
     border-radius 3px
     color #333
-    border 1px solid white
+    border 1px solid rgba(0, 0, 0, 0)
     cursor pointer
     padding 3px 4px
+    position relative
+    top -4px
 
     &:hover
       border 1px solid #ddd

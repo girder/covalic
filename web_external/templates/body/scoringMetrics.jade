@@ -22,22 +22,31 @@
           | Copy metrics from other phase
 
 if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
-  .c-metric-list
+  .c-metric-list.panel-group(role="tablist")
+    - var i = 0
     each metric, id in phase.get('metrics')
-      .c-metric-container
-        .c-metric-remove-button(title="Remove metric"): i.icon-cancel
-        .c-metric-info-label Short identifier
-        input.form-control.input-sm.c-metric-id(value="#{id}")
-        .c-metric-info-label Full metric name
-        input.form-control.input-sm.c-metric-title(value="#{metric.title}")
-        .c-metric-info-label
-          | Description (supports
-          a(target="_blank", href="http://daringfireball.net/projects/markdown")  Markdown
-          |  syntax)
-        textarea.form-control.input-sm.c-metric-description(rows="4")= metric.description
-        .c-metric-info-label
-          | Numeric weighting factor
-        input.form-control.input-sm.c-metric-weight(type="text", value="#{metric.weight}")
+      - i += 1
+      .c-metric-container.panel.panel-default
+        .panel-heading(role="tab")
+          h4.panel-title
+            a.c-metric-id-panel-title(data-toggle="collapse" data-parent=".c-metric-list"
+              href="#c-metric-#{i}")= id
+          .c-metric-remove-button(title="Remove metric"): i.icon-cancel
+        .c-metric-panel.panel-collapse.collapse(
+            id="c-metric-#{i}" role="tabpanel" class="#{id === openMetric ? 'in' : ''}")
+          .panel-body
+            .c-metric-info-label.c-first Short identifier
+            input.form-control.input-sm.c-metric-id(value="#{id}")
+            .c-metric-info-label Full metric name
+            input.form-control.input-sm.c-metric-title(value="#{metric.title}")
+            .c-metric-info-label
+              | Description (supports
+              a(target="_blank", href="http://daringfireball.net/projects/markdown")  Markdown
+              |  syntax)
+            textarea.form-control.input-sm.c-metric-description(rows="4")= metric.description
+            .c-metric-info-label
+              | Numeric weighting factor
+            input.form-control.input-sm.c-metric-weight(type="text", value="#{metric.weight}")
 
   .g-validation-failed-message
   button.c-save-metrics.btn.btn-primary(type="submit")

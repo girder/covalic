@@ -21,6 +21,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
                             weight: 0,
                             description: ''
                         };
+                        this.openMetric = metric.id;
                         this.render();
                     }
                 }, this);
@@ -37,7 +38,8 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
                     girder.events.trigger('g:alert', {
                         type: 'success',
                         icon: 'ok',
-                        text: 'Metrics saved.'
+                        text: 'Metrics saved.',
+                        timeout: 2000
                     });
                 }, this).saveMetrics();
             }
@@ -47,6 +49,13 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
             $(e.currentTarget).parents('.c-metric-container').fadeOut(400, function () {
                 $(this).remove();
             });
+        },
+
+        'input .c-metric-id': function (e) {
+            var el = $(e.currentTarget);
+            el.parents('.c-metric-container')
+              .find('a.c-metric-id-panel-title')
+              .text(el.val());
         }
     },
 
@@ -90,6 +99,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
         girder.cancelRestRequests('fetch');
 
         this.model = settings.phase;
+        this.openMetric = settings.openMetric || null;
 
         if (this.challenge) {
             this.render();
@@ -107,6 +117,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
         this.$el.html(covalic.templates.scoringMetrics({
             phase: this.model,
             challenge: this.challenge,
+            openMetric: this.openMetric,
             _: _
         }));
 
@@ -114,6 +125,11 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
             placement: 'left'
         });
 
+        if (this.openMetric) {
+            var el = this.$('.c-metric-id[value="' + this.openMetric + '"]');
+            el.focus();
+            window.scrollTo(el.offset().top);
+        }
         return this;
     }
 });
