@@ -29,6 +29,21 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
             this.addMetricWidget.render();
         },
 
+        'click .c-copy-metrics': function () {
+            if (!this.copyMetricsWidget) {
+                this.copyMetricsWidget = new covalic.views.SelectPhaseWidget({
+                    el: $('#g-dialog-container'),
+                    phase: this.model,
+                    title: 'Copy metric information from phase',
+                    parentView: this
+                }).on('c:phaseSelected', function (phase) {
+                    this.model.set('metrics', phase.get('metrics'));
+                    this.render();
+                }, this);
+            }
+            this.copyMetricsWidget.render();
+        },
+
         'click .c-save-metrics': function () {
             this.$('.g-validation-failed-message').empty();
             var metrics = this._getMetricsState();
