@@ -27,7 +27,7 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
                 metricInfo = metricsInfo[metricId] || {},
                 title = metricInfo.title || metricId,
                 description = metricInfo.description ?
-                    markdown.toHTML(metricInfo.description) : null,
+                    girder.renderMarkdown(metricInfo.description) : null,
                 weight = metricInfo.weight || 0;
 
             el.popover({
