@@ -63,7 +63,7 @@ covalic.views.PhaseView = covalic.View.extend({
                             type: 'success',
                             timeout: 4000
                         });
-                        girder.router.navigate(
+                        covalic.router.navigate(
                             'challenge/' + this.model.get('challengeId'), {
                                 trigger: true
                         });
