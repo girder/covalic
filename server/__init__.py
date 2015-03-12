@@ -124,7 +124,7 @@ def deleteSubmissions(event):
 
     submissions = subModel.find({
         'phaseId': phase['_id']
-    }, limit=0, timeout=False)
+    }, limit=0)
 
     for sub in submissions:
         subModel.remove(sub)
