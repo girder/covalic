@@ -144,6 +144,6 @@ covalic.router.route('submission/:id', 'phase_submission', function (id, params)
             submission: submission
         });
     }).on('g:error', function () {
-        girder.router.navigate('challenges', {trigger: true});
+        covalic.router.navigate('challenges', {trigger: true});
     }).fetch();
 });

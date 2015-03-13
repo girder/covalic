@@ -54,14 +54,14 @@ covalic.views.ChallengesView = covalic.View.extend({
             el: $('#g-dialog-container'),
             parentView: this
         }).on('g:saved', function (challenge) {
-            girder.router.navigate('challenge/' + challenge.get('_id'), {
+            covalic.router.navigate('challenge/' + challenge.get('_id'), {
                 trigger: true
             });
         }, this).render();
     },
 
     _gotoChallenge: function (challenge) {
-        girder.router.navigate('challenge/' + challenge.id, {trigger: true});
+        covalic.router.navigate('challenge/' + challenge.id, {trigger: true});
     }
 });
 

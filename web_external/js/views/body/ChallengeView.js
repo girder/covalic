@@ -59,7 +59,7 @@ covalic.views.ChallengeView = covalic.View.extend({
                             type: 'success',
                             timeout: 4000
                         });
-                        girder.router.navigate('challenges', {trigger: true});
+                        covalic.router.navigate('challenges', {trigger: true});
                     });
                 }, this)
             });

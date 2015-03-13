@@ -21,7 +21,7 @@ covalic.views.LayoutHeaderUserView = covalic.View.extend({
         },
 
         'click a.g-my-settings':function(){
-            girder.router.navigate('useraccount/'+girder.currentUser.get('_id')+
+            covalic.router.navigate('useraccount/'+girder.currentUser.get('_id')+
                                     '/info',{trigger:true});
         }
     },
