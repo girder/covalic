@@ -15,7 +15,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
                     var metrics = this._getMetricsState();
 
                     if (metrics) {
-                        this.model.set('metrics', metrics)
+                        this.model.set('metrics', metrics);
                         this.model.get('metrics')[metric.id] = {
                             title: '',
                             weight: 0,
