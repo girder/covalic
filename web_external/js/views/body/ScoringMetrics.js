@@ -149,7 +149,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/metrics', 'phaseMetrics', function(id, params) {
+covalic.router.route('phase/:id/metrics', 'phaseMetrics', function (id, params) {
     // Fetch the phase by id, then render the view.
     var phase = new covalic.models.PhaseModel();
     phase.set({

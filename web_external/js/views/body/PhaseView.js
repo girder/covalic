@@ -66,7 +66,7 @@ covalic.views.PhaseView = covalic.View.extend({
                         covalic.router.navigate(
                             'challenge/' + this.model.get('challengeId'), {
                                 trigger: true
-                        });
+                            });
                     }, this);
                 }, this)
             });
@@ -93,7 +93,7 @@ covalic.views.PhaseView = covalic.View.extend({
             this.model = new girder.models.PhaseModel();
             this.model.set('_id', settings.id);
 
-            this.model.on('g:fetched', function() {
+            this.model.on('g:fetched', function () {
                 this.render();
             }, this).fetch();
         }
@@ -136,7 +136,7 @@ covalic.views.PhaseView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id', 'phase', function(id, params) {
+covalic.router.route('phase/:id', 'phase', function (id, params) {
     // Fetch the phase by id, then render the view.
     var phase = new covalic.models.PhaseModel();
     phase.set({

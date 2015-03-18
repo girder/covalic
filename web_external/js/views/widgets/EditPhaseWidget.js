@@ -17,7 +17,7 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
                 this.updatePhase(fields);
             } else {
                 this.createPhase(_.extend({
-                    'challengeId': this.challenge.get('_id')
+                    challengeId: this.challenge.get('_id')
                 }, fields));
             }
 

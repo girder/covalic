@@ -1,6 +1,6 @@
 covalic.App = girder.App.extend({
 
-    render: function() {
+    render: function () {
         this.$el.html(covalic.templates.layout());
 
         new covalic.views.LayoutHeaderView({
