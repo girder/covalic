@@ -1,4 +1,3 @@
-var covalic = covalic || {};
 
 _.extend(covalic, {
     models: {},
