@@ -76,7 +76,7 @@ covalic.views.ChallengeView = covalic.View.extend({
             this.model = new girder.models.ChallengeModel();
             this.model.set('_id', settings.id);
 
-            this.model.on('g:fetched', function() {
+            this.model.on('g:fetched', function () {
                 this._initWidgets();
                 this.render();
             }, this).fetch();
@@ -111,7 +111,7 @@ covalic.views.ChallengeView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenge/:id', 'challenge', function(id, params) {
+covalic.router.route('challenge/:id', 'challenge', function (id, params) {
     // Fetch the challenge by id, then render the view.
     var challenge = new covalic.models.ChallengeModel();
     challenge.set({

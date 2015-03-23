@@ -86,7 +86,7 @@ covalic.views.SubmissionView = covalic.View.extend({
 
             if (progress._id === this.job.get('progress').notificationId) {
                 if (progress.data.state === 'active') {
-                    var barClass = [], progressClass = [];
+                    var width = '0', barClass = [], progressClass = [];
                     if (progress.data.total <= 0) {
                         width = '100%';
                         barClass.push('progress-bar-warning');
@@ -98,8 +98,8 @@ covalic.views.SubmissionView = covalic.View.extend({
                         percentText = width = '100%';
                     } else {
                         var percent = (100 * progress.data.current / progress.data.total);
-                            width = Math.round(percent) + '%';
-                            percentText = percent.toFixed(1) + '%';
+                        width = Math.round(percent) + '%';
+                        percentText = percent.toFixed(1) + '%';
                     }
 
                     this.$('.c-score-progress-container').html(covalic.templates.scoringProgress({

@@ -1,6 +1,6 @@
 covalic.App = girder.App.extend({
 
-    render: function() {
+    render: function () {
         this.$el.html(covalic.templates.layout());
 
         new covalic.views.LayoutHeaderView({
@@ -13,6 +13,6 @@ covalic.App = girder.App.extend({
 
     navigateTo: function (view, settings) {
         this.$('#g-app-body-container').removeClass('c-body-nopad');
-        return girder.App.prototype.navigateTo.apply(this, arguments)
+        return girder.App.prototype.navigateTo.apply(this, arguments);
     }
 });

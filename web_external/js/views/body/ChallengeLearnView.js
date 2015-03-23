@@ -15,10 +15,10 @@ covalic.views.ChallengeLearnView = covalic.View.extend({
         var jumboHeight = $('.jumbotron').outerHeight();
         var parallax = function () {
             var scrolled = $(window).scrollTop();
-            $('.bg').css('height', (jumboHeight-scrolled) + 'px');
+            $('.bg').css('height', (jumboHeight - scrolled) + 'px');
         };
 
-        $(window).scroll(function(e){
+        $(window).scroll(function (e) {
             parallax();
         });
     }
