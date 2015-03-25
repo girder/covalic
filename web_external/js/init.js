@@ -1,3 +1,5 @@
+/*global covalic:true*/
+
 var covalic = covalic || {};
 
 _.extend(covalic, {
