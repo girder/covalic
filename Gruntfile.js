@@ -80,7 +80,8 @@ module.exports = function (grunt) {
                 jsDir + '/utilities.js',
                 jsDir + '/models/**/*.js',
                 jsDir + '/collections/**/*.js',
-                jsDir + '/views/**/*.js'
+                jsDir + '/views/**/*.js',
+                jsDir + '/ext/**/*.js'
             ];
             files[staticDir + '/main.min.js'] = [
                 jsDir + '/main.js'
