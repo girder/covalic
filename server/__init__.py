@@ -18,7 +18,6 @@
 ###############################################################################
 
 import mako
-import os
 import posixpath
 
 from girder import constants, events
