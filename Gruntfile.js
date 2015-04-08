@@ -37,7 +37,7 @@ module.exports = function (grunt) {
         var jadeDir = pluginDir + '/' + sourceDir + '/templates';
         if (fs.existsSync(jadeDir)) {
             var files = {};
-            files[staticDir + '/templates.js'] = [jadeDir + '/**/*.jade'];
+            files[staticDir + '/covalic_templates.js'] = [jadeDir + '/**/*.jade'];
             grunt.config.set('jade.' + pluginName, {
                 files: files
             });
@@ -73,7 +73,7 @@ module.exports = function (grunt) {
             // should only be loaded as a separate web app running as covalic
             files[staticDir + '/covalic.min.js'] = [
                 jsDir + '/init.js',
-                staticDir + '/templates.js',
+                staticDir + '/covalic_templates.js',
                 jsDir + '/covalic-version.js',
                 jsDir + '/view.js',
                 jsDir + '/app.js',
