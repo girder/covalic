@@ -96,7 +96,7 @@ class Submission(Resource):
         jobModel = self.model('job', 'jobs')
 
         job = jobModel.createJob(
-            title=jobTitle, type='covalic_score', handler='romanesco',
+            title=jobTitle, type='covalic_score', handler='romanesco_handler',
             user=user)
         jobToken = jobModel.createJobToken(job)
         scoreUserId = self.model('setting').get(PluginSettings.SCORING_USER_ID)
@@ -132,35 +132,68 @@ class Submission(Resource):
                 save=True)
 
         kwargs = {
-            'input': {
+            'task': {
+                'name': jobTitle,
+                'mode': 'docker',
+                'docker_image': 'girder/covalic-metrics:latest',
+                'container_args': [
+                    '--groundtruth=$input{groundtruth}',
+                    '--submission=$input{submission}'
+                ],
+                'inputs': [{
+                    'id': 'submission',
+                    'type': 'string',
+                    'format': 'string',
+                    'target': 'filepath',
+                    'filename': 'submission.zip'
+                }, {
+                    'id': 'groundtruth',
+                    'type': 'string',
+                    'format': 'string',
+                    'target': 'filepath',
+                    'filename': 'groundtruth.zip'
+                }],
+                'outputs': [{
+                    'id': '_stdout',
+                    'format': 'string',
+                    'type': 'string'
+                }]
+            },
+            'inputs': {
                 'submission': {
-                    'type': 'http',
+                    'mode': 'http',
                     'method': 'GET',
                     'url': '/'.join((
                         apiUrl, 'folder', str(folder['_id']), 'download')),
                     'headers': {'Girder-Token': scoreToken['_id']}
                 },
-                'ground_truth': {
-                    'type': 'http',
+                'groundtruth': {
+                    'mode': 'http',
                     'method': 'GET',
                     'url': '/'.join((
-                        apiUrl, 'folder', str(groundTruth['_id']), 'download')),
+                        apiUrl, 'folder', str(groundTruth['_id']),
+                        'download')),
                     'headers': {'Girder-Token': scoreToken['_id']}
                 }
             },
-            'jobUpdate': {
-                'type': 'http',
+            'outputs': {
+                '_stdout': {
+                    'mode': 'http',
+                    'method': 'POST',
+                    'format': 'string',
+                    'url': '/'.join((apiUrl, 'covalic_submission',
+                                     str(submission['_id']), 'score')),
+                    'headers': {'Girder-Token': scoreToken['_id']}
+                }
+            },
+            'jobInfo': {
                 'method': 'PUT',
                 'url': '/'.join((apiUrl, 'job', str(job['_id']))),
-                'headers': {'Girder-Token': jobToken['_id']}
+                'headers': {'Girder-Token': jobToken['_id']},
+                'logPrint': True
             },
-            'scoreTarget': {
-                'type': 'http',
-                'method': 'POST',
-                'url': '/'.join((apiUrl, 'covalic_submission',
-                                 str(submission['_id']), 'score')),
-                'headers': {'Girder-Token': scoreToken['_id']}
-            },
+            'validate': False,
+            'auto_convert': False,
             'cleanup': True
         }
         job['kwargs'] = kwargs

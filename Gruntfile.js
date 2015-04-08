@@ -44,7 +44,7 @@ module.exports = function (grunt) {
             grunt.config.set('jade.' + pluginName + '.options', {
                 namespace: 'covalic.templates'
             });
-            grunt.config.set('watch.jade_' + pluginName, {
+            grunt.config.set('watch.jade_' + pluginName + '_app', {
                 files: [jadeDir + '/**/*.jade'],
                 tasks: ['jade:' + pluginName, 'uglify:' + pluginName]
             });
@@ -58,7 +58,7 @@ module.exports = function (grunt) {
             grunt.config.set('stylus.' + pluginName, {
                 files: files
             });
-            grunt.config.set('watch.stylus_' + pluginName, {
+            grunt.config.set('watch.stylus_' + pluginName + '_app', {
                 files: [cssDir + '/**/*.styl'],
                 tasks: ['stylus:' + pluginName]
             });
@@ -89,7 +89,7 @@ module.exports = function (grunt) {
             grunt.config.set('uglify.' + pluginName, {
                 files: files
             });
-            grunt.config.set('watch.js_' + pluginName, {
+            grunt.config.set('watch.js_' + pluginName + '_app', {
                 files: [jsDir + '/**/*.js'],
                 tasks: ['uglify:' + pluginName]
             });
