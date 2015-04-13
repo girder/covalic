@@ -52,6 +52,12 @@
     - girder
     - deploy-update
 
+- name: clone romanesco plugin
+  git: repo=git://github.com/kitware/romanesco.git dest={{ girder_root}}/plugins/romanesco accept_hostkey=yes version={{ romanesco_version }}
+  tags:
+    - girder
+    - deploy-update
+
 - name: install girder requirements
   pip: requirements={{ girder_root }}/requirements.txt
   sudo: yes
@@ -59,8 +65,8 @@
     - girder
     - deploy-update
 
-- name: install celery_jobs plugin requirements
-  pip: requirements={{ girder_root }}/plugins/celery_jobs/requirements.txt
+- name: install celery pip package
+  pip: name=celery version=3.1.11
   sudo: yes
   tags:
     - girder
@@ -180,7 +186,7 @@
   tags: girder
 
 - name: Create celery covalic user regardless if such a user exists
-  shell: "curl --data \"login={{girder_celery_user}}&firstName=covalic&lastName=celery&password={{girder_celery_password}}&email={{girder_celery_email}}\" http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user"
+  shell: "curl --data \"login={{girder_celery_user}}&firstName=Scoring&lastName=Robot&password={{girder_celery_password}}&email={{girder_celery_email}}\" http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/user"
   tags: girder
 
 - name: Search for the celery user even if we just created one, to get the id
@@ -189,21 +195,25 @@
   tags:
     - girder
 
-# set celery_jobs girder plugin config params
+# Configure plugin settings
 
-- name: Set config for the celery_jobs plugin broker_url
-  shell: "curl -X PUT --data 'key=celery_jobs.broker_url&value=amqp://guest@{{mq_private_ip}}//' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
+- name: Set config for romanesco broker
+  shell: "curl -X PUT --data 'key=romanesco.broker&value=amqp://guest@{{mq_private_ip}}//' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/system/setting"
   tags:
     - girder
     - rewire
 
-- name: Set config for the celery_jobs plugin app_main
-  shell: "curl -X PUT --data 'key=celery_jobs.app_main&value=girder_celery' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
-  tags: girder
+- name: Set config for romanesco backend
+  shell: "curl -X PUT --data 'key=romanesco.backend&value=amqp://guest@{{mq_private_ip}}//' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/system/setting"
+  tags:
+    - girder
+    - rewire
 
-- name: Set config for the celery_jobs plugin girder celery user
-  shell: "curl -X PUT --data 'key=celery_jobs.celery_user_id&value={{(celery_user_search_response.stdout|from_json)[0]._id}}' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://localhost:8080/api/v1/system/setting"
-  tags: girder
+- name: Set config for the scoring user
+  shell: "curl -X PUT --data 'key=covalic.scoring_user_id&value={{(celery_user_search_response.stdout|from_json)[0]._id}}' -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/system/setting"
+  tags:
+    - girder
+    - rewire
 
 # set up assetstore
 
