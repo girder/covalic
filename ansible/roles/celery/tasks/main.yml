@@ -28,14 +28,27 @@
     - celery
     - deploy-update
 
-- name: Install celery
-  pip: name=celery
-  sudo: yes
-  tags: celery
-
 - name: Clone romanesco worker
   sudo: yes
   git: repo=git://github.com/kitware/romanesco.git dest=/opt/romanesco accept_hostkey=yes version={{ romanesco_version }}
+  tags:
+    - celery
+    - deploy-update
+
+- name: Remove R dependency from romanesco
+  lineinfile:
+      dest: /opt/romanesco/requirements.txt
+      state: present
+      regexp: '^rpy2'
+      line: '# rpy2'
+  sudo: yes
+  tags:
+    - celery
+    - deploy-update
+
+- name: Install worker pip dependencies
+  pip: requirements=/opt/romanesco/requirements.txt
+  sudo: yes
   tags:
     - celery
     - deploy-update
