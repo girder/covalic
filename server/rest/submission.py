@@ -23,12 +23,12 @@ import os
 import posixpath
 import pymongo
 
+from ..constants import PluginSettings
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
 from girder.constants import AccessType
 from girder.models.model_base import ValidationException
-from girder.plugins.celery_jobs import getCeleryUser
 from girder.utility import mail_utils
 
 
@@ -96,12 +96,22 @@ class Submission(Resource):
         jobModel = self.model('job', 'jobs')
 
         job = jobModel.createJob(
-            title=jobTitle, type='covalic_score', handler='celery', user=user)
+            title=jobTitle, type='covalic_score', handler='romanesco_handler',
+            user=user)
         jobToken = jobModel.createJobToken(job)
-        celeryUser = getCeleryUser()
-        celeryToken = self.model('token').createToken(user=celeryUser, days=7)
+        scoreUserId = self.model('setting').get(PluginSettings.SCORING_USER_ID)
+
+        if not scoreUserId:
+            raise Exception('No scoring user ID is set. Please set one on the '
+                            'plugin configuration page.')
+        scoreUser = self.model('user').load(scoreUserId, force=True)
+
+        if not scoreUser:
+            raise Exception('Invalid scoring user setting (%s).' % scoreUserId)
+
+        scoreToken = self.model('token').createToken(user=scoreUser, days=7)
         self.model('folder').setUserAccess(
-            folder, user=celeryUser, level=AccessType.READ, save=True)
+            folder, user=scoreUser, level=AccessType.READ, save=True)
 
         groundTruth = self.model('folder').load(phase['groundTruthFolderId'],
                                                 force=True)
@@ -111,46 +121,79 @@ class Submission(Resource):
             user, phase, folder, job, title)
 
         if not self.model('phase', 'challenge').hasAccess(
-                phase, user=celeryUser, level=AccessType.ADMIN):
+                phase, user=scoreUser, level=AccessType.ADMIN):
             self.model('phase', 'challenge').setUserAccess(
-                phase, user=celeryUser, level=AccessType.ADMIN, save=True)
+                phase, user=scoreUser, level=AccessType.ADMIN, save=True)
 
         if not self.model('folder').hasAccess(
-                groundTruth, user=celeryUser, level=AccessType.READ):
+                groundTruth, user=scoreUser, level=AccessType.READ):
             self.model('folder').setUserAccess(
-                groundTruth, user=celeryUser, level=AccessType.READ,
+                groundTruth, user=scoreUser, level=AccessType.READ,
                 save=True)
 
         kwargs = {
-            'input': {
+            'task': {
+                'name': jobTitle,
+                'mode': 'docker',
+                'docker_image': 'girder/covalic-metrics:latest',
+                'container_args': [
+                    '--groundtruth=$input{groundtruth}',
+                    '--submission=$input{submission}'
+                ],
+                'inputs': [{
+                    'id': 'submission',
+                    'type': 'string',
+                    'format': 'string',
+                    'target': 'filepath',
+                    'filename': 'submission.zip'
+                }, {
+                    'id': 'groundtruth',
+                    'type': 'string',
+                    'format': 'string',
+                    'target': 'filepath',
+                    'filename': 'groundtruth.zip'
+                }],
+                'outputs': [{
+                    'id': '_stdout',
+                    'format': 'string',
+                    'type': 'string'
+                }]
+            },
+            'inputs': {
                 'submission': {
-                    'type': 'http',
+                    'mode': 'http',
                     'method': 'GET',
                     'url': '/'.join((
                         apiUrl, 'folder', str(folder['_id']), 'download')),
-                    'headers': {'Girder-Token': celeryToken['_id']}
+                    'headers': {'Girder-Token': scoreToken['_id']}
                 },
-                'ground_truth': {
-                    'type': 'http',
+                'groundtruth': {
+                    'mode': 'http',
                     'method': 'GET',
                     'url': '/'.join((
-                        apiUrl, 'folder', str(groundTruth['_id']), 'download')),
-                    'headers': {'Girder-Token': celeryToken['_id']}
+                        apiUrl, 'folder', str(groundTruth['_id']),
+                        'download')),
+                    'headers': {'Girder-Token': scoreToken['_id']}
                 }
             },
-            'jobUpdate': {
-                'type': 'http',
+            'outputs': {
+                '_stdout': {
+                    'mode': 'http',
+                    'method': 'POST',
+                    'format': 'string',
+                    'url': '/'.join((apiUrl, 'covalic_submission',
+                                     str(submission['_id']), 'score')),
+                    'headers': {'Girder-Token': scoreToken['_id']}
+                }
+            },
+            'jobInfo': {
                 'method': 'PUT',
                 'url': '/'.join((apiUrl, 'job', str(job['_id']))),
-                'headers': {'Girder-Token': jobToken['_id']}
+                'headers': {'Girder-Token': jobToken['_id']},
+                'logPrint': True
             },
-            'scoreTarget': {
-                'type': 'http',
-                'method': 'POST',
-                'url': '/'.join((apiUrl, 'covalic_submission',
-                                 str(submission['_id']), 'score')),
-                'headers': {'Girder-Token': celeryToken['_id']}
-            },
+            'validate': False,
+            'auto_convert': False,
             'cleanup': True
         }
         job['kwargs'] = kwargs
@@ -178,7 +221,7 @@ class Submission(Resource):
         submission['score'] = json.loads(cherrypy.request.body.read())
         submission = self.model('submission', 'covalic').save(submission)
 
-        # Delete the celery user's job token since the job is now complete.
+        # Delete the scirubg user's job token since the job is now complete.
         token = self.getCurrentToken()
         self.model('token').remove(token)
 

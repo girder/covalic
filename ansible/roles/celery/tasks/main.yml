@@ -28,28 +28,55 @@
     - celery
     - deploy-update
 
-- name: Install celery
-  pip: name=celery
+- name: Clone romanesco worker
   sudo: yes
-  tags: celery
-
-- name: Clone covalic plugin
-  sudo: yes
-  git: repo=git://github.com/girder/covalic.git dest=/opt/covalic accept_hostkey=yes version={{ covalic_version }}
+  git: repo=git://github.com/kitware/romanesco.git dest=/opt/romanesco accept_hostkey=yes version={{ romanesco_version }}
   tags:
     - celery
     - deploy-update
 
-- name: Change ownership of covalic to www-data
+- name: Remove R dependency from romanesco
+  lineinfile:
+      dest: /opt/romanesco/requirements.txt
+      state: present
+      regexp: '^rpy2'
+      line: '# rpy2'
   sudo: yes
-  file: dest=/opt/covalic mode=755 owner=www-data group=www-data state=directory recurse=yes
   tags:
     - celery
     - deploy-update
 
-- name: Create Docker group
-  group: name=docker state=present
-  tags: celery
+- name: Install worker pip dependencies
+  pip: requirements=/opt/romanesco/requirements.txt
+  sudo: yes
+  tags:
+    - celery
+    - deploy-update
+
+- name: Create local romanesco config file if it does not exist
+  sudo: yes
+  command: cp /opt/romanesco/romanesco/worker.dist.cfg /opt/romanesco/romanesco/worker.local.cfg creates=/opt/romanesco/romanesco/worker.local.cfg
+  tags:
+    - celery
+    - deploy-update
+
+- name: Set romanesco broker URL in config file
+  lineinfile:
+    dest: /opt/romanesco/romanesco/worker.local.cfg
+    state: present
+    regexp: '^broker='
+    line: "broker=amqp://guest@localhost/"
+  sudo: yes
+  tags:
+    - celery
+    - deploy-update
+
+- name: Change ownership of romanesco to www-data
+  sudo: yes
+  file: dest=/opt/romanesco mode=755 owner=www-data group=www-data state=directory recurse=yes
+  tags:
+    - celery
+    - deploy-update
 
 - name: Create Docker group
   group: name=docker state=present
@@ -70,7 +97,7 @@
     - celery
     - deploy-update
 
-- name: Install Celery worker as a service
+- name: Install celery worker as a service
   copy: src=celery_worker.conf dest=/etc/init/celery_worker.conf mode=644 owner=root
   sudo: yes
   tags: celery

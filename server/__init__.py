@@ -20,11 +20,23 @@
 import mako
 import posixpath
 
-from girder import constants, events
+from girder import events
+from girder.constants import AccessType
 from girder.plugins.jobs.constants import JobStatus
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
 from .rest import submission, phase
+from .constants import PluginSettings
+
+
+def validateSettings(event):
+    if event.info['key'] == PluginSettings.SCORING_USER_ID:
+        if not event.info['value']:
+            raise ValidationException(
+                'Scoring user ID must not be empty.', 'value')
+        ModelImporter.model('user').load(
+            event.info['value'], force=True, exc=True)
+        event.preventDefault().stopPropagation()
 
 
 class CustomAppRoot(object):
@@ -139,7 +151,8 @@ def load(info):
     events.bind('model.challenge_phase.remove_with_kwargs', 'covalic',
                 deleteSubmissions)
     events.bind('jobs.job.update', 'covalic', onJobUpdate)
+    events.bind('model.setting.validate', 'covalic', validateSettings)
 
     # Expose extended fields on models
     ModelImporter.model('phase', 'challenge').exposeFields(
-        level=constants.AccessType.READ, fields='metrics')
+        level=AccessType.READ, fields='metrics')

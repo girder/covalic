@@ -37,14 +37,14 @@ module.exports = function (grunt) {
         var jadeDir = pluginDir + '/' + sourceDir + '/templates';
         if (fs.existsSync(jadeDir)) {
             var files = {};
-            files[staticDir + '/templates.js'] = [jadeDir + '/**/*.jade'];
+            files[staticDir + '/covalic_templates.js'] = [jadeDir + '/**/*.jade'];
             grunt.config.set('jade.' + pluginName, {
                 files: files
             });
             grunt.config.set('jade.' + pluginName + '.options', {
                 namespace: 'covalic.templates'
             });
-            grunt.config.set('watch.jade_' + pluginName, {
+            grunt.config.set('watch.jade_' + pluginName + '_app', {
                 files: [jadeDir + '/**/*.jade'],
                 tasks: ['jade:' + pluginName, 'uglify:' + pluginName]
             });
@@ -58,7 +58,7 @@ module.exports = function (grunt) {
             grunt.config.set('stylus.' + pluginName, {
                 files: files
             });
-            grunt.config.set('watch.stylus_' + pluginName, {
+            grunt.config.set('watch.stylus_' + pluginName + '_app', {
                 files: [cssDir + '/**/*.styl'],
                 tasks: ['stylus:' + pluginName]
             });
@@ -73,7 +73,7 @@ module.exports = function (grunt) {
             // should only be loaded as a separate web app running as covalic
             files[staticDir + '/covalic.min.js'] = [
                 jsDir + '/init.js',
-                staticDir + '/templates.js',
+                staticDir + '/covalic_templates.js',
                 jsDir + '/covalic-version.js',
                 jsDir + '/view.js',
                 jsDir + '/app.js',
@@ -89,7 +89,7 @@ module.exports = function (grunt) {
             grunt.config.set('uglify.' + pluginName, {
                 files: files
             });
-            grunt.config.set('watch.js_' + pluginName, {
+            grunt.config.set('watch.js_' + pluginName + '_app', {
                 files: [jsDir + '/**/*.js'],
                 tasks: ['uglify:' + pluginName]
             });

@@ -1,0 +1,15 @@
+.g-config-breadcrumb-container
+
+p.
+  Before submissions can be scored, you must create and set a user that will
+  represent the agent responsible for scoring the submissions. This agent will
+  be given access to both the ground truth files and the submissions being scored.
+
+form#g-covalic-config-form(role="form")
+  .form-group
+    label.control-label(for="g-scoring-user-id") Scoring user ID
+    input.input-sm.form-control#g-scoring-user-id(type="text")
+    .g-scoring-user-select-container
+
+  p#g-covalic-error-message.g-validation-failed-message
+  input.btn.btn-sm.btn-primary(type="submit", value="Save")
