@@ -40,18 +40,9 @@
     - celery
     - deploy-update
 
-- name: Check if local config file exists
-  sudo: yes
-  stat: path=/opt/romanesco/romanesco/worker.local.cfg
-  register: local_config
-  tags:
-    - celery
-    - deploy-update
-
 - name: Create local romanesco config file if it does not exist
   sudo: yes
-  shell: cp /opt/romanesco/romanesco/worker.dist.cfg /opt/romanesco/romanesco/worker.local.cfg
-  when: local_config.stat.exists == False
+  command: cp /opt/romanesco/romanesco/worker.dist.cfg /opt/romanesco/romanesco/worker.local.cfg creates=/opt/romanesco/romanesco/worker.local.cfg
   tags:
     - celery
     - deploy-update
