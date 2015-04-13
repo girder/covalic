@@ -25,6 +25,12 @@ codebase, you'll need to use the `utils/build_pod_inventory.sh` script:
 That will create the appropriate inventory file for that pod in your `pod_inventory`
 directory, and you will then be able to reference that pod in other operations.
 
+## SSH to an EC2 instance
+
+Because we use Ubuntu images, `ubuntu` is the root user
+
+    ssh -i <PATH_TO covalic_admin.pem> ubuntu@<ec2-instance-public-dns>
+
 ## Common workflows
 
 Below are detailed descriptions of individual steps, but here are listed likely
