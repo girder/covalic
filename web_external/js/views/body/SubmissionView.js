@@ -19,29 +19,29 @@ covalic.views.SubmissionView = covalic.View.extend({
     initialize: function (settings) {
         this.submission = settings.submission;
 
-        if (!this.submission.get('score')) {
-            girder.eventStream.on('g:event.job_status', this._statusHandler, this);
-            girder.eventStream.on('g:event.progress', this._progressHandler, this);
-
-            if (girder.currentUser && (
-                    girder.currentUser.get('_id') === this.submission.get('creatorId') ||
-                    girder.currentUser.get('admin'))) {
-                this.job = new girder.models.JobModel({
-                    _id: this.submission.get('jobId')
-                }).on('g:fetched', function () {
-                    if (this.job.get('status') === girder.jobs_JobStatus.ERROR) {
-                        this._renderProcessingError();
-                    } else if (this.job.get('status') === girder.jobs_JobStatus.SUCCESS) {
-                        this.submission.once('g:fetched', this.render, this).fetch();
-                    }
-                }, this).fetch();
-            }
-        }
-
         this.phase = new covalic.models.PhaseModel({
             _id: this.submission.get('phaseId')
         }).on('g:fetched', function () {
             this.render();
+
+            if (!this.submission.get('score')) {
+                girder.eventStream.on('g:event.job_status', this._statusHandler, this);
+                girder.eventStream.on('g:event.progress', this._progressHandler, this);
+
+                if (girder.currentUser && (
+                        girder.currentUser.get('_id') === this.submission.get('creatorId') ||
+                        girder.currentUser.get('admin'))) {
+                    this.job = new girder.models.JobModel({
+                        _id: this.submission.get('jobId')
+                    }).on('g:fetched', function () {
+                        if (this.job.get('status') === girder.jobs_JobStatus.ERROR) {
+                            this._renderProcessingError();
+                        } else if (this.job.get('status') === girder.jobs_JobStatus.SUCCESS) {
+                            this.submission.once('g:fetched', this.render, this).fetch();
+                        }
+                    }, this).fetch();
+                }
+            }
         }, this).fetch();
     },
 
