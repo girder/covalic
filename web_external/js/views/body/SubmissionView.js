@@ -38,6 +38,8 @@ covalic.views.SubmissionView = covalic.View.extend({
                             this._renderProcessingError();
                         } else if (this.job.get('status') === girder.jobs_JobStatus.SUCCESS) {
                             this.submission.once('g:fetched', this.render, this).fetch();
+                        } else {
+                            this.render();
                         }
                     }, this).fetch();
                 }
@@ -48,6 +50,8 @@ covalic.views.SubmissionView = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.submissionPage({
             submission: this.submission,
+            JobStatus: girder.jobs_JobStatus,
+            job: this.job,
             created: girder.formatDate(this.submission.get('created'), girder.DATE_SECOND)
         }));
 
@@ -67,6 +71,7 @@ covalic.views.SubmissionView = covalic.View.extend({
     },
 
     _statusHandler: function (progress) {
+        console.log(progress);
         var status = window.parseInt(progress.data.status);
         if (progress.data._id === this.job.get('_id') &&
                 status === girder.jobs_JobStatus.SUCCESS) {
@@ -75,7 +80,7 @@ covalic.views.SubmissionView = covalic.View.extend({
                 girder.eventStream.off('g:event.progress', null, this);
                 this.render();
             }, this).fetch();
-        } else if (status === girder.jobs_JobStatus.ERROR) {
+        } else {
             this.job.fetch();
         }
     },
