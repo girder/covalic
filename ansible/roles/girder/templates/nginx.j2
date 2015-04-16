@@ -8,8 +8,11 @@ server {
     server_name localhost;
 
     location / {
-         proxy_pass http://localhost:8080;
-         include /etc/nginx/proxy_params;
+        proxy_pass http://localhost:8080;
+        include /etc/nginx/proxy_params;
+        # Must turn buffering off for SSE to work
+        proxy_buffering off;
+        proxy_read_timeout 600s;
     }
 
     location /static {
