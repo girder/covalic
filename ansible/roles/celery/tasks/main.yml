@@ -10,6 +10,8 @@
   apt: name={{ item }} state=present
   with_items:
     - rabbitmq-server
+    - libffi-dev
+    - libssl-dev
     - python-pip
     - python-dev
     - git
