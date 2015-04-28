@@ -44,6 +44,8 @@
     - pod_dynamic_vars/{{pod}}_vars.yml
     - pod_static_vars/{{pod}}_s3_assetstore.yml
     - pod_static_vars/{{pod}}_girder_passwords.yml
+    - pod_static_vars/prod_cert.yml
+    - pod_static_vars/prod_key.yml
   roles:
     - users
     - common

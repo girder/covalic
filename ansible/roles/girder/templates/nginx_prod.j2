@@ -1,0 +1,36 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on;
+    # redirect to https
+    return 307 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    ssl_certificate /etc/nginx/ssl/challenge_kitware_com.pem;
+    ssl_certificate_key /etc/nginx/ssl/challenge.kitware.com.key;
+
+    root {{ girder_root }}/clients/web;
+
+    # Make site accessible from http://localhost/
+    server_name localhost;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Forwarded-Server $host;
+        include /etc/nginx/proxy_params;
+        # Must turn buffering off for SSE to work
+        proxy_buffering off;
+        proxy_read_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+
+    location /static {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /midas {
+        rewrite ^(.*)/midas(.*)$ http://challenge-legacy.kitware.com/midas$2 permanent;
+    }
+}
