@@ -116,6 +116,16 @@
     - girder
     - rewire
 
+- name: Let cherrypy know about nginx proxying
+  lineinfile:
+    dest: /opt/covalic/girder/girder/conf/girder.local.cfg
+    state: present
+    insertafter: 'global'
+    regexp: 'tools.proxy.on: True'
+    line: 'tools.proxy.on: True'
+  tags: girder
+  when: pod == 'prod'
+
 - name: install Girder as a service
   copy: src=girder.conf dest=/etc/init/girder.conf mode=644 owner=root
   sudo: yes
@@ -138,15 +148,45 @@
   sudo: yes
   tags: girder
 
-- name: add the girder nginx site
+- name: add the girder production nginx site
+  template: src=nginx_prod.j2 dest=/etc/nginx/sites-available/girder
+  sudo: yes
+  when: pod == 'prod'
+  tags: girder
+
+- name: add the girder non-production nginx site
   template: src=nginx.j2 dest=/etc/nginx/sites-available/girder
   sudo: yes
+  when: pod != 'prod'
   tags: girder
 
 - name: enable girder nginx site
   command: ln -s /etc/nginx/sites-available/girder /etc/nginx/sites-enabled/girder creates=/etc/nginx/sites-enabled/girder
   sudo: yes
   tags: girder
+
+- name: create /etc/nginx/ssl
+  file: path=/etc/nginx/ssl
+        owner=root
+        group=root
+        state=directory
+        mode=0770
+        recurse=no
+  sudo: yes
+  tags: girder
+  when: pod == 'prod'
+
+- name: copy ssl_certificate
+  copy: content="{{prod_cert}}" dest=/etc/nginx/ssl/challenge_kitware_com.pem mode=640 owner=root
+  sudo: yes
+  tags: girder
+  when: pod == 'prod'
+    
+- name: copy ssl_key
+  copy: content="{{prod_key}}" dest=/etc/nginx/ssl/challenge.kitware.com.key mode=640 owner=root
+  sudo: yes
+  tags: girder
+  when: pod == 'prod'
 
 # force a restart of nginx to pick up any changes in girder
 - name: Restart nginx service
