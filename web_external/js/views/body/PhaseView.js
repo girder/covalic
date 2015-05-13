@@ -74,7 +74,11 @@ covalic.views.PhaseView = covalic.View.extend({
     },
 
     initialize: function (settings) {
-        this.on('c:joinPhase', this.render, this);
+        this.on('c:joinPhase', function () {
+            this.render();
+            this._showDatasetDownloadButtons();
+        }, this);
+
         girder.cancelRestRequests('fetch');
         if (settings.phase) {
             this.model = settings.phase;
