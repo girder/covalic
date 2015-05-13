@@ -40,6 +40,12 @@ if phase.get('instructions')
 
 .c-phase-submit-container
     if userInChallenge
+        a.c-download-test-data.btn.btn-lg.btn-primary.hide
+          i.icon-download
+          |  Download test data
+        a.c-download-ground-truth.btn.btn-lg.btn-primary.hide
+          i.icon-target
+          |  Download ground truth data
         if phase.get('active')
             a#c-submit-phase-dataset.btn.btn-lg.btn-success(
               href="#phase/#{phase.get('_id')}/submit")
