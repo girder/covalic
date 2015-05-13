@@ -74,30 +74,49 @@ covalic.views.PhaseView = covalic.View.extend({
     },
 
     initialize: function (settings) {
-        this.on('c:joinPhase', this.render, this);
+        this.on('c:joinPhase', function () {
+            this.render();
+            this._showDatasetDownloadButtons();
+        }, this);
+
         girder.cancelRestRequests('fetch');
         if (settings.phase) {
             this.model = settings.phase;
 
-            if (this.challenge) {
+            this.challenge = new covalic.models.ChallengeModel();
+            this.challenge.set({
+                _id: this.model.get('challengeId')
+            }).on('g:fetched', function () {
                 this.render();
-            } else {
-                this.challenge = new covalic.models.ChallengeModel();
-                this.challenge.set({
-                    _id: this.model.get('challengeId')
-                }).on('g:fetched', function () {
-                    this.render();
-                }, this).fetch();
-            }
-        } else if (settings.id) {
-            this.model = new girder.models.PhaseModel();
-            this.model.set('_id', settings.id);
-
-            this.model.on('g:fetched', function () {
-                this.render();
+                this._showDatasetDownloadButtons();
             }, this).fetch();
         }
+    },
 
+    _showDatasetDownloadButtons: function () {
+        if (this.model.get('groundTruthFolderId')) {
+            var gtFolder = new girder.models.FolderModel({
+                _id: this.model.get('groundTruthFolderId')
+            });
+            gtFolder.once('g:fetched', function () {
+                this.$('.c-download-ground-truth').removeClass('hide')
+                    .attr('href', gtFolder.downloadUrl());
+            }, this).fetch({
+                ignoreError: true
+            });
+        }
+
+        if (this.model.get('testDataFolderId')) {
+            var testFolder = new girder.models.FolderModel({
+                _id: this.model.get('testDataFolderId')
+            });
+            testFolder.once('g:fetched', function () {
+                this.$('.c-download-test-data').removeClass('hide')
+                    .attr('href', testFolder.downloadUrl());
+            }, this).fetch({
+                ignoreError: true
+            });
+        }
     },
 
     isUserInChallenge: function () {
