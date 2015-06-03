@@ -5,7 +5,8 @@
     "dependencies": [
         "challenge",
         "gravatar",
-        "romanesco"
+        "romanesco",
+        "oauth"
     ],
     "grunt": {
         "file": "Gruntfile.js",
