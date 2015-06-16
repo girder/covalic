@@ -34,7 +34,7 @@
             - proto: tcp
               from_port: 22
               to_port: 22
-              cidr_ip: 97.65.130.163/32
+              cidr_ip: 97.65.130.169/32
             # SSH from KSW
             - proto: tcp
               from_port: 22
@@ -78,7 +78,7 @@
             - proto: tcp
               from_port: 22
               to_port: 22
-              cidr_ip: 97.65.130.163/32
+              cidr_ip: 97.65.130.169/32
             # SSH from KSW
             - proto: tcp
               from_port: 22
