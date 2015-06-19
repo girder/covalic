@@ -137,14 +137,9 @@ def onJobUpdate(event):
 
 
 def load(info):
-    phaseExt = phase.PhaseExt()
-    info['apiRoot'].covalic_submission = submission.Submission()
-
     # Extend challenge_phase resource
-    phaseResource = info['apiRoot'].challenge_phase
-    phaseResource.route(
-        'GET', (':id', 'groundtruth', 'item'), phaseExt.groundtruthItems)
-    phaseResource.route('PUT', (':id', 'metrics'), phaseExt.setMetrics)
+    info['apiRoot'].challenge_phase = phase.PhaseExt()
+    info['apiRoot'].covalic_submission = submission.Submission()
 
     # Move girder app to /girder, serve covalic app from /
     info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),

@@ -20,6 +20,10 @@
         a.c-copy-metrics(role="menuitem")
           i.icon-paste
           | Copy metrics from other phase
+      li(role="presentation")
+        a.c-initialize-metrics(role="menuitem")
+          i.icon-chart-bar
+          | Auto-initialize metrics
 
 if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
   .c-metric-list.panel-group(role="tablist")

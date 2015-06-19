@@ -71,6 +71,14 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
             el.parents('.c-metric-container')
               .find('a.c-metric-id-panel-title')
               .text(el.val());
+        },
+
+        'click .c-initialize-metrics': function (e) {
+            new covalic.views.InitializeMetricsDialog({
+                parentView: this,
+                el: $('#g-dialog-container'),
+                model: this.model
+            }).render();
         }
     },
 
