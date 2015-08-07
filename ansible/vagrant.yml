@@ -1,0 +1,27 @@
+---
+- hosts: all
+  roles:
+    - vagrant
+    - mongodb
+    - girder
+    #- celery
+  vars:
+    pod: dev  # girder config actually requires pod to be set
+    vagrant: true
+    girder_admin_user: covalic
+    girder_admin_email: covalic@kitware.com
+    girder_admin_password: covalic
+    girder_socket_host: localhost
+    girder_socket_port: 8080
+    girder_exec_user: vagrant
+    girder_exec_group: vagrant
+    girder_plugins: ['romanesco', 'challenge', 'covalic', 'jobs']
+    girder_celery_user: celery
+    girder_celery_email: covalic-celery@kitware.com
+    girder_celery_password: celery
+    girder_root: /opt/covalic/girder
+    girder_assetstore_type: filesystem
+    girder_assetstore_name: local_fs
+    girder_assetstore_local_fs: true
+    mongo_private_ip: localhost
+    mq_private_ip: localhost
