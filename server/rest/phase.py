@@ -19,11 +19,19 @@
 
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import Resource, loadmodel
+from girder.api.rest import loadmodel, getApiUrl
 from girder.constants import AccessType
+from girder.plugins.challenge.rest.phase import Phase
 
 
-class PhaseExt(Resource):
+class PhaseExt(Phase):
+    def __init__(self):
+        Phase.__init__(self)
+
+        self.route('GET', (':id', 'groundtruth', 'item'), self.groundtruthItems)
+        self.route('PUT', (':id', 'metrics'), self.setMetrics)
+        self.route('POST', (':id', 'metrics', 'init'), self.initMetrics)
+
     @access.public
     @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
     def groundtruthItems(self, phase, params):
@@ -80,3 +88,87 @@ class PhaseExt(Resource):
                'this parameter to the ID of that phase.', required=False)
         .param('metrics', 'A JSON object representing the set of metrics for '
                'the challenge.', required=False, paramType='body'))
+
+    @access.user
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.WRITE)
+    def initMetrics(self, phase, params):
+        user = self.getCurrentUser()
+
+        apiUrl = getApiUrl()
+        jobModel = self.model('job', 'jobs')
+
+        title = '%s: metric weight initialization' % phase['name']
+        job = jobModel.createJob(
+            title=title, type='covalic_weight_init', user=user,
+            handler='romanesco_handler')
+        jobToken = jobModel.createJobToken(job)
+
+        scoreToken = self.model('token').createToken(user=user, days=7)
+        groundTruth = self.model('folder').load(
+            phase['groundTruthFolderId'], user=user, level=AccessType.READ,
+            exc=True)
+
+        kwargs = {
+            'task': {
+                'name': jobTitle,
+                'mode': 'docker',
+                'docker_image': 'girder/covalic-metrics:latest',
+                'container_args': [
+                    '/covalic/Python/RankAggregation/computeWeights.py',
+                    '--groundtruth=$input{groundtruth}'
+                ],
+                'entrypoint': 'python',
+                'inputs': [{
+                    'id': 'groundtruth',
+                    'type': 'string',
+                    'format': 'string',
+                    'target': 'filepath',
+                    'filename': 'groundtruth.zip'
+                }],
+                'outputs': [{
+                    'id': '_stdout',
+                    'format': 'string',
+                    'type': 'string'
+                }]
+            },
+            'inputs': {
+                'groundtruth': {
+                    'mode': 'http',
+                    'method': 'GET',
+                    'url': '/'.join((
+                        apiUrl, 'folder', str(groundTruth['_id']),
+                        'download')),
+                    'headers': {'Girder-Token': scoreToken['_id']}
+                }
+            },
+            'outputs': {
+                '_stdout': {
+                    'mode': 'http',
+                    'method': 'PUT',
+                    'format': 'string',
+                    'url': '/'.join((apiUrl, 'challenge_phase',
+                                     str(phase['_id']), 'metrics')),
+                    'headers': {'Girder-Token': scoreToken['_id']}
+                }
+            },
+            'jobInfo': {
+                'method': 'PUT',
+                'url': '/'.join((apiUrl, 'job', str(job['_id']))),
+                'headers': {'Girder-Token': jobToken['_id']},
+                'logPrint': True
+            },
+            'validate': False,
+            'auto_convert': False,
+            'cleanup': True
+        }
+        job['kwargs'] = kwargs
+        job = jobModel.save(job)
+        jobModel.scheduleJob(job)
+
+        return jobModel.filter(job, user)
+    initMetrics.description = (
+        Description('Test ground truth data to set initial metric weights.')
+        .notes('Runs perturbation on the ground truth images and then scores '
+               'the results in order to automatically initialize the metric '
+               'weights to sensible values.')
+        .param('id', 'The ID of the phase.', paramType='path'))

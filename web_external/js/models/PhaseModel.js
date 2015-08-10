@@ -25,5 +25,16 @@ covalic.models.PhaseModel = girder.AccessControlledModel.extend({
         }, this)).error(_.bind(function (err) {
             this.trigger('c:error', err);
         }, this));
+    },
+
+    initMetrics: function () {
+        girder.restRequest({
+            path: this.resourceName + '/' + this.get('_id') + '/metrics/init',
+            type: 'POST'
+        }).done(_.bind(function (resp) {
+            this.trigger('c:metricsInitialized', resp);
+        }, this)).error(_.bind(function (err) {
+            this.trigger('c:error', err);
+        }, this));
     }
 });
