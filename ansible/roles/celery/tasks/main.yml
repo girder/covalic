@@ -105,7 +105,11 @@
     - deploy-update
 
 - name: Install celery worker as a service
-  copy: src=celery_worker.conf dest=/etc/init/celery_worker.conf mode=644 owner=root
+  template:
+      src: celery_worker.conf
+      dest: /etc/init/celery_worker.conf
+      mode: 644
+      owner: root
   sudo: yes
   tags: celery
 
