@@ -91,7 +91,7 @@ class Submission(Resource):
             self.model('phase', 'challenge').requireAccess(
                 phase, user, level=AccessType.WRITE)
 
-        jobTitle = '{} submission: {}'.format(phase['name'], folder['name'])
+        jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
         apiUrl = os.path.dirname(cherrypy.url())
         jobModel = self.model('job', 'jobs')
 
