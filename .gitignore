@@ -5,6 +5,5 @@ tmp
 .*.swo
 *.local.cfg
 .worker_pids
-<<<<<<< HEAD
 *~
 /.vagrant/
