@@ -237,6 +237,23 @@
   tags:
     - girder
 
+- name: Restart Girder as a service to make sure our plugins are running
+  service: name=girder state=restarted enabled=yes
+  sudo: yes
+  tags:
+    - girder
+    - deploy-update
+    - rewire
+
+- name: Wait for Girder startup
+  wait_for:
+    port: "{{girder_socket_port}}"
+    delay: 1
+  tags:
+    - girder
+    - deploy-update
+    - rewire
+
 # Configure plugin settings
 
 - name: Set config for romanesco broker
@@ -323,14 +340,6 @@
   tags:
     - girder
     - girder-assetstore
-
-- name: Restart Girder as a service to have Covalic be the webapp
-  service: name=girder state=restarted enabled=yes
-  sudo: yes
-  tags:
-    - girder
-    - deploy-update
-    - rewire
 
 # force a restart of nginx to pick up any changes in girder
 - name: Restart nginx service
