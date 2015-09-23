@@ -46,13 +46,13 @@ will shut down your Covalic VM.
 
 In a browser on your host machine, navigate to 
 
-    localhost://9080
+    http://localhost:9080
 
 to get to the Covalic web application.
 
 Navigate to 
 
-    localhost://9080/girder
+    http://localhost:9080/girder
 
 to get to the Girder web application backing Covalic.
 
