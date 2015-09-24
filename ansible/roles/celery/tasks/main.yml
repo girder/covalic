@@ -32,7 +32,12 @@
 
 - name: Clone romanesco worker
   sudo: yes
-  git: repo=git://github.com/kitware/romanesco.git dest=/opt/romanesco accept_hostkey=yes version={{ romanesco_version }}
+  git:
+      repo: git://github.com/kitware/romanesco.git
+      dest: /opt/romanesco
+      accept_hostkey: yes
+      force: yes
+      version: "{{ romanesco_version }}"
   tags:
     - celery
     - deploy-update
@@ -73,9 +78,20 @@
     - celery
     - deploy-update
 
-- name: Change ownership of romanesco to www-data
+- name: Activate the romanesco docker plugin in config file
+  lineinfile:
+    dest: /opt/romanesco/romanesco/worker.local.cfg
+    state: present
+    regexp: '^plugins_enabled='
+    line: "plugins_enabled=docker"
   sudo: yes
-  file: dest=/opt/romanesco mode=755 owner=www-data group=www-data state=directory recurse=yes
+  tags:
+    - celery
+    - deploy-update
+
+- name: Change ownership of romanesco to correct user
+  sudo: yes
+  file: dest=/opt/romanesco mode=755 owner={{romanesco_exec_user}} group={{romanesco_exec_group}} state=directory recurse=yes
   tags:
     - celery
     - deploy-update
@@ -84,9 +100,9 @@
   group: name=docker state=present
   tags: celery
 
-- name: Add www-data to Docker group
+- name: Add romanesco user to Docker group
   user: shell=/bin/bash
-        name=www-data
+        name={{romanesco_exec_user}}
         groups=docker
         append=yes
   sudo: yes
@@ -100,7 +116,11 @@
     - deploy-update
 
 - name: Install celery worker as a service
-  copy: src=celery_worker.conf dest=/etc/init/celery_worker.conf mode=644 owner=root
+  template:
+      src: celery_worker.conf
+      dest: /etc/init/celery_worker.conf
+      mode: 644
+      owner: root
   sudo: yes
   tags: celery
 

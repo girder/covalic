@@ -1,0 +1,4 @@
+---
+romanesco_exec_user: www-data
+romanesco_exec_group: www-data
+docker_package_name: docker.io

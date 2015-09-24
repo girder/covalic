@@ -12,6 +12,6 @@ respawn limit 20 5
 script
 
     cd /opt/covalic/girder
-    exec sudo -u www-data /usr/bin/python -m girder > /dev/null 2>&1
+    exec sudo -u {{ girder_exec_user }} /usr/bin/python -m girder > /dev/null 2>&1
 
 end script

@@ -128,7 +128,7 @@
   when: pod == 'prod'
 
 - name: install Girder as a service
-  copy: src=girder.conf dest=/etc/init/girder.conf mode=644 owner=root
+  template: src=girder.conf.j2 dest=/etc/init/girder.conf mode=644 owner=root
   sudo: yes
   tags: girder
 
@@ -141,6 +141,7 @@
 
 - name: add www-data to developers so nginx can serve static content
   user: name=www-data state=present groups=developers append=yes
+  when: vagrant is not defined
   sudo: yes
   tags: girder
 
@@ -236,6 +237,23 @@
   tags:
     - girder
 
+- name: Restart Girder as a service to make sure our plugins are running
+  service: name=girder state=restarted enabled=yes
+  sudo: yes
+  tags:
+    - girder
+    - deploy-update
+    - rewire
+
+- name: Wait for Girder startup
+  wait_for:
+    port: "{{girder_socket_port}}"
+    delay: 1
+  tags:
+    - girder
+    - deploy-update
+    - rewire
+
 # Configure plugin settings
 
 - name: Set config for romanesco broker
@@ -279,7 +297,7 @@
 
 - name: Require assetstore_devicename to be defined
   fail: msg="Environment variable assetstore_devicename undefined, should be set up as part of a filesystem assetstore definition."
-  when: girder_assetstore_type == 'filesystem' and assetstore_devicename is not defined
+  when: girder_assetstore_type == 'filesystem' and assetstore_devicename is not defined and girder_assetstore_local_fs is not defined
   tags:
     - girder
     - girder-assetstore
@@ -287,14 +305,14 @@
 - name: format filesystem for assetstore
   sudo: yes
   filesystem: force=no fstype=ext4 dev={{assetstore_devicename}}
-  when: girder_assetstore_type == 'filesystem'
+  when: girder_assetstore_type == 'filesystem' and girder_assetstore_local_fs is not defined
   tags:
     - girder
     - girder-assetstore
 
 - name: create local mountpoint
   sudo: yes
-  file: dest=/opt/covalic/assetstore mode=755 owner=www-data group=developers state=directory
+  file: dest=/opt/covalic/assetstore mode=755 owner={{girder_exec_user}} group={{girder_exec_group}} state=directory
   when: girder_assetstore_type == 'filesystem'
   tags:
     - girder
@@ -303,14 +321,14 @@
 - name: Mount assetstore volume
   sudo: yes
   mount: name=/opt/covalic/assetstore src={{assetstore_devicename}} fstype=ext4 state=mounted opts=defaults,nofail,nobootwait dump=0 passno=2
-  when: girder_assetstore_type == 'filesystem'
+  when: girder_assetstore_type == 'filesystem' and girder_assetstore_local_fs is not defined
   tags:
     - girder
     - girder-assetstore
 
 - name: enforce ownership of assetstore
   sudo: yes
-  file: dest=/opt/covalic/assetstore mode=755 owner=www-data group=developers state=directory recurse=yes
+  file: dest=/opt/covalic/assetstore mode=755 owner={{girder_exec_user}} group={{girder_exec_group}} state=directory recurse=yes
   when: girder_assetstore_type == 'filesystem'
   tags:
     - girder
@@ -322,14 +340,6 @@
   tags:
     - girder
     - girder-assetstore
-
-- name: Restart Girder as a service to have Covalic be the webapp
-  service: name=girder state=restarted enabled=yes
-  sudo: yes
-  tags:
-    - girder
-    - deploy-update
-    - rewire
 
 # force a restart of nginx to pick up any changes in girder
 - name: Restart nginx service

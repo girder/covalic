@@ -1,0 +1,14 @@
+---
+- name: give ownership of /opt/covalic to vagrant user
+  file: path=/opt/covalic
+        owner=vagrant
+        group=vagrant
+        mode=0775
+        state=directory
+        recurse=no
+  sudo: yes
+
+- name: install curl
+  apt: pkg=curl state=installed
+  sudo: yes
+  tags: common

@@ -73,8 +73,6 @@ class CustomAppRoot(object):
               href="${staticRoot}/built/plugins/covalic/covalic.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/jobs/plugin.min.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/oauth/plugin.min.css">
         <link rel="icon"
               type="image/png"
               href="${staticRoot}/img/Girder_Favicon.png">
@@ -88,7 +86,6 @@ class CustomAppRoot(object):
         <script src="${staticRoot}/built/plugins/jobs/plugin.min.js"></script>
         <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js">
         </script>
-        <script src="${staticRoot}/built/plugins/oauth/plugin.min.js"></script>
         <script src="${staticRoot}/built/plugins/covalic/covalic.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/covalic/main.min.js"></script>
