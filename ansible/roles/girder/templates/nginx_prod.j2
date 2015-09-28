@@ -9,7 +9,7 @@ server {
     listen 443 ssl;
     ssl_certificate /etc/nginx/ssl/challenge_kitware_com.pem;
     ssl_certificate_key /etc/nginx/ssl/challenge.kitware.com.key;
-
+    add_header Strict-Transport-Security "max-age=15552000";
     root {{ girder_root }}/clients/web;
 
     # Make site accessible from http://localhost/
