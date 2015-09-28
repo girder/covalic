@@ -18,10 +18,11 @@
 ###############################################################################
 
 import mako
+import os
 import posixpath
 
 from girder import events
-from girder.constants import AccessType
+from girder.constants import AccessType, SettingKey, STATIC_ROOT_DIR
 from girder.plugins.jobs.constants import JobStatus
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
@@ -39,7 +40,7 @@ def validateSettings(event):
         event.preventDefault().stopPropagation()
 
 
-class CustomAppRoot(object):
+class CustomAppRoot(ModelImporter):
     """
     The webroot endpoint simply serves the main index HTML file of covalic.
     """
@@ -71,8 +72,10 @@ class CustomAppRoot(object):
               href="${staticRoot}/built/app.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/covalic/covalic.min.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/jobs/plugin.min.css">
+        % for plugin in pluginCss:
+            <link rel="stylesheet"
+                  href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
+        % endfor
         <link rel="icon"
               type="image/png"
               href="${staticRoot}/img/Girder_Favicon.png">
@@ -83,9 +86,10 @@ class CustomAppRoot(object):
         <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
         <script src="${staticRoot}/built/libs.min.js"></script>
         <script src="${staticRoot}/built/app.min.js"></script>
-        <script src="${staticRoot}/built/plugins/jobs/plugin.min.js"></script>
-        <script src="${staticRoot}/built/plugins/gravatar/plugin.min.js">
-        </script>
+        % for plugin in pluginJs:
+          <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js">
+          </script>
+        % endfor
         <script src="${staticRoot}/built/plugins/covalic/covalic.min.js">
         </script>
         <script src="${staticRoot}/built/plugins/covalic/main.min.js"></script>
@@ -95,6 +99,20 @@ class CustomAppRoot(object):
 
     def GET(self):
         if self.indexHtml is None:
+            self.vars['pluginCss'] = []
+            self.vars['pluginJs'] = []
+
+            builtDir = os.path.join(
+                STATIC_ROOT_DIR, 'clients', 'web', 'static', 'built', 'plugins')
+            plugins = self.model('setting').get(SettingKey.PLUGINS_ENABLED, ())
+
+            for plugin in plugins:
+                if os.path.exists(os.path.join(builtDir, plugin,
+                                               'plugin.min.css')):
+                    self.vars['pluginCss'].append(plugin)
+                if os.path.exists(os.path.join(builtDir, plugin,
+                                               'plugin.min.js')):
+                    self.vars['pluginJs'].append(plugin)
             self.indexHtml = mako.template.Template(self.template).render(
                 **self.vars)
 
