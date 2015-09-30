@@ -110,7 +110,7 @@ class PhaseExt(Phase):
 
         kwargs = {
             'task': {
-                'name': jobTitle,
+                'name': title,
                 'mode': 'docker',
                 'docker_image': 'girder/covalic-metrics:latest',
                 'container_args': [
