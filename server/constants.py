@@ -17,5 +17,6 @@
 #  limitations under the License.
 ###############################################################################
 
+
 class PluginSettings():
     SCORING_USER_ID = 'covalic.scoring_user_id'

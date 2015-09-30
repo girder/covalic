@@ -23,6 +23,7 @@ import posixpath
 
 from girder import events
 from girder.constants import AccessType, SettingKey, STATIC_ROOT_DIR
+from girder.models.model_base import ValidationException
 from girder.plugins.jobs.constants import JobStatus
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
