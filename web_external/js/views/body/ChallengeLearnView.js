@@ -1,9 +1,5 @@
 covalic.views.ChallengeLearnView = covalic.View.extend({
-
-    events: {
-    },
-
-    initialize: function (settings) {
+    initialize: function () {
         girder.cancelRestRequests('fetch');
         this.render();
     },
@@ -18,7 +14,8 @@ covalic.views.ChallengeLearnView = covalic.View.extend({
             $('.bg').css('height', (jumboHeight - scrolled) + 'px');
         };
 
-        $(window).scroll(function (e) {
+        // TODO this breaks modularity.
+        $(window).scroll(function () {
             parallax();
         });
     }

@@ -1,7 +1,7 @@
 covalic.views.PhaseView = covalic.View.extend({
 
     events: {
-        'click #c-join-phase': function (event) {
+        'click #c-join-phase': function () {
             if (!girder.currentUser) {
                 girder.events.trigger('g:loginUi');
             } else {
@@ -11,7 +11,7 @@ covalic.views.PhaseView = covalic.View.extend({
                     path: path,
                     type: type,
                     error: null // TODO what?
-                }).done(_.bind(function (resp) {
+                }).done(_.bind(function () {
                     var participantGroupId = this.model.get('participantGroupId');
                     girder.currentUser.addToGroup(participantGroupId);
                     this.trigger('c:joinPhase');
@@ -30,6 +30,19 @@ covalic.views.PhaseView = covalic.View.extend({
                 }, this);
             }
             this.editPhaseWidget.render();
+        },
+
+        'click .c-edit-scoring': function () {
+            if (!this.editScoringWidget) {
+                this.editScoringWidget = new covalic.views.EditScoringWidget({
+                    el: $('#g-dialog-container'),
+                    model: this.model,
+                    parentView: this
+                }).on('g:saved', function () {
+                    this.render();
+                }, this);
+            }
+            this.editScoringWidget.render();
         },
 
         'click .c-phase-access-control': function () {
@@ -155,7 +168,7 @@ covalic.views.PhaseView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id', 'phase', function (id, params) {
+covalic.router.route('phase/:id', 'phase', function (id) {
     // Fetch the phase by id, then render the view.
     var phase = new covalic.models.PhaseModel();
     phase.set({

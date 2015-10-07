@@ -17,9 +17,11 @@
 #  limitations under the License.
 ###############################################################################
 
+import json
 import mako
 import os
 import posixpath
+import six
 
 from girder import events
 from girder.constants import AccessType, SettingKey, STATIC_ROOT_DIR
@@ -39,6 +41,23 @@ def validateSettings(event):
         ModelImporter.model('user').load(
             event.info['value'], force=True, exc=True)
         event.preventDefault().stopPropagation()
+
+
+def validatePhase(event):
+    phase = event.info
+
+    # Ensure dockerArgs is a proper JSON list. If not, convert it to one.
+    if phase.get('scoreTask', {}).get('dockerArgs'):
+        args = phase['scoreTask']['dockerArgs']
+        if isinstance(args, six.string_types):
+            try:
+                phase['scoreTask']['dockerArgs'] = json.loads(args)
+            except ValueError:
+                raise ValidationException(
+                    'Docker arguments must be specified as a JSON list.')
+
+        if not isinstance(phase['scoreTask']['dockerArgs'], list):
+            raise ValidationException('Docker arguments must be a list.')
 
 
 class CustomAppRoot(ModelImporter):
@@ -167,7 +186,10 @@ def load(info):
                 deleteSubmissions)
     events.bind('jobs.job.update', 'covalic', onJobUpdate)
     events.bind('model.setting.validate', 'covalic', validateSettings)
+    events.bind('model.challenge_phase.validate', 'covalic', validatePhase)
 
     # Expose extended fields on models
     ModelImporter.model('phase', 'challenge').exposeFields(
         level=AccessType.READ, fields='metrics')
+    ModelImporter.model('phase', 'challenge').exposeFields(
+        level=AccessType.SITE_ADMIN, fields='scoreTask')

@@ -11,7 +11,7 @@ covalic.App = girder.App.extend({
         return this;
     },
 
-    navigateTo: function (view, settings) {
+    navigateTo: function () {
         this.$('#g-app-body-container').removeClass('c-body-nopad');
         return girder.App.prototype.navigateTo.apply(this, arguments);
     }

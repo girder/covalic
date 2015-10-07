@@ -111,7 +111,7 @@ covalic.views.ChallengeView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenge/:id', 'challenge', function (id, params) {
+covalic.router.route('challenge/:id', 'challenge', function (id) {
     // Fetch the challenge by id, then render the view.
     var challenge = new covalic.models.ChallengeModel();
     challenge.set({

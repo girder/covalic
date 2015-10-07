@@ -11,7 +11,7 @@ covalic.views.InitializeMetricsDialog = covalic.View.extend({
         'click .c-begin-metric-initialization': function () {
             this.model.once('g:metricsInitialized', function () {
 
-            }, this).initMetrics()
+            }, this).initMetrics();
         }
     },
 

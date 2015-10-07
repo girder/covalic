@@ -131,15 +131,19 @@ class Submission(Resource):
                 groundTruth, user=scoreUser, level=AccessType.READ,
                 save=True)
 
+        task = phase.get('scoreTask', {})
+        image = task.get('dockerImage') or 'girder/covalic-metrics:latest'
+        containerArgs = task.get('dockerArgs') or [
+            '--groundtruth=$input{groundtruth}',
+            '--submission=$input{submission}'
+        ]
+
         kwargs = {
             'task': {
                 'name': jobTitle,
                 'mode': 'docker',
-                'docker_image': 'girder/covalic-metrics:latest',
-                'container_args': [
-                    '--groundtruth=$input{groundtruth}',
-                    '--submission=$input{submission}'
-                ],
+                'docker_image': image,
+                'container_args': containerArgs,
                 'inputs': [{
                     'id': 'submission',
                     'type': 'string',

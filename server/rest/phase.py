@@ -30,6 +30,7 @@ class PhaseExt(Phase):
 
         self.route('GET', (':id', 'groundtruth', 'item'), self.groundtruthItems)
         self.route('PUT', (':id', 'metrics'), self.setMetrics)
+        self.route('PUT', (':id', 'scoring_info'), self.setScoringInfo)
         self.route('POST', (':id', 'metrics', 'init'), self.initMetrics)
 
     @access.public
@@ -172,3 +173,26 @@ class PhaseExt(Phase):
                'the results in order to automatically initialize the metric '
                'weights to sensible values.')
         .param('id', 'The ID of the phase.', paramType='path'))
+
+    @access.admin
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.ADMIN)
+    def setScoringInfo(self, phase, params):
+        phase['scoreTask'] = phase.get('scoreTask', {})
+
+        if 'dockerImage' in params:
+            phase['scoreTask']['dockerImage'] = params['dockerImage']
+        if 'dockerArgs' in params:
+            phase['scoreTask']['dockerArgs'] = params['dockerArgs']
+
+        phaseModel = self.model('phase', 'challenge')
+        return self.model('phase', 'challenge').filter(
+            phaseModel.save(phase), self.getCurrentUser())
+    setScoringInfo.description = (
+        Description('Customize submission scoring behavior for this phase.')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .param('dockerImage', 'Name of the docker image to use for scoring '
+               'submissions to this phase.', required=False)
+        .param('dockerArgs', 'JSON list of arguments to pass to the scoring '
+               'container.', required=False)
+        .notes('Only site administrators may use this route.')
+    )
