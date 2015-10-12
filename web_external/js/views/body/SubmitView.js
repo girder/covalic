@@ -102,7 +102,7 @@ covalic.views.SubmitView = covalic.View.extend({
             this.uploadWidget.parentType = 'folder';
             this.uploadWidget.parent = this.folder;
             this.uploadWidget.uploadNextFile();
-        }, this).on('g:error', function (err) {
+        }, this).on('g:error', function () {
             girder.events.trigger('g:alert', {
                 icon: 'cancel',
                 text: 'Could not create submission folder.',
@@ -124,7 +124,7 @@ covalic.views.SubmitView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/submit', 'phase_submit', function (id, params) {
+covalic.router.route('phase/:id/submit', 'phase_submit', function (id) {
     var phase = new covalic.models.PhaseModel();
     phase.set({
         _id: id

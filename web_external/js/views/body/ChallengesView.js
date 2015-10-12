@@ -9,7 +9,7 @@ covalic.views.ChallengesView = covalic.View.extend({
         'click .c-challenge-create-button': 'createDialog'
     },
 
-    initialize: function (settings) {
+    initialize: function () {
         girder.cancelRestRequests('fetch');
 
         this.collection = new covalic.collections.ChallengeCollection();
@@ -65,7 +65,7 @@ covalic.views.ChallengesView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenges', 'challenges', function (params) {
+covalic.router.route('challenges', 'challenges', function () {
     girder.events.trigger('g:navigateTo', covalic.views.ChallengesView);
     girder.events.trigger('g:highlightItem', 'ChallengesView');
 });

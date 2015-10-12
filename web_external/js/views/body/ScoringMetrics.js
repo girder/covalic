@@ -73,7 +73,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
               .text(el.val());
         },
 
-        'click .c-initialize-metrics': function (e) {
+        'click .c-initialize-metrics': function () {
             new covalic.views.InitializeMetricsDialog({
                 parentView: this,
                 el: $('#g-dialog-container'),
@@ -157,7 +157,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/metrics', 'phaseMetrics', function (id, params) {
+covalic.router.route('phase/:id/metrics', 'phaseMetrics', function (id) {
     // Fetch the phase by id, then render the view.
     var phase = new covalic.models.PhaseModel();
     phase.set({

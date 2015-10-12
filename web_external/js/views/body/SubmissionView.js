@@ -140,7 +140,7 @@ covalic.views.SubmissionView = covalic.View.extend({
     }
 });
 
-covalic.router.route('submission/:id', 'phase_submission', function (id, params) {
+covalic.router.route('submission/:id', 'phase_submission', function (id) {
     var submission = new covalic.models.SubmissionModel();
     submission.set({
         _id: id

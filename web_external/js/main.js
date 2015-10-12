@@ -1,6 +1,6 @@
 $(function () {
     covalic.events.trigger('g:appload.before');
-    var app = new covalic.App({
+    covalic.mainApp = new covalic.App({
         el: 'body',
         parentView: null
     });
