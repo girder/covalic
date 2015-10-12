@@ -3,15 +3,20 @@
   form.c-challenge-search-form.form-inline(role="form")
     .form-group.c-challenges-search-container
 
-  if (admin)
+  if admin
     button.c-challenge-create-button.btn.btn-sm.btn-default
       i.icon-plus-squared
       |  New challenge
 
-each challenge in challenges
-  .c-challenge-list-entry
-    .c-challenge-right-column
-    .c-challenge-title
-      a.c-challenge-link(c-challenge-cid="#{challenge.cid}")= challenge.get('name')
-    .c-challenge-description= challenge.get('description')
-    .g-clear-right
+.c-challenge-cards-container
+  each challenge in challenges
+    .c-challenge-card
+      .c-thumbnail-container
+        a.c-challenge-link.c-thumbnail-link(c-challenge-cid=challenge.cid)
+          img.c-challenge-image(src=challenge.getThumbnailUrl())
+          .c-thumbnail-overlay
+      .c-card-bottom
+        a.c-challenge-link.c-text-link(
+          c-challenge-cid=challenge.cid title=challenge.name())
+            | #{challenge.name()}
+            span.c-text-fade
