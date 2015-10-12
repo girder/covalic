@@ -9,7 +9,8 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
             var fields = {
                 name: this.$('#c-challenge-name').val(),
                 description: this.$('#c-challenge-description').val(),
-                instructions: this.$('#c-challenge-instructions').val()
+                instructions: this.$('#c-challenge-instructions').val(),
+                organizers: this.$('#c-challenge-organizers').val()
             };
 
             if (this.model) {
@@ -44,6 +45,7 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
                 view.$('#c-challenge-name').val(view.model.get('name'));
                 view.$('#c-challenge-description').val(view.model.get('description'));
                 view.$('#c-challenge-instructions').val(view.model.get('instructions'));
+                view.$('#c-challenge-organizers').val(view.model.get('organizers'));
 
                 view.create = false;
             } else {

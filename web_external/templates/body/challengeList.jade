@@ -20,3 +20,6 @@
           c-challenge-cid=challenge.cid title=challenge.name())
             | #{challenge.name()}
             span.c-text-fade
+        .c-challenge-organizers(title=challenge.get('organizers'))
+          | #{challenge.get('organizers')} &nbsp;
+          span.c-text-fade
