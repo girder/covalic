@@ -1,5 +1,4 @@
 .c-challenge-list-header
-  .c-challenge-pagination
   form.c-challenge-search-form.form-inline(role="form")
     .form-group.c-challenges-search-container
 
@@ -15,6 +14,10 @@
         a.c-challenge-link.c-thumbnail-link(c-challenge-cid=challenge.cid)
           img.c-challenge-image(src=challenge.getThumbnailUrl())
           .c-thumbnail-overlay
+            if challenge.getAccessLevel() >= girder.AccessType.WRITE
+              a.c-edit-thumbnail.c-tooltip(
+                title="Change thumbnail" href="#challenge/#{challenge.id}/thumbnail")
+                  i.icon-pencil
       .c-card-bottom
         a.c-challenge-link.c-text-link(
           c-challenge-cid=challenge.cid title=challenge.name())
@@ -23,3 +26,5 @@
         .c-challenge-organizers(title=challenge.get('organizers'))
           | #{challenge.get('organizers')} &nbsp;
           span.c-text-fade
+
+.c-challenge-pagination

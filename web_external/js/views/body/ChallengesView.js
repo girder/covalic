@@ -40,11 +40,17 @@ covalic.views.ChallengesView = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.challengeList({
             challenges: this.collection.models,
-            admin: !!(girder.currentUser && girder.currentUser.get('admin'))
+            admin: !!(girder.currentUser && girder.currentUser.get('admin')),
+            girder: girder
         }));
 
         this.paginateWidget.setElement(this.$('.c-challenge-pagination')).render();
         this.searchWidget.setElement(this.$('.c-challenges-search-container')).render();
+
+        this.$('.c-tooltip').tooltip({
+            delay: 100,
+            container: this.$el
+        });
 
         return this;
     },

@@ -42,13 +42,15 @@
   .c-challenge-image
     height 200px
     width 200px
+    display block
 
   .c-thumbnail-container
     position relative
     height 200px
-    width 100%
+    width 200px
 
   .c-thumbnail-link
+    display block
     position absolute
     top 0
     bottom 0
@@ -94,7 +96,22 @@
 
     .c-text-fade
       height 20px
-      width 50px
+      width 45px
       position absolute
       background linear-gradient(left, rgba(255,255,255,0), rgba(255,255,255,1))
       right 0
+
+.c-edit-thumbnail
+  position absolute
+  z-index 1
+  right 5px
+  top 5px
+  border-radius 3px
+  background-color rgba(255,255,255,0.84)
+  color #333
+  border 1px solid #ddd
+  padding 2px
+
+  &:hover
+    background-color white
+    color #333
