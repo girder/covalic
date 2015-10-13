@@ -1,11 +1,6 @@
 covalic.views.ChallengesView = covalic.View.extend({
 
     events: {
-        'click a.c-challenge-link': function (event) {
-            var cid = $(event.currentTarget).attr('c-challenge-cid');
-            covalic.router.navigate('challenge/' + this.collection.get(cid).id, {trigger: true});
-        },
-
         'click .c-challenge-create-button': 'createDialog'
     },
 

@@ -1,5 +1,10 @@
 .c-challenge-list-header
   form.c-challenge-search-form.form-inline(role="form")
+    .form-group
+      select.c-challenges-filter.form-control.input-sm
+        option All challenges
+        option Ongoing challenges
+        option Not yet started
     .form-group.c-challenges-search-container
 
   if admin
@@ -11,7 +16,7 @@
   each challenge in challenges
     .c-challenge-card
       .c-thumbnail-container
-        a.c-challenge-link.c-thumbnail-link(c-challenge-cid=challenge.cid)
+        a.c-challenge-link.c-thumbnail-link(href="#challenge/#{challenge.id}")
           img.c-challenge-image(src=challenge.getThumbnailUrl())
           .c-thumbnail-overlay
             if challenge.getAccessLevel() >= girder.AccessType.WRITE
@@ -20,7 +25,7 @@
                   i.icon-pencil
       .c-card-bottom
         a.c-challenge-link.c-text-link(
-          c-challenge-cid=challenge.cid title=challenge.name())
+          href="#challenge/#{challenge.id}" title=challenge.name())
             | #{challenge.name()}
             span.c-text-fade
         .c-challenge-organizers(title=challenge.get('organizers'))

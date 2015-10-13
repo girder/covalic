@@ -15,7 +15,7 @@
     girder_socket_port: 8080
     girder_exec_user: vagrant
     girder_exec_group: vagrant
-    girder_plugins: ['romanesco', 'challenge', 'covalic', 'jobs']
+    girder_plugins: ['covalic']
     girder_celery_user: celery
     girder_celery_email: covalic-celery@kitware.com
     girder_celery_password: celery

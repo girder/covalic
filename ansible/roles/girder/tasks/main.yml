@@ -33,6 +33,10 @@
     - cmake
     - git
     - postfix
+    - libjpeg-dev
+    - libfreetype6-dev
+    - zlib1g-dev
+    - libpng-dev
   tags: girder
 
 - name: clone girder

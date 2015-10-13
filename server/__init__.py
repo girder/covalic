@@ -29,7 +29,7 @@ from girder.models.model_base import ValidationException
 from girder.plugins.jobs.constants import JobStatus
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
-from .rest import submission, phase
+from .rest import challenge, submission, phase
 from .constants import PluginSettings
 
 
@@ -174,6 +174,7 @@ def onJobUpdate(event):
 
 def load(info):
     # Extend challenge_phase resource
+    info['apiRoot'].challenge = challenge.ChallengeExt()
     info['apiRoot'].challenge_phase = phase.PhaseExt()
     info['apiRoot'].covalic_submission = submission.Submission()
 
