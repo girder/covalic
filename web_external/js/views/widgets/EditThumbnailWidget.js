@@ -68,6 +68,7 @@ covalic.views.EditThumbnailWidget = covalic.View.extend({
         this.uploadWidget.setElement(this.$('.c-thumbnail-upload-widget')).render();
         this.uploadWidget.$(
             '.g-start-upload,.g-overall-progress-message').hide();
+        this.uploadWidget.$('.g-drop-zone').text('Browse or drop a file...');
     }
 });
 
