@@ -32,7 +32,9 @@ class ChallengeExt(Challenge):
         Challenge.__init__(self)
 
         self.route('GET', (':id', 'thumbnail', 'download'), self.downloadThumb)
+        self.route('GET', (':id', 'assets_folder'), self.getAssetsFolder)
         self.route('POST', (':id', 'thumbnail'), self.createThumb)
+        self.route('DELETE', (':id', 'thumbnail'), self.removeThumb)
 
     @access.public
     @loadmodel(model='challenge', plugin='challenge', level=AccessType.READ)
@@ -100,3 +102,35 @@ class ChallengeExt(Challenge):
         .param('id', 'The ID of the challenge.', paramType='path')
         .param('size', 'Side length of the thumbnail image.', dataType='int')
         .param('fileId', 'The source image file ID.'))
+
+    @access.public
+    @loadmodel(model='challenge', plugin='challenge', level=AccessType.READ)
+    def getAssetsFolder(self, challenge, params):
+        user = self.getCurrentUser()
+
+        collection = self.model('collection').load(
+            challenge['collectionId'], force=True)
+
+        folder = self.model('folder').createFolder(
+            parentType='collection', parent=collection,
+            name='Assets', creator=user, reuseExisting=True,
+            description='Assets related to this challenge.')
+        self.model('folder').requireAccess(folder, user=user,
+                                           level=AccessType.READ)
+        return self.model('folder').filter(folder, user)
+    getAssetsFolder.description = (
+        Description('Get the folder containing assets related to this '
+                    'challenge.')
+        .param('id', 'The ID of the challenge', paramType='path'))
+
+    @access.user
+    @loadmodel(model='challenge', plugin='challenge', level=AccessType.WRITE)
+    def removeThumb(self, challenge, params):
+        del challenge['thumbnailSourceId']
+        del challenge['thumbnails']
+        self.model('challenge', 'challenge').save(challenge)
+
+        return {'message': 'Thumbnail deleted.'}
+    removeThumb.description = (
+        Description('Remove the thumbnail for a challenge.')
+        .param('id', 'The ID of the challenge.', paramType='path'))
