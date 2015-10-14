@@ -1,8 +1,4 @@
 covalic.views.EditThumbnailWidget = covalic.View.extend({
-    events: {
-
-    },
-
     initialize: function () {
         this.render();
 
@@ -35,7 +31,8 @@ covalic.views.EditThumbnailWidget = covalic.View.extend({
                 this._renderUploadWidget();
             }, this).once('c:error', function (err) {
                 this.uploadWidget.$('.g-validation-failed-message').text(
-                    err.responseJson.message);
+                    err.responseJSON.message);
+                this.uploadWidget.$('.g-drop-zone').removeClass('hide');
             }, this).createThumbnail(this.uploadWidget.currentFile.id);
         }, this);
 

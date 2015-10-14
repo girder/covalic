@@ -19,9 +19,10 @@
 
 import cherrypy
 
+from girder import logger
 from girder.api import access
 from girder.api.describe import Description
-from girder.api.rest import loadmodel
+from girder.api.rest import loadmodel, RestException
 from girder.constants import AccessType
 from girder.plugins.challenge.rest.challenge import Challenge
 from girder.plugins.thumbnails.worker import createThumbnail
@@ -87,9 +88,14 @@ class ChallengeExt(Challenge):
                 break
             i += 1
 
-        newThumb = createThumbnail(
-            width=size, height=size, crop=True, fileId=file['_id'],
-            attachToType='item', attachToId=file['itemId'])
+        try:
+            newThumb = createThumbnail(
+                width=size, height=size, crop=True, fileId=file['_id'],
+                attachToType='item', attachToId=file['itemId'])
+        except IOError:
+            logger.exception('Thumbnail creation IOError')
+            raise RestException('Could not create thumbnail from the file.')
+
         challenge['thumbnails'].insert(i, {
             'size': size,
             'fileId': newThumb['_id']

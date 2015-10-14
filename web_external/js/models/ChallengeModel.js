@@ -31,7 +31,8 @@ covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
             data: {
                 fileId: fileId,
                 size: size
-            }
+            },
+            error: null
         }).done(_.bind(function (resp) {
             this.trigger('c:thumbnailCreated');
         }, this)).error(_.bind(function (err) {
