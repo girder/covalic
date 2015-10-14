@@ -9,7 +9,8 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
             var fields = {
                 name: this.$('#c-challenge-name').val(),
                 description: this.$('#c-challenge-description').val(),
-                instructions: this.$('#c-challenge-instructions').val()
+                instructions: this.$('#c-challenge-instructions').val(),
+                organizers: this.$('#c-challenge-organizers').val()
             };
 
             if (this.model) {
@@ -44,6 +45,7 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
                 view.$('#c-challenge-name').val(view.model.get('name'));
                 view.$('#c-challenge-description').val(view.model.get('description'));
                 view.$('#c-challenge-instructions').val(view.model.get('instructions'));
+                view.$('#c-challenge-organizers').val(view.model.get('organizers'));
 
                 view.create = false;
             } else {
@@ -66,11 +68,12 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
         var challenge = new covalic.models.ChallengeModel();
         challenge.set(fields);
         challenge.on('g:saved', function () {
-            this.$el.modal('hide');
-            this.trigger('g:saved', challenge);
+            this.$el.on('hidden.bs.modal', _.bind(function () {
+                this.trigger('g:saved', challenge);
+            }, this)).modal('hide');
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
-            this.$('button.c-save-phase').removeClass('disabled');
+            this.$('button.c-save-challenge').removeClass('disabled');
             this.$('#c-challenge-' + err.responseJSON.field).focus();
         }, this).save();
     },
@@ -78,8 +81,9 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
     updateChallenge: function (fields) {
         this.model.set(fields);
         this.model.on('g:saved', function () {
-            this.$el.modal('hide');
-            this.trigger('g:saved', this.model);
+            this.$el.on('hidden.bs.modal', _.bind(function () {
+                this.trigger('g:saved', this.model);
+            }, this)).modal('hide');
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.c-save-challenge').removeClass('disabled');

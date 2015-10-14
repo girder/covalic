@@ -74,8 +74,9 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
         var phase = new covalic.models.PhaseModel();
         phase.set(fields);
         phase.on('g:saved', function () {
-            this.$el.modal('hide');
-            this.trigger('g:saved', phase);
+            this.$el.on('hidden.bs.modal', _.bind(function () {
+                this.trigger('g:saved', phase);
+            }, this)).modal('hide');
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.c-save-phase').removeClass('disabled');
@@ -86,8 +87,9 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
     updatePhase: function (fields) {
         this.model.set(fields);
         this.model.on('g:saved', function () {
-            this.$el.modal('hide');
-            this.trigger('g:saved', this.model);
+            this.$el.on('hidden.bs.modal', _.bind(function () {
+                this.trigger('g:saved', this.model);
+            }, this)).modal('hide');
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.c-save-phase').removeClass('disabled');
