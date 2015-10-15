@@ -1,9 +1,4 @@
 covalic.views.ChallengesView = covalic.View.extend({
-
-    events: {
-        'click .c-challenge-create-button': 'createDialog'
-    },
-
     initialize: function () {
         girder.cancelRestRequests('fetch');
 
@@ -44,7 +39,10 @@ covalic.views.ChallengesView = covalic.View.extend({
 
         this.$('.c-tooltip').tooltip({
             delay: 100,
-            container: this.$el
+            container: this.$el,
+            placement: function (tip, el) {
+                return $(el).attr('placement') || 'top';
+            }
         });
 
         return this;
@@ -68,5 +66,4 @@ covalic.views.ChallengesView = covalic.View.extend({
 
 covalic.router.route('challenges', 'challenges', function () {
     girder.events.trigger('g:navigateTo', covalic.views.ChallengesView);
-    girder.events.trigger('g:highlightItem', 'ChallengesView');
 });
