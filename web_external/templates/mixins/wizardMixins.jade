@@ -1,0 +1,10 @@
+mixin wizardNav(current, total)
+  .c-wizard-steps-container
+    - var i = 0
+    while i < total
+      - var state = i === current ? "active" : "inactive"
+      .c-wizard-step-box(state=state)
+      - i += 1
+
+  if current < total - 1
+    button.btn.c-wizard-next-button Next #[i.icon-right-big]
