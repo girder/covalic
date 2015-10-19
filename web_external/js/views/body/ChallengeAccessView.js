@@ -6,6 +6,17 @@ covalic.views.ChallengeAccessView = covalic.View.extend({
                     '/thumbnail?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
                     this.wizard.total, {trigger: true});
             }, this).saveAccessList();
+        },
+
+        'click .c-save-access-button': function () {
+            this.accessWidget.once('g:accessListSaved', function () {
+                girder.events.trigger('g:alert', {
+                    text: 'Settings saved.',
+                    type: 'success',
+                    icon: 'ok',
+                    timeout: 3000
+                });
+            }, this).saveAccessList();
         }
     },
 
@@ -21,7 +32,7 @@ covalic.views.ChallengeAccessView = covalic.View.extend({
             modal: false,
             model: this.model,
             hideRecurseOption: true,
-            hideSaveButton: !!this.wizard
+            hideSaveButton: true
         });
 
         this.render();

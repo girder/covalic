@@ -13,22 +13,6 @@ covalic.views.ChallengeView = covalic.View.extend({
             this.editChallengeWidget.render();
         },
 
-        'click .c-challenge-access-control': function () {
-            if (!this.accessWidget) {
-                this.accessWidget = new girder.views.AccessWidget({
-                    el: $('#g-dialog-container'),
-                    model: this.model,
-                    modelType: 'challenge',
-                    hideRecurseOption: true,
-                    parentView: this
-                }).on('g:saved', function () {
-                    this.render();
-                }, this);
-            } else {
-                this.accessWidget.render();
-            }
-        },
-
         'click .c-create-phase': function () {
             if (!this.editPhaseWidget) {
                 this.editPhaseWidget = new covalic.views.EditPhaseWidget({

@@ -18,7 +18,7 @@
         if (challenge.getAccessLevel() >= girder.AccessType.ADMIN)
           li.divider(role="presentation")
           li(role="presentation")
-            a.c-challenge-access-control(role="menuitem")
+            a.c-challenge-access-control(role="menuitem" href="#challenge/#{challenge.id}/access")
               i.icon-lock
               | Access control
           li(role="presentation")

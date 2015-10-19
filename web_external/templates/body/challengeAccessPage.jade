@@ -15,3 +15,5 @@ include ../mixins/wizardMixins
   if wizard
     .c-wizard-nav-container
       +wizardNav(wizard.current, wizard.total)
+  else
+    button.c-save-access-button.btn.btn-primary #[i.icon-ok]  Save
