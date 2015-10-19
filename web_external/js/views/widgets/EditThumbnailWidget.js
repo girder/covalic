@@ -68,16 +68,3 @@ covalic.views.EditThumbnailWidget = covalic.View.extend({
         this.uploadWidget.$('.g-drop-zone').text('Browse or drop a file...');
     }
 });
-
-covalic.router.route('challenge/:id/thumbnail', 'challengeThumbnail', function (id) {
-    var challenge = new covalic.models.ChallengeModel();
-    challenge.set({
-        _id: id
-    }).on('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.EditThumbnailWidget, {
-            model: challenge
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});

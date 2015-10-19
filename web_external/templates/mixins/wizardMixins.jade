@@ -8,3 +8,5 @@ mixin wizardNav(current, total)
 
   if current < total - 1
     button.btn.c-wizard-next-button Next #[i.icon-right-big]
+  else
+    button.btn.c-wizard-next-button.c-wizard-finish-button #[i.icon-ok] Done

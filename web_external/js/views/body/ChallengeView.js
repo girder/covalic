@@ -19,6 +19,7 @@ covalic.views.ChallengeView = covalic.View.extend({
                     el: $('#g-dialog-container'),
                     model: this.model,
                     modelType: 'challenge',
+                    hideRecurseOption: true,
                     parentView: this
                 }).on('g:saved', function () {
                     this.render();

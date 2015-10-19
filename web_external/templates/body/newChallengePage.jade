@@ -1,6 +1,6 @@
 include ../mixins/wizardMixins
 
-.c-new-challenge-page-container
+.c-wizard-page-container
   .c-page-title Create a new challenge
 
   p.
@@ -11,8 +11,9 @@ include ../mixins/wizardMixins
     step.
 
   p.
-    You don't have to get everything right just now &mdash; any of these fields
+    You don't have to get everything right just yet &mdash; any of these fields
     can be changed later.
+
   .c-form-container
     form.c-challenge-create-form
       .form-group
@@ -30,7 +31,7 @@ include ../mixins/wizardMixins
         label.control-label(for="c-challenge-long-description")
           | Instructions (supports
           a(target="_blank", href="http://daringfireball.net/projects/markdown")  Markdown
-          |  syntax)
+          |  for rich text)
         textarea.input-sm#c-challenge-instructions.form-control(
           placeholder="Enter instructions", rows="4")
       .g-validation-failed-message
