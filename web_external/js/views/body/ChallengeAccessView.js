@@ -3,7 +3,7 @@ covalic.views.ChallengeAccessView = covalic.View.extend({
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
                 covalic.router.navigate('challenge/' + this.model.id +
-                    '/thumbnail?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
+                    '/instructions?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
                     this.wizard.total, {trigger: true});
             }, this).saveAccessList();
         },

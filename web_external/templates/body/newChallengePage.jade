@@ -4,11 +4,11 @@ include ../mixins/wizardMixins
   .c-page-title Create a new challenge
 
   p.
-    Provide a name for your challenge, and optionally add a list of organizers,
-    a short description, and instructions for participants. When you're done,
-    click #[b Next], and your challenge will be created. At first, no one will be
-    able to see the challenge except for you, but you can change that in the next
-    step.
+    Provide a name for your challenge, and optionally add a list of organizers
+    and a short description. (You'll be able to add a more detailed, rich description
+    in a later step.) When you're done, click #[b Next], and your challenge will be
+    created. At first, no one will be able to see the challenge except for you, but
+    you can change that in the next step.
 
   p.
     You don't have to get everything right just yet &mdash; any of these fields
@@ -18,7 +18,7 @@ include ../mixins/wizardMixins
     form.c-challenge-create-form
       .form-group
         label.control-label(for="c-challenge-name") Name (required)
-        input.input-sm#c-challenge-name.form-control(type="text", placeholder="Enter challenge name")
+        input.input-sm#c-challenge-name.form-control(type="text" placeholder="Enter challenge name")
       .form-group
         label.control-label(for="c-challenge-organizers") Challenge organizers
         input.input-sm#c-challenge-organizers.form-control(
@@ -27,14 +27,7 @@ include ../mixins/wizardMixins
         label.control-label(for="c-challenge-description") Short description
         textarea.input-sm#c-challenge-description.form-control(
           placeholder="Enter short description")
-      .form-group
-        label.control-label(for="c-challenge-long-description")
-          | Instructions (supports
-          a(target="_blank", href="http://daringfireball.net/projects/markdown")  Markdown
-          |  for rich text)
-        textarea.input-sm#c-challenge-instructions.form-control(
-          placeholder="Enter instructions", rows="4")
-      .g-validation-failed-message
+
 
   if wizard
     .c-wizard-nav-container

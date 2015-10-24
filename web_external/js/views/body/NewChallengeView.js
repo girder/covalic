@@ -5,7 +5,6 @@ covalic.views.NewChallengeView = covalic.View.extend({
             challenge.set({
                 name: this.$('#c-challenge-name').val(),
                 description: this.$('#c-challenge-description').val(),
-                instructions: this.$('#c-challenge-instructions').val(),
                 organizers: this.$('#c-challenge-organizers').val()
             });
 
@@ -37,6 +36,7 @@ covalic.views.NewChallengeView = covalic.View.extend({
         this.$el.html(covalic.templates.newChallengePage({
             wizard: this.wizard
         }));
+
         return this;
     }
 });
@@ -44,7 +44,7 @@ covalic.views.NewChallengeView = covalic.View.extend({
 covalic.router.route('challenge/new', 'newChallenge', function () {
     girder.events.trigger('g:navigateTo', covalic.views.NewChallengeView, {
         wizard: {
-            total: 3
+            total: 4
         }
     });
 });
