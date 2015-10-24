@@ -81,14 +81,8 @@ covalic.views.ChallengeView = covalic.View.extend({
             girder: girder
         }));
 
-        var instructionsContainer = this.$('.c-challenge-instructions-container');
-        if (this.model.get('instructions')) {
-            girder.renderMarkdown(this.model.get('instructions'),
-                                  instructionsContainer);
-            instructionsContainer.show();
-        } else {
-            instructionsContainer.hide();
-        }
+        girder.renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
+                              this.$('.c-challenge-instructions-container'));
 
         this.phasesView.setElement(this.$('.c-challenge-phase-container')).render();
 

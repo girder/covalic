@@ -1,5 +1,5 @@
 .c-challenge-header
-  if (challenge.getAccessLevel() >= girder.AccessType.WRITE)
+  if challenge.getAccessLevel() >= girder.AccessType.WRITE
     .btn-group.pull-right
       button.c-challenge-actions-button.btn.btn-default.dropdown-toggle(
           data-toggle="dropdown", title="Challenge actions")
@@ -15,7 +15,7 @@
           a.c-create-phase(role="menuitem")
             i.icon-plus
             | Create new phase
-        if (challenge.getAccessLevel() >= girder.AccessType.ADMIN)
+        if challenge.getAccessLevel() >= girder.AccessType.ADMIN
           li.divider(role="presentation")
           li(role="presentation")
             a.c-challenge-access-control(role="menuitem" href="#challenge/#{challenge.id}/access")
@@ -30,6 +30,13 @@
   .c-challenge-organizers= challenge.get('organizers')
   .c-challenge-description= challenge.get('description')
 
-.c-challenge-instructions-container
+.c-overview-container
+  .c-section-header
+    | Overview
+    if challenge.getAccessLevel() >= girder.AccessType.WRITE
+      a.c-edit-instructions(
+        href="#challenge/#{challenge.id}/instructions"): i.icon-pencil
+  .c-challenge-instructions-container
+
 
 .c-challenge-phase-container

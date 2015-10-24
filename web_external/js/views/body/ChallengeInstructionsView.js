@@ -47,7 +47,8 @@ covalic.views.ChallengeInstructionsView = covalic.View.extend({
         }));
 
         this.instructionsEditor.setElement(
-            this.$('.c-instructions-markdown-editor')).render();
+            this.$('.c-instructions-markdown-editor')).render()
+            .val(this.model.get('instructions') || '');
     }
 });
 

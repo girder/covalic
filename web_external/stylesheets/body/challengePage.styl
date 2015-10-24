@@ -1,3 +1,5 @@
+@import 'nib'
+
 .c-challenge-header
   border-bottom 1px solid #ddd
   margin-bottom 10px
@@ -18,19 +20,33 @@
     color #444
     margin-top 6px
 
+.c-section-header
+  color #7e8685
+  font-size 25px
+  text-transform uppercase
+  margin 20px 0
+  line-height 30px
+
+.c-edit-instructions
+  color #444
+  margin-left 15px
+  border 1px solid #ddd
+  border-radius 3px
+  padding 3px
+  font-size 16px
+  line-height 30px
+  vertical-align middle
+
+  &:hover
+    background linear-gradient(top, white 60%, #f6f6f6 100%)
+
+  &:active
+    background linear-gradient(bottom, white 60%, #f6f6f6 100%)
+
 .c-challenge-instructions-container
-  padding 10px 16px
-  background-color #f8f8f0
-  border 1px solid #e6e6e0
+  padding 0 20px
 
 .c-challenge-phase-container
-  margin-top 10px
-
-  .c-phase-list-title
-    font-variant small-caps
-    font-weight bold
-    font-size 20px
-
   ul.c-phase-list
     padding-left 0
 
