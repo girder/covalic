@@ -1,4 +1,5 @@
 @import 'nib'
+@import 'challengeList'
 
 .c-challenge-header
   border-bottom 1px solid #ddd
@@ -67,3 +68,8 @@
     &>li.sortable-placeholder
       border 1px dashed #CCC
       background none
+
+.c-phase-create
+  @extend .c-challenge-create-button
+  margin-left 15px
+  vertical-align top

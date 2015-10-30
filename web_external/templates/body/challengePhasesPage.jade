@@ -1,4 +1,8 @@
 .c-phase-list-title.c-section-header Phases for this challenge
+  if canCreate
+    a.btn.btn-sm.c-phase-create.c-tooltip(
+        title="Create new phase" href="#challenge/#{challenge.id}/phase/new")
+      i.icon-plus
 
 ul.c-phase-list
   each phase in phases
@@ -8,3 +12,10 @@ ul.c-phase-list
         i.icon-clock
         | #{phase.get('name')}
       i.c-phase-reorder.icon-menu(title="Drag to re-order")
+
+if !phases.length
+  .c-no-phases-message
+    | There are currently no phases in this challenge.
+    if canCreate
+      a(href="#challenge/#{challenge.id}/phase/new")  Click here
+      |  to create one.
