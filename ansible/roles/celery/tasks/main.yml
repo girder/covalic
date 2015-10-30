@@ -109,7 +109,7 @@
   tags: celery
 
 - name: Restart docker daemon
-  service: name=docker.io state=restarted enabled=yes
+  service: name=docker state=restarted enabled=yes
   sudo: yes
   tags:
     - celery
