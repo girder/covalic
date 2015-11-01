@@ -1,18 +1,31 @@
 covalic.views.PhaseGroundTruthView = covalic.View.extend({
     events: {
         'click .c-wizard-next-button': function () {
-            this._saveAndGoTo('phase/' + this.model.id +
-                '/input?wizard&curr=' + (this.wizard.current + 1) +
-                '&total=' + this.wizard.total);
+            this.accessWidget.once('g:accessListSaved', function () {
+                covalic.router.navigate('phase/' + this.model.id +
+                    '/input?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
+                    this.wizard.total, {trigger: true});
+            }, this).saveAccessList();
         },
 
-        'click .c-save-access': function () {
-            this._saveAndGoTo('phase/' + this.model.id);
+        'click .c-save-access-button': function () {
+            this.accessWidget.once('g:accessListSaved', function () {
+                girder.events.trigger('g:alert', {
+                    text: 'Settings saved.',
+                    type: 'success',
+                    icon: 'ok',
+                    timeout: 3000
+                });
+            }, this).saveAccessList();
         }
     },
 
     _saveAndGoTo: function (route) {
-        // TODO
+        this.model.once('g:saved', function () {
+            covalic.router.navigate(route, {trigger: true});
+        }, this).set({
+
+        }).saveAccessList();
     },
 
     initialize: function (settings) {
