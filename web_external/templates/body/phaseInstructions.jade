@@ -1,0 +1,21 @@
+include ../mixins/wizardMixins
+
+.c-wizard-page-container
+  .c-page-title Overview
+
+  p.
+    Please provide an overview to be displayed when users navigate to this phase.
+    It should include any relevant information about this phase, most importantly
+    instructions for participants on what results should be submitted and how
+    the results will be scored.
+  p.
+    The editor supports #[a(href=markdownLink, target="_blank") Markdown syntax]
+    for rich text. Remember, you can always change this later.
+
+  .c-instructions-markdown-editor
+
+  if wizard
+    .c-wizard-nav-container
+      +wizardNav(wizard.current, wizard.total)
+  else
+    button.btn.btn-primary.c-save-instructions #[i.icon-ok] Save

@@ -45,7 +45,6 @@ covalic.views.ChallengeAccessView = covalic.View.extend({
 
         this.accessWidget.setElement(this.$('.c-access-list-container')).render();
 
-
         return this;
     }
 });

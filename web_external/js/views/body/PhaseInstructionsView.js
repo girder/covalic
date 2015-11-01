@@ -22,26 +22,25 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
     initialize: function (settings) {
         this.wizard = settings.wizard || false;
 
-        this.model.once('c:assetsFolderFetched', function (resp) {
-            this.assetsFolder = new girder.models.FolderModel(resp);
+        this.phaseFolder = new girder.models.FolderModel({
+            _id: this.model.get('folderId')
+        });
 
-            this.instructionsEditor = new girder.views.MarkdownWidget({
-                parentView: this,
-                prefix: 'challenge-instructions',
-                placeholder: 'Enter challenge overview',
-                enableUploads: true,
-                maxUploadSize: 1024*1024*2,
-                allowedExtensions: ['png', 'jpeg', 'jpg'],
-                parent: this.assetsFolder
-            });
+        this.instructionsEditor = new girder.views.MarkdownWidget({
+            parentView: this,
+            prefix: 'phase-instructions',
+            placeholder: 'Enter phase overview',
+            enableUploads: true,
+            maxUploadSize: 1024*1024*2,
+            allowedExtensions: ['png', 'jpeg', 'jpg'],
+            parent: this.phaseFolder,
+        });
 
-            this.render();
-        }, this).fetchAssetsFolder();
+        this.render();
     },
 
     render: function () {
-        this.$el.html(covalic.templates.challengeInstructions({
-            challenge: this.model,
+        this.$el.html(covalic.templates.phaseInstructions({
             wizard: this.wizard,
             markdownLink: 'https://daringfireball.net/projects/markdown/syntax'
         }));
@@ -49,11 +48,13 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
         this.instructionsEditor.setElement(
             this.$('.c-instructions-markdown-editor')).render()
             .val(this.model.get('instructions') || '');
+
+        return this;
     }
 });
 
-covalic.router.route('challenge/:id/instructions', 'challengeAccess', function (id, params) {
-    var challenge = new covalic.models.ChallengeModel({_id: id}),
+covalic.router.route('phase/:id/instructions', 'phaseInstructions', function (id, params) {
+    var phase = new covalic.models.PhaseModel({_id: id}),
         wizard = false;
 
     params = girder.parseQueryString(params);
@@ -65,9 +66,9 @@ covalic.router.route('challenge/:id/instructions', 'challengeAccess', function (
         };
     }
 
-    challenge.once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.ChallengeInstructionsView, {
-            model: challenge,
+    phase.once('g:fetched', function () {
+        girder.events.trigger('g:navigateTo', covalic.views.PhaseInstructionsView, {
+            model: phase,
             wizard: wizard
         });
     }, this).on('g:error', function () {

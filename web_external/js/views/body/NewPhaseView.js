@@ -52,7 +52,7 @@ covalic.router.route('challenge/:id/phase/new', 'newPhase', function (id) {
     girder.events.trigger('g:navigateTo', covalic.views.NewPhaseView, {
         challenge: challenge,
         wizard: {
-            total: 4
+            total: 5
         }
     });
 });
