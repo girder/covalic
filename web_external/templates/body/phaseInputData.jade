@@ -1,0 +1,27 @@
+include ../mixins/wizardMixins
+
+.c-wizard-page-container.c-ground-truth-page-container
+  .c-page-title Input data
+
+  p.
+    Use this page to upload the input data for this phase, and to control
+    who has access to it. This is the set of files that your users should run
+    their algorithms on. The results of those algorithms will be uploaded as
+    submissions and scored against the ground truth files.
+  p.
+    If you want to clear out any existing input files before uploading
+    new files, #[a.c-clear-contents click here].
+
+  .c-upload-container
+
+  p.
+    Configure who can access this data. Typically this should be available to
+    all participants in the phase.
+
+  .c-access-container
+
+  if wizard
+    .c-wizard-nav-container
+      +wizardNav(wizard.current, wizard.total)
+  else
+    button.btn.btn-primary.c-save-access #[i.icon-ok] Save

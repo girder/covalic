@@ -62,5 +62,17 @@ covalic.models.PhaseModel = girder.AccessControlledModel.extend({
         }, this)).error(_.bind(function (err) {
             this.trigger('c:error', err);
         }, this));
+    },
+
+    cleanInputData: function () {
+        girder.restRequest({
+            path: 'folder/' + this.get('testDataFolderId') + '/contents',
+            progress: true,
+            type: 'DELETE'
+        }).done(_.bind(function (resp) {
+            this.trigger('c:inputDataDeleted', resp);
+        }, this)).error(_.bind(function (err) {
+            this.trigger('c:error', err);
+        }, this));
     }
 });

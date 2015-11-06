@@ -1,18 +1,25 @@
 include ../mixins/wizardMixins
 
-.c-wizard-page-container
+.c-wizard-page-container.c-ground-truth-page-container
   .c-page-title Ground truth data
 
   p.
     Use this page to upload the ground truth data for this phase, and to control
-    who has access to it. If this is a competitive phase of the challenge, make
-    sure that access to the ground truth files is restricted only to administrators
-    of the challenge.
+    who has access to it. Submissions to this phase will be scored based on how
+    similar they are to the ground truth files.
   p.
     If you want to clear out any existing ground truth files before uploading
-    new files, #[a.g-clear-contents click here].
+    new files, #[a.c-clear-contents click here].
 
   .c-upload-container
+
+  p.
+    Configure who can access this data. If this is a competitive phase of
+    the challenge, make sure that access to the ground truth files is restricted
+    only to administrators of the challenge. If this is a training phase where
+    participants should have access to the ground truth, #[a.c-expose-to-group click here]
+    to add the participant group to the access list.
+
   .c-access-container
 
   if wizard

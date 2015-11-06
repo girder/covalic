@@ -1,10 +1,8 @@
-covalic.views.PhaseGroundTruthView = covalic.View.extend({
+covalic.views.PhaseInputView = covalic.View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                covalic.router.navigate('phase/' + this.model.id +
-                    '/input?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
-                    this.wizard.total, {trigger: true});
+                covalic.router.navigate('phase/' + this.model.id, {trigger: true});
             }, this).saveAccessList();
         },
 
@@ -21,26 +19,19 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
 
         'click .c-clear-contents': function () {
             girder.confirm({
-                text: 'Are you sure you want to delete any existing ground ' +
-                      'truth files for this phase? This cannot be undone.',
+                text: 'Are you sure you want to delete any existing input ' +
+                      'files for this phase? This cannot be undone.',
                 yesText: 'Delete',
                 confirmCallback: _.bind(function () {
-                    this.model.once('c:groundTruthDeleted', function () {
+                    this.model.once('c:inputDataDeleted', function () {
                         girder.events.trigger('g:alert', {
                             text: 'Data deleted.',
                             type: 'success',
                             icon: 'ok',
                             timeout: 3000
                         });
-                    }, this).cleanGroundTruthData();
+                    }, this).cleanInputData();
                 }, this)
-            });
-        },
-
-        'click .c-expose-to-group': function () {
-            this.accessWidget.addEntry({
-                type: 'group',
-                id: this.model.get('participantGroupId')
             });
         }
     },
@@ -55,15 +46,15 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
 
     initialize: function (settings) {
         this.wizard = settings.wizard || false;
-        this.groundTruthFolder = new girder.models.FolderModel({
-            _id: this.model.get('groundTruthFolderId')
+        this.inputFolder = new girder.models.FolderModel({
+            _id: this.model.get('testDataFolderId')
         }).once('g:fetched', function () {
             this.uploadWidget = new girder.views.UploadWidget({
                 parentView: this,
                 modal: false,
                 parentType: 'folder',
                 title: false,
-                parent: this.groundTruthFolder
+                parent: this.inputFolder
             }).on('g:uploadFinished', this._uploadFinished, this);
 
             this.accessWidget = new girder.views.AccessWidget({
@@ -71,8 +62,8 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
                 modal: false,
                 hideRecurseOption: true,
                 hideSaveButton: true,
-                modelType: 'ground truth data',
-                model: this.groundTruthFolder
+                modelType: 'input data',
+                model: this.inputFolder
             });
 
             this.render();
@@ -80,7 +71,7 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.phaseGroundTruth({
+        this.$el.html(covalic.templates.phaseInputData({
             wizard: this.wizard,
             phase: this.model
         }));
@@ -102,7 +93,7 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/groundtruth', 'phaseGroundTruth', function (id, params) {
+covalic.router.route('phase/:id/input', 'phaseInput', function (id, params) {
     var phase = new covalic.models.PhaseModel({_id: id}),
         wizard = false;
 
@@ -116,7 +107,7 @@ covalic.router.route('phase/:id/groundtruth', 'phaseGroundTruth', function (id, 
     }
 
     phase.once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.PhaseGroundTruthView, {
+        girder.events.trigger('g:navigateTo', covalic.views.PhaseInputView, {
             model: phase,
             wizard: wizard
         });
