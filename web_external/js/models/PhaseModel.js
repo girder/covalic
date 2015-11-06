@@ -50,5 +50,17 @@ covalic.models.PhaseModel = girder.AccessControlledModel.extend({
         }, this)).error(_.bind(function (err) {
             this.trigger('c:error', err);
         }, this));
+    },
+
+    cleanGroundTruthData: function () {
+        girder.restRequest({
+            path: 'folder/' + this.get('groundTruthFolderId') + '/contents',
+            progress: true,
+            type: 'DELETE'
+        }).done(_.bind(function (resp) {
+            this.trigger('c:groundTruthDeleted', resp);
+        }, this)).error(_.bind(function (err) {
+            this.trigger('c:error', err);
+        }, this));
     }
 });

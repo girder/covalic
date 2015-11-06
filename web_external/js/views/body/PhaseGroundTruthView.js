@@ -8,7 +8,7 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
             }, this).saveAccessList();
         },
 
-        'click .c-save-access-button': function () {
+        'click .c-save-access': function () {
             this.accessWidget.once('g:accessListSaved', function () {
                 girder.events.trigger('g:alert', {
                     text: 'Settings saved.',
@@ -17,6 +17,24 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
                     timeout: 3000
                 });
             }, this).saveAccessList();
+        },
+
+        'click .g-clear-contents': function () {
+            girder.confirm({
+                text: 'Are you sure you want to delete any existing ground ' +
+                      'truth files for this phase? This cannot be undone.',
+                yesText: 'Delete',
+                confirmCallback: _.bind(function () {
+                    this.model.once('c:groundTruthDeleted', function () {
+                        girder.events.trigger('g:alert', {
+                            text: 'Data deleted.',
+                            type: 'success',
+                            icon: 'ok',
+                            timeout: 3000
+                        });
+                    }, this).cleanGroundTruthData();
+                }, this)
+            });
         }
     },
 
@@ -39,13 +57,13 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
                 parentType: 'folder',
                 title: false,
                 parent: this.groundTruthFolder
-            });
+            }).on('g:uploadFinished', this._uploadFinished, this);
 
             this.accessWidget = new girder.views.AccessWidget({
                 parentView: this,
                 modal: false,
                 hideRecurseOption: true,
-                hideSaveButton: !!this.wizard,
+                hideSaveButton: true,
                 modelType: 'ground truth data',
                 model: this.groundTruthFolder
             });
@@ -64,6 +82,17 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
         this.accessWidget.setElement(this.$('.c-access-container')).render();
 
         return this;
+    },
+
+    _uploadFinished: function (info) {
+        console.log(arguments);
+        this.uploadWidget.render();
+        girder.events.trigger('g:alert', {
+            text: 'Added ' + info.files.length + ' ground truth files.',
+            type: 'success',
+            icon: 'ok',
+            timeout: 4000
+        });
     }
 });
 

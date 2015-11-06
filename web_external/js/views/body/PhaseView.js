@@ -150,10 +150,8 @@ covalic.views.PhaseView = covalic.View.extend({
             challenge: this.challenge
         }));
 
-        if (this.model.get('instructions')) {
-            girder.renderMarkdown(
-                this.model.get('instructions'), this.$('.c-phase-instructions'));
-        }
+        girder.renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
+                              this.$('.c-phase-instructions-container'));
 
         new covalic.views.LeaderboardWidget({
             phase: this.model,
@@ -162,8 +160,11 @@ covalic.views.PhaseView = covalic.View.extend({
         }).render();
 
         this.$('button[title]').tooltip({
-            placement: 'left'
+            placement: 'left',
+            container: this.$el
         });
+
+
 
         return this;
     }
