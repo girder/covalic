@@ -83,7 +83,7 @@
     dest: /opt/romanesco/romanesco/worker.local.cfg
     state: present
     regexp: '^plugins_enabled='
-    line: "plugins_enabled=docker"
+    line: "plugins_enabled=docker,girder_io"
   sudo: yes
   tags:
     - celery
