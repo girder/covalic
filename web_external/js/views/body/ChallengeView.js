@@ -13,21 +13,6 @@ covalic.views.ChallengeView = covalic.View.extend({
             this.editChallengeWidget.render();
         },
 
-        'click .c-challenge-access-control': function () {
-            if (!this.accessWidget) {
-                this.accessWidget = new girder.views.AccessWidget({
-                    el: $('#g-dialog-container'),
-                    model: this.model,
-                    modelType: 'challenge',
-                    parentView: this
-                }).on('g:saved', function () {
-                    this.render();
-                }, this);
-            } else {
-                this.accessWidget.render();
-            }
-        },
-
         'click .c-create-phase': function () {
             if (!this.editPhaseWidget) {
                 this.editPhaseWidget = new covalic.views.EditPhaseWidget({
@@ -96,14 +81,8 @@ covalic.views.ChallengeView = covalic.View.extend({
             girder: girder
         }));
 
-        var instructionsContainer = this.$('.c-challenge-instructions-container');
-        if (this.model.get('instructions')) {
-            girder.renderMarkdown(this.model.get('instructions'),
-                                  instructionsContainer);
-            instructionsContainer.show();
-        } else {
-            instructionsContainer.hide();
-        }
+        girder.renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
+                              this.$('.c-challenge-instructions-container'));
 
         this.phasesView.setElement(this.$('.c-challenge-phase-container')).render();
 

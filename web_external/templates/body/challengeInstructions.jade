@@ -1,0 +1,22 @@
+include ../mixins/wizardMixins
+
+.c-wizard-page-container
+  .c-page-title Overview
+
+  p.
+    Please provide an overview to be displayed on the front page of your challenge.
+    It should include general background information about your challenge, instructions
+    for participants, and any information about rewards for winners. If your challenge
+    has multiple phases, this is also a good place to give a brief overview of the phases.
+    The editor supports #[a(href=markdownLink, target="_blank") Markdown syntax] for
+    rich text.
+
+  p Remember, you can always update this at any later time.
+
+  .c-instructions-markdown-editor
+
+  if wizard
+    .c-wizard-nav-container
+      +wizardNav(wizard.current, wizard.total)
+  else
+    button.btn.btn-primary.c-save-instructions: #[i.icon-ok] Save

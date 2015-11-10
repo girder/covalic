@@ -50,7 +50,8 @@ covalic.views.PhaseView = covalic.View.extend({
                 this.accessWidget = new girder.views.AccessWidget({
                     el: $('#g-dialog-container'),
                     model: this.model,
-                    modelType: 'challenge_phase',
+                    modelType: 'phase',
+                    hideRecurseOption: true,
                     parentView: this
                 }).on('g:saved', function () {
                     this.render();

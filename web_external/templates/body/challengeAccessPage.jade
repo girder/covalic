@@ -1,0 +1,19 @@
+include ../mixins/wizardMixins
+
+.c-wizard-page-container
+  .c-page-title Configure access
+
+  p.
+    Specify who can access your challenge. First, select whether the challenge
+    should be public (visible to everyone) or private (visible only to those
+    who are specifically granted access). To grant access to specific users or
+    groups, type the user's or group's name into the search box.
+  p You can always change these settings later.
+
+  .c-access-list-container
+
+  if wizard
+    .c-wizard-nav-container
+      +wizardNav(wizard.current, wizard.total)
+  else
+    button.c-save-access-button.btn.btn-primary #[i.icon-ok]  Save

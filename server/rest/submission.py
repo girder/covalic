@@ -21,13 +21,12 @@ import cherrypy
 import json
 import os
 import posixpath
-import pymongo
 
 from ..constants import PluginSettings
 from girder.api import access
 from girder.api.describe import Description
 from girder.api.rest import Resource, loadmodel
-from girder.constants import AccessType
+from girder.constants import AccessType, SortDir
 from girder.models.model_base import ValidationException
 from girder.utility import mail_utils
 
@@ -47,7 +46,7 @@ class Submission(Resource):
                level=AccessType.READ)
     def listSubmissions(self, phase, params):
         limit, offset, sort = self.getPagingParameters(
-            params, 'overallScore', defaultSortDir=pymongo.DESCENDING)
+            params, 'overallScore', defaultSortDir=SortDir.DESCENDING)
 
         userFilter = None
         if 'userId' in params:
