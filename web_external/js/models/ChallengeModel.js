@@ -34,6 +34,7 @@ covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
             },
             error: null
         }).done(_.bind(function (resp) {
+            /* jshint unused: false */
             this.trigger('c:thumbnailCreated');
         }, this)).error(_.bind(function (err) {
             this.trigger('c:error', err);
