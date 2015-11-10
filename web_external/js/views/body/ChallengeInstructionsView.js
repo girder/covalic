@@ -30,7 +30,7 @@ covalic.views.ChallengeInstructionsView = covalic.View.extend({
                 prefix: 'challenge-instructions',
                 placeholder: 'Enter challenge overview',
                 enableUploads: true,
-                maxUploadSize: 1024*1024*2,
+                maxUploadSize: 1024 * 1024 * 2,
                 allowedExtensions: ['png', 'jpeg', 'jpg'],
                 parent: this.assetsFolder
             });
