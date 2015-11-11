@@ -15,7 +15,7 @@ covalic.views.EditThumbnailWidget = covalic.View.extend({
                 this.uploadWidget.$('.g-progress-overall').hide();
             } else {
                 this.uploadWidget.$('.g-validation-failed-message').text(
-                    'Please select only one file.')
+                    'Please select only one file.');
             }
         }, this).on('g:uploadFinished', function () {
             new girder.views.LoadingAnimation({
