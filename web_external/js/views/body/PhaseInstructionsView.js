@@ -2,7 +2,7 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this._saveAndGoTo('phase/' + this.model.id +
-                '/groundtruth?wizard&curr=' + (this.wizard.current + 1) +
+                '/input?wizard&curr=' + (this.wizard.current + 1) +
                 '&total=' + this.wizard.total);
         },
 
@@ -42,6 +42,7 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.phaseInstructions({
             wizard: this.wizard,
+            phase: this.model,
             markdownLink: 'https://daringfireball.net/projects/markdown/syntax'
         }));
 

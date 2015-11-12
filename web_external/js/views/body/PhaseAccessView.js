@@ -40,7 +40,8 @@ covalic.views.PhaseAccessView = covalic.View.extend({
 
     render: function () {
         this.$el.html(covalic.templates.phaseAccessPage({
-            wizard: this.wizard
+            wizard: this.wizard,
+            phase: this.model
         }));
 
         this.accessWidget.setElement(this.$('.c-access-list-container')).render();

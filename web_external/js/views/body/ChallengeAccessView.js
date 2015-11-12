@@ -40,7 +40,8 @@ covalic.views.ChallengeAccessView = covalic.View.extend({
 
     render: function () {
         this.$el.html(covalic.templates.challengeAccessPage({
-            wizard: this.wizard
+            wizard: this.wizard,
+            challenge: this.model
         }));
 
         this.accessWidget.setElement(this.$('.c-access-list-container')).render();

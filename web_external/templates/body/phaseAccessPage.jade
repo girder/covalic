@@ -1,3 +1,4 @@
+include ../mixins/backMixins
 include ../mixins/wizardMixins
 
 .c-wizard-page-container
@@ -17,3 +18,4 @@ include ../mixins/wizardMixins
       +wizardNav(wizard.current, wizard.total)
   else
     button.c-save-access-button.btn.btn-primary #[i.icon-ok]  Save
+    +backToModel(phase, '#phase/' + phase.id)

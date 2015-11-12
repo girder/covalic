@@ -2,9 +2,7 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                covalic.router.navigate('phase/' + this.model.id +
-                    '/input?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
-                    this.wizard.total, {trigger: true});
+                covalic.router.navigate('phase/' + this.model.id, {trigger: true});
             }, this).saveAccessList();
         },
 

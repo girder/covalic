@@ -2,7 +2,9 @@ covalic.views.PhaseInputView = covalic.View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                covalic.router.navigate('phase/' + this.model.id, {trigger: true});
+                covalic.router.navigate('phase/' + this.model.id +
+                    '/groundtruth?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
+                    this.wizard.total, {trigger: true});
             }, this).saveAccessList();
         },
 

@@ -1,3 +1,4 @@
+include ../mixins/backMixins
 include ../mixins/wizardMixins
 
 .c-wizard-page-container.c-ground-truth-page-container
@@ -25,3 +26,4 @@ include ../mixins/wizardMixins
       +wizardNav(wizard.current, wizard.total)
   else
     button.btn.btn-primary.c-save-access #[i.icon-ok] Save
+    +backToModel(phase, '#phase/' + phase.id)

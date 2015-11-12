@@ -1,4 +1,7 @@
+include ../mixins/backMixins
 include ../mixins/wizardMixins
+
+
 
 .c-wizard-page-container
   .c-page-title Choose thumbnail
@@ -15,3 +18,5 @@ include ../mixins/wizardMixins
   if wizard
     .c-wizard-nav-container
       +wizardNav(wizard.current, wizard.total)
+  else
+    +backToModel(challenge)
