@@ -3,7 +3,8 @@ server {
     listen [::]:80 default_server ipv6only=on;
 
     root {{ girder_root }}/clients/web;
-
+    client_max_body_size 500M;
+    
     # Make site accessible from http://localhost/
     server_name localhost;
 
