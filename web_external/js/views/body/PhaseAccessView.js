@@ -1,8 +1,8 @@
-covalic.views.ChallengeAccessView = covalic.View.extend({
+covalic.views.PhaseAccessView = covalic.View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                covalic.router.navigate('challenge/' + this.model.id +
+                covalic.router.navigate('phase/' + this.model.id +
                     '/instructions?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
                     this.wizard.total, {trigger: true});
             }, this).saveAccessList();
@@ -28,7 +28,7 @@ covalic.views.ChallengeAccessView = covalic.View.extend({
 
         this.accessWidget = new girder.views.AccessWidget({
             parentView: this,
-            modelType: 'challenge',
+            modelType: 'phase',
             modal: false,
             model: this.model,
             hideRecurseOption: true,
@@ -39,9 +39,9 @@ covalic.views.ChallengeAccessView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.challengeAccessPage({
+        this.$el.html(covalic.templates.phaseAccessPage({
             wizard: this.wizard,
-            challenge: this.model
+            phase: this.model
         }));
 
         this.accessWidget.setElement(this.$('.c-access-list-container')).render();
@@ -50,8 +50,8 @@ covalic.views.ChallengeAccessView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenge/:id/access', 'challengeAccess', function (id, params) {
-    var challenge = new covalic.models.ChallengeModel({_id: id}),
+covalic.router.route('phase/:id/access', 'phaseAccess', function (id, params) {
+    var phase = new covalic.models.PhaseModel({_id: id}),
         wizard = false;
 
     params = girder.parseQueryString(params);
@@ -63,9 +63,9 @@ covalic.router.route('challenge/:id/access', 'challengeAccess', function (id, pa
         };
     }
 
-    challenge.once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.ChallengeAccessView, {
-            model: challenge,
+    phase.once('g:fetched', function () {
+        girder.events.trigger('g:navigateTo', covalic.views.PhaseAccessView, {
+            model: phase,
             wizard: wizard
         });
     }, this).on('g:error', function () {

@@ -1,21 +1,22 @@
-covalic.views.NewChallengeView = covalic.View.extend({
+covalic.views.NewPhaseView = covalic.View.extend({
     events: {
         'click .c-wizard-next-button': function () {
-            var challenge = new covalic.models.ChallengeModel();
-            challenge.set({
-                name: this.$('#c-challenge-name').val(),
+            var phase = new covalic.models.PhaseModel();
+            phase.set({
+                challengeId: this.challenge.id,
+                name: this.$('#c-phase-name').val(),
                 description: this.$('#c-challenge-description').val(),
-                organizers: this.$('#c-challenge-organizers').val()
+                active: this.$('#c-phase-active').is(':checked')
             });
 
-            challenge.on('g:saved', function () {
-                covalic.router.navigate('challenge/' + challenge.id +
+            phase.on('g:saved', function () {
+                covalic.router.navigate('phase/' + phase.id +
                     '/access?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
                     this.wizard.total, {trigger: true});
             }, this).off('g:error').on('g:error', function (err) {
                 this.$('.g-validation-failed-message').text(err.responseJSON.message);
                 this.$('button.c-save-challenge').removeClass('disabled');
-                this.$('#c-challenge-' + err.responseJSON.field).focus();
+                this.$('#c-phase-' + err.responseJSON.field).focus();
             }, this).save();
 
             this.$('button.c-save-challenge').addClass('disabled');
@@ -24,6 +25,7 @@ covalic.views.NewChallengeView = covalic.View.extend({
     },
 
     initialize: function (settings) {
+        this.challenge = settings.challenge;
         this.wizard = settings.wizard || false;
         if (this.wizard && !_.has(this.wizard, 'current')) {
             this.wizard.current = 0;
@@ -33,20 +35,24 @@ covalic.views.NewChallengeView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.newChallengePage({
+        this.$el.html(covalic.templates.newPhasePage({
             wizard: this.wizard
         }));
 
-        this.$('#c-challenge-name').focus();
+        this.$('#c-phase-name').focus();
 
         return this;
     }
 });
 
-covalic.router.route('challenge/new', 'newChallenge', function () {
-    girder.events.trigger('g:navigateTo', covalic.views.NewChallengeView, {
+covalic.router.route('challenge/:id/phase/new', 'newPhase', function (id) {
+    var challenge = new covalic.models.ChallengeModel({
+        _id: id
+    });
+    girder.events.trigger('g:navigateTo', covalic.views.NewPhaseView, {
+        challenge: challenge,
         wizard: {
-            total: 4
+            total: 5
         }
     });
 });

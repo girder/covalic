@@ -9,7 +9,6 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
             var fields = {
                 name: this.$('#c-phase-name').val(),
                 description: this.$('#c-phase-description').val(),
-                instructions: this.$('#c-phase-instructions').val(),
                 active: this.$('#c-phase-active').is(':checked')
             };
 
@@ -47,7 +46,6 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
             if (view.model) {
                 view.$('#c-phase-name').val(view.model.get('name'));
                 view.$('#c-phase-description').val(view.model.get('description'));
-                view.$('#c-phase-instructions').val(view.model.get('instructions'));
                 if (view.model.get('active')) {
                     view.$('#c-phase-active').attr('checked', 'checked');
                 } else {

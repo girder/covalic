@@ -8,13 +8,7 @@
         i.icon-down-dir
       ul.c-challenge-actions-menu.dropdown-menu.pull-right(role="menu")
         li(role="presentation")
-          a.c-edit-challenge(role="menuitem")
-            i.icon-edit
-            | Edit info
-        li(role="presentation")
-          a.c-create-phase(role="menuitem")
-            i.icon-plus
-            | Create new phase
+          a.c-edit-challenge(role="menuitem") #[i.icon-edit] Edit info
         if challenge.getAccessLevel() >= girder.AccessType.ADMIN
           li.divider(role="presentation")
           li(role="presentation")

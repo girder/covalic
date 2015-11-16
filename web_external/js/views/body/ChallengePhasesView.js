@@ -29,7 +29,9 @@ covalic.views.ChallengePhasesView = covalic.View.extend({
 
     render: function () {
         this.$el.html(covalic.templates.challengePhasesPage({
-            phases: this.collection.models
+            phases: this.collection.models,
+            challenge: this.challenge,
+            canCreate: this.challenge.getAccessLevel() >= girder.AccessType.WRITE
         }));
 
         if (this.challenge.getAccessLevel() >= girder.AccessType.ADMIN) {
@@ -47,6 +49,10 @@ covalic.views.ChallengePhasesView = covalic.View.extend({
             delay: 200,
             container: this.$el,
             trigger: 'hover'
+        });
+        this.$('.c-tooltip').tooltip({
+            delay: 100,
+            container: this.$el
         });
 
         return this;

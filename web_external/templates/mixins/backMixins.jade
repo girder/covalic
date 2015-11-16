@@ -1,0 +1,4 @@
+mixin backToModel(model, link)
+  - link = link || '#' + model.resourceName + '/' + model.id
+  .c-back-to-model-container
+    a(href=link) #[i.icon-angle-circled-left] Back to #{model.name()}

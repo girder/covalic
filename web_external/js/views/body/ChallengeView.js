@@ -13,21 +13,6 @@ covalic.views.ChallengeView = covalic.View.extend({
             this.editChallengeWidget.render();
         },
 
-        'click .c-create-phase': function () {
-            if (!this.editPhaseWidget) {
-                this.editPhaseWidget = new covalic.views.EditPhaseWidget({
-                    el: $('#g-dialog-container'),
-                    challenge: this.model,
-                    parentView: this
-                }).on('g:saved', function () {
-                    this.phasesView.initialize({
-                        challenge: this.model
-                    });
-                }, this);
-            }
-            this.editPhaseWidget.render();
-        },
-
         'click .c-delete-challenge': function () {
             girder.confirm({
                 text: 'Are you sure you want to delete the challenge <b>' +
