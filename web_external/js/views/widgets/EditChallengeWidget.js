@@ -9,7 +9,9 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
             var fields = {
                 name: this.$('#c-challenge-name').val(),
                 description: this.$('#c-challenge-description').val(),
-                organizers: this.$('#c-challenge-organizers').val()
+                organizers: this.$('#c-challenge-organizers').val(),
+                startDate: this.dateTimeRangeWidget.fromDateString(),
+                endDate: this.dateTimeRangeWidget.toDateString()
             };
 
             if (this.model) {
@@ -25,6 +27,10 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
 
     initialize: function (settings) {
         this.model = settings.model || null;
+
+        this.dateTimeRangeWidget = new girder.views.DateTimeRangeWidget({
+            parentView: this
+        });
     },
 
     render: function () {
@@ -44,6 +50,11 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
                 view.$('#c-challenge-name').val(view.model.get('name'));
                 view.$('#c-challenge-description').val(view.model.get('description'));
                 view.$('#c-challenge-organizers').val(view.model.get('organizers'));
+
+                view.dateTimeRangeWidget.setElement(view.$('#c-challenge-timeframe'));
+                view.dateTimeRangeWidget.render();
+                view.dateTimeRangeWidget.setFromDate(view.model.get('startDate'));
+                view.dateTimeRangeWidget.setToDate(view.model.get('endDate'));
 
                 view.create = false;
             } else {
