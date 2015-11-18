@@ -31,9 +31,9 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
             prefix: 'phase-instructions',
             placeholder: 'Enter phase overview',
             enableUploads: true,
-            maxUploadSize: 1024*1024*2,
+            maxUploadSize: 1024 * 1024 * 2,
             allowedExtensions: ['png', 'jpeg', 'jpg'],
-            parent: this.phaseFolder,
+            parent: this.phaseFolder
         });
 
         this.render();
