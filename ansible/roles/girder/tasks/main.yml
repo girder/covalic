@@ -37,7 +37,9 @@
     - libfreetype6-dev
     - zlib1g-dev
     - libpng-dev
-  tags: girder
+  tags:
+    - girder
+    - deploy-update
 
 - name: clone girder
   git: repo=git://github.com/girder/girder.git dest={{ girder_root }} accept_hostkey=yes version={{ girder_version }}
@@ -63,8 +65,8 @@
     - girder
     - deploy-update
 
-- name: install girder requirements
-  pip: requirements={{ girder_root }}/requirements.txt
+- name: install girder python requirements for core and plugins
+  shell: python {{ girder_root }}/scripts/InstallPythonRequirements.py
   sudo: yes
   tags:
     - girder
