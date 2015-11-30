@@ -16,7 +16,9 @@
     - python-dev
     - git
     - docker.io
-  tags: celery
+  tags:
+    - celery
+    - deploy-update
 
 - name: Enable rabbitmq-server to survive reboot
   service: name=rabbitmq-server enabled=yes
