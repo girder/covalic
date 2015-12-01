@@ -45,8 +45,7 @@ covalic.views.NewPhaseView = covalic.View.extend({
             wizard: this.wizard
         }));
 
-        this.dateTimeRangeWidget.setElement(this.$('#c-phase-timeframe'));
-        this.dateTimeRangeWidget.render();
+        this.dateTimeRangeWidget.setElement(this.$('#c-phase-timeframe')).render();
 
         this.$('#c-phase-name').focus();
 

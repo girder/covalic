@@ -43,8 +43,7 @@ covalic.views.NewChallengeView = covalic.View.extend({
             wizard: this.wizard
         }));
 
-        this.dateTimeRangeWidget.setElement(this.$('#c-challenge-timeframe'));
-        this.dateTimeRangeWidget.render();
+        this.dateTimeRangeWidget.setElement(this.$('#c-challenge-timeframe')).render();
 
         this.$('#c-challenge-name').focus();
 

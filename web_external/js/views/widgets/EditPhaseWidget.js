@@ -58,8 +58,7 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
                     view.$('#c-phase-active').removeAttr('checked');
                 }
 
-                view.dateTimeRangeWidget.setElement(view.$('#c-phase-timeframe'));
-                view.dateTimeRangeWidget.render();
+                view.dateTimeRangeWidget.setElement(view.$('#c-phase-timeframe')).render();
                 view.dateTimeRangeWidget.setFromDate(view.model.get('startDate'));
                 view.dateTimeRangeWidget.setToDate(view.model.get('endDate'));
 

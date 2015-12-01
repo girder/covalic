@@ -51,8 +51,7 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
                 view.$('#c-challenge-description').val(view.model.get('description'));
                 view.$('#c-challenge-organizers').val(view.model.get('organizers'));
 
-                view.dateTimeRangeWidget.setElement(view.$('#c-challenge-timeframe'));
-                view.dateTimeRangeWidget.render();
+                view.dateTimeRangeWidget.setElement(view.$('#c-challenge-timeframe')).render();
                 view.dateTimeRangeWidget.setFromDate(view.model.get('startDate'));
                 view.dateTimeRangeWidget.setToDate(view.model.get('endDate'));
 
