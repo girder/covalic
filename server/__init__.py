@@ -89,8 +89,6 @@ class CustomAppRoot(ModelImporter):
         <link rel="stylesheet"
               href="${staticRoot}/lib/fontello/css/animation.css">
         <link rel="stylesheet"
-              href="${staticRoot}/built/eonasdan-bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css">
-        <link rel="stylesheet"
               href="${staticRoot}/built/app.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/covalic/covalic.min.css">
