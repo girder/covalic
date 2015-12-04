@@ -4,12 +4,18 @@ include ../mixins/wizardMixins
   .c-page-title Create a new phase
 
   p.
-    A challenge is divided into phases, though challenges may have just one phase.
-    For example, many challenges will have a training phase where participants
-    are allowed to see the ground truth data, and then a competitive phase where
-    ground truth is hidden from them. On this page, provide a name and short
-    description for this phase, and choose whether the phase is actively accepting
-    submissions or not. You can always change these values later.
+    A challenge is divided into phases, though challenges may have just one
+    phase. For example, many challenges will have a training phase where
+    participants are allowed to see the ground truth data, and then a
+    competitive phase where ground truth is hidden from them. On this page,
+    provide a name and short description for this phase, enter the start date
+    and end date of the phase, and choose whether the phase is actively
+    accepting submissions or not. You can always change these values later.
+
+  p.
+    You may leave the dates blank if your phase does not have a known schedule.
+    If you provide a start or end date, submissions to the phase will only be
+    allowed during the specified range.
 
   .c-form-container
     form.c-phase-create-form
@@ -20,6 +26,7 @@ include ../mixins/wizardMixins
         label.control-label(for="c-phase-description") Short description
         textarea.input-sm#c-phase-description.form-control(
           placeholder="Enter short description")
+      .form-group#c-phase-timeframe
       .checkbox
         label
           input#c-phase-active(type="checkbox")

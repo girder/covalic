@@ -6,7 +6,9 @@ covalic.views.NewPhaseView = covalic.View.extend({
                 challengeId: this.challenge.id,
                 name: this.$('#c-phase-name').val(),
                 description: this.$('#c-challenge-description').val(),
-                active: this.$('#c-phase-active').is(':checked')
+                active: this.$('#c-phase-active').is(':checked'),
+                startDate: this.dateTimeRangeWidget.fromDateString(),
+                endDate: this.dateTimeRangeWidget.toDateString()
             });
 
             phase.on('g:saved', function () {
@@ -31,6 +33,10 @@ covalic.views.NewPhaseView = covalic.View.extend({
             this.wizard.current = 0;
         }
 
+        this.dateTimeRangeWidget = new girder.views.DateTimeRangeWidget({
+            parentView: this
+        });
+
         this.render();
     },
 
@@ -38,6 +44,8 @@ covalic.views.NewPhaseView = covalic.View.extend({
         this.$el.html(covalic.templates.newPhasePage({
             wizard: this.wizard
         }));
+
+        this.dateTimeRangeWidget.setElement(this.$('#c-phase-timeframe')).render();
 
         this.$('#c-phase-name').focus();
 

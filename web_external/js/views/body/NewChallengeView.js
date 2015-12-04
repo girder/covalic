@@ -5,7 +5,9 @@ covalic.views.NewChallengeView = covalic.View.extend({
             challenge.set({
                 name: this.$('#c-challenge-name').val(),
                 description: this.$('#c-challenge-description').val(),
-                organizers: this.$('#c-challenge-organizers').val()
+                organizers: this.$('#c-challenge-organizers').val(),
+                startDate: this.dateTimeRangeWidget.fromDateString(),
+                endDate: this.dateTimeRangeWidget.toDateString()
             });
 
             challenge.on('g:saved', function () {
@@ -29,6 +31,10 @@ covalic.views.NewChallengeView = covalic.View.extend({
             this.wizard.current = 0;
         }
 
+        this.dateTimeRangeWidget = new girder.views.DateTimeRangeWidget({
+            parentView: this
+        });
+
         this.render();
     },
 
@@ -36,6 +42,8 @@ covalic.views.NewChallengeView = covalic.View.extend({
         this.$el.html(covalic.templates.newChallengePage({
             wizard: this.wizard
         }));
+
+        this.dateTimeRangeWidget.setElement(this.$('#c-challenge-timeframe')).render();
 
         this.$('#c-challenge-name').focus();
 
