@@ -88,3 +88,14 @@ covalic.router.route('challenge/:id', 'challenge', function (id) {
         covalic.router.navigate('challenges', {trigger: true});
     }, this).fetch();
 });
+
+covalic.router.route('challenge/n/:name', 'challengeByName', function (name) {
+    var challenge = new covalic.models.ChallengeModel();
+    challenge.findByName(name).once('c:found', function () {
+        girder.events.trigger('g:navigateTo', covalic.views.ChallengeView, {
+            challenge: challenge
+        });
+    }).once('c:notFound', function () {
+        covalic.router.navigate('challenges', {trigger: true});
+    });
+});

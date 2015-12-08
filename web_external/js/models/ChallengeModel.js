@@ -38,5 +38,30 @@ covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
         }, this)).error(_.bind(function (err) {
             this.trigger('c:error', err);
         }, this));
+    },
+
+    /**
+     * Lookup a challenge by name. If found, sets the properties of this model
+     * to the result, and triggers ``c:found``. If not found, triggers ``c:notFound``.
+     *
+     * @param name The challenge name to lookup.
+     */
+    findByName: function (name) {
+        girder.restRequest({
+            path: this.resourceName,
+            type: 'GET',
+            data: {
+                name: name
+            }
+        }).done(_.bind(function (resp) {
+            if (resp.length) {
+                this.set(resp[0]);
+                this.trigger('c:found');
+            } else {
+                this.trigger('c:notFound');
+            }
+        }, this));
+
+        return this;
     }
 });
