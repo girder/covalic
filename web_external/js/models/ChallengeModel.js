@@ -41,6 +41,32 @@ covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
     },
 
     /**
+     * Transforms a challenge name back and forth between a form suitable for
+     * a permalink URL.
+     */
+    transformNameForUrl: function (name, reverse) {
+        name = name || this.name();
+
+        if (reverse) {
+            if (name.indexOf(' ') !== -1 && name.indexOf('_') !== -1) {
+                // Name has both spaces and underscores, meaning it had underscores originally
+                return name;
+            } else {
+                return name.replace(/_/g, ' ');
+            }
+        } else {
+            if (name.indexOf('_') !== -1) {
+                // Name contains underscores, we can't do the trivial space transform
+                return name;
+            } else {
+                // Replace all spaces with underscores
+                return name.replace(/ /g, '_');
+            }
+        }
+
+    },
+
+    /**
      * Lookup a challenge by name. If found, sets the properties of this model
      * to the result, and triggers ``c:found``. If not found, triggers ``c:notFound``.
      *
@@ -51,7 +77,7 @@ covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
             path: this.resourceName,
             type: 'GET',
             data: {
-                name: name
+                name: this.transformNameForUrl(name, true)
             }
         }).done(_.bind(function (resp) {
             if (resp.length) {

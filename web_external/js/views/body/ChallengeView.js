@@ -63,6 +63,7 @@ covalic.views.ChallengeView = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.challengePage({
             challenge: this.model,
+            humanLink: '#challenge/n/' + encodeURIComponent(this.model.transformNameForUrl()),
             girder: girder
         }));
 
