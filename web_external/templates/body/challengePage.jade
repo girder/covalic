@@ -1,24 +1,27 @@
 .c-challenge-header
-  if challenge.getAccessLevel() >= girder.AccessType.WRITE
-    .btn-group.pull-right
-      button.c-challenge-actions-button.btn.btn-default.dropdown-toggle(
-          data-toggle="dropdown", title="Challenge actions")
-        i.icon-menu
-        |  Actions
-        i.icon-down-dir
-      ul.c-challenge-actions-menu.dropdown-menu.pull-right(role="menu")
+  .btn-group.pull-right
+    button.c-challenge-actions-button.btn.btn-default.dropdown-toggle(
+        data-toggle="dropdown", title="Challenge actions")
+      i.icon-menu
+      |  Actions
+      i.icon-down-dir
+    ul.c-challenge-actions-menu.dropdown-menu.pull-right(role="menu")
+      li(role="presentation")
+        a(href=humanLink) #[i.icon-link] Human-readable link
+      if challenge.getAccessLevel() >= girder.AccessType.WRITE
+        li.divider(role="presentation")
         li(role="presentation")
           a.c-edit-challenge(role="menuitem") #[i.icon-edit] Edit info
-        if challenge.getAccessLevel() >= girder.AccessType.ADMIN
-          li.divider(role="presentation")
-          li(role="presentation")
-            a.c-challenge-access-control(role="menuitem" href="#challenge/#{challenge.id}/access")
-              i.icon-lock
-              | Access control
-          li(role="presentation")
-            a.c-delete-challenge(role="menuitem")
-              i.icon-trash
-              | Delete challenge
+      if challenge.getAccessLevel() >= girder.AccessType.ADMIN
+        li.divider(role="presentation")
+        li(role="presentation")
+          a.c-challenge-access-control(role="menuitem" href="#challenge/#{challenge.id}/access")
+            i.icon-lock
+            | Access control
+        li(role="presentation")
+          a.c-delete-challenge(role="menuitem")
+            i.icon-trash
+            | Delete challenge
 
   .c-challenge-title= challenge.get('name')
   .c-challenge-organizers= challenge.get('organizers')

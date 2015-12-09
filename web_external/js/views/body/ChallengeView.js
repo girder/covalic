@@ -63,6 +63,7 @@ covalic.views.ChallengeView = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.challengePage({
             challenge: this.model,
+            humanLink: '#challenge/n/' + encodeURIComponent(this.model.transformNameForUrl()),
             girder: girder
         }));
 
@@ -87,4 +88,15 @@ covalic.router.route('challenge/:id', 'challenge', function (id) {
     }, this).on('g:error', function () {
         covalic.router.navigate('challenges', {trigger: true});
     }, this).fetch();
+});
+
+covalic.router.route('challenge/n/:name', 'challengeByName', function (name) {
+    var challenge = new covalic.models.ChallengeModel();
+    challenge.findByName(name).once('c:found', function () {
+        girder.events.trigger('g:navigateTo', covalic.views.ChallengeView, {
+            challenge: challenge
+        });
+    }).once('c:notFound', function () {
+        covalic.router.navigate('challenges', {trigger: true});
+    });
 });
