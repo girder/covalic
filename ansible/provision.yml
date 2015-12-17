@@ -37,7 +37,8 @@
     girder_admin_email: covalic-aws@kitware.com
     girder_socket_host: localhost
     girder_socket_port: 8080
-    girder_plugins: ['covalic']
+    girder_plugins:
+      - covalic
     girder_celery_user: celery
     girder_celery_email: covalic-celery@kitware.com
   vars_files:
