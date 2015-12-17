@@ -264,6 +264,7 @@
     password: "{{ girder_admin_password }}"
     plugins: "{{ girder_plugins }}"
     state: present
+  register: girder_admin_resp
   tags: girder
 
 - name: Restart Girder as a service to make sure our plugins are running
@@ -336,7 +337,7 @@
     - girder-assetstore
 
 - name: Set the S3 Assetstore properties
-  shell: "curl -H 'Girder-Token: {{(token_response.stdout|from_json).authToken.token}}' -F 'accessKeyId={{iam_assetstore_access_key_id}}' -F 'secret={{iam_assetstore_secret_access_key}}' -F 'service=s3.amazonaws.com' -F 'name={{girder_assetstore_name}}' -F 'bucket={{assetstore_bucketname}}'  -F 'type=2' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/assetstore"
+  shell: "curl -H 'Girder-Token: {{ girder_admin_resp['token'] }}' -F 'accessKeyId={{iam_assetstore_access_key_id}}' -F 'secret={{iam_assetstore_secret_access_key}}' -F 'service=s3.amazonaws.com' -F 'name={{girder_assetstore_name}}' -F 'bucket={{assetstore_bucketname}}'  -F 'type=2' http://{{girder_socket_host}}:{{girder_socket_port}}/api/v1/assetstore"
   register: assetstore_response
   when: girder_assetstore_type == 's3'
   tags:
