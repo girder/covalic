@@ -33,6 +33,8 @@ from girder.utility import mail_utils
 
 class Submission(Resource):
     def __init__(self):
+        super(Submission, self).__init__()
+
         self.resourceName = 'covalic_submission'
 
         self.route('GET', (), self.listSubmissions)
