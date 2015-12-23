@@ -105,6 +105,13 @@
     - girder
     - deploy-update
 
+- name: install challenge python requirements
+  pip: requirements="{{ girder_root }}/plugins/challenge/requirements.txt"
+  sudo: yes
+  tags:
+    - girder
+    - deploy-update
+
 - name: install celery pip package
   pip: name=celery version=3.1.11
   sudo: yes
