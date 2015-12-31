@@ -83,7 +83,7 @@ class CustomAppRoot(ModelImporter):
         <link rel="stylesheet"
               href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
         <link rel="stylesheet"
-              href="${staticRoot}/lib/bootstrap/css/bootstrap.min.css">
+              href="${staticRoot}/built/bootstrap.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/lib/fontello/css/fontello.css">
         <link rel="stylesheet"
