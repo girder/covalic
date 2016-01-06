@@ -1,11 +1,19 @@
 covalic.views.ChallengesView = covalic.View.extend({
+    events: {
+        'change .c-challenges-filter': 'challengeFilterChanged'
+    },
+
     initialize: function () {
         girder.cancelRestRequests('fetch');
+
+        this.filter = 'all';
+
+        var params = { timeframe: this.filter };
 
         this.collection = new covalic.collections.ChallengeCollection();
         this.collection.on('g:changed', function () {
             this.render();
-        }, this).fetch();
+        }, this).fetch(params);
 
         this.paginateWidget = new girder.views.PaginateWidget({
             collection: this.collection,
@@ -31,7 +39,8 @@ covalic.views.ChallengesView = covalic.View.extend({
         this.$el.html(covalic.templates.challengeList({
             challenges: this.collection.models,
             admin: !!(girder.currentUser && girder.currentUser.get('admin')),
-            girder: girder
+            girder: girder,
+            filter: this.filter
         }));
 
         this.paginateWidget.setElement(this.$('.c-challenge-pagination')).render();
@@ -61,6 +70,18 @@ covalic.views.ChallengesView = covalic.View.extend({
 
     _gotoChallenge: function (challenge) {
         covalic.router.navigate('challenge/' + challenge.id, {trigger: true});
+    },
+
+    challengeFilterChanged: function (e) {
+        var select = e.currentTarget;
+        this.filter = select.value;
+
+        var params = { timeframe: this.filter };
+        // FIXME fetch() ignores params when reset is true
+        // Workaround: set params explicitly
+        // this.collection.fetch(params, true);
+        this.collection.params = params;
+        this.collection.fetch(null, true);
     }
 });
 
