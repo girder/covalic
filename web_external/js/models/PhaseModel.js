@@ -13,6 +13,16 @@ covalic.models.PhaseModel = girder.AccessControlledModel.extend({
         }, this));
     },
 
+    fetchTestDataItems: function (params) {
+        var items = new girder.collections.ItemCollection();
+        items.altUrl = this.resourceName + '/' + this.get('_id') + '/test_data/item';
+        items.once('g:changed', function () {
+            this.trigger('c:testDataItemsFetched', items);
+        }, this).fetch(params);
+
+        return items;
+    },
+
     saveMetrics: function () {
         girder.restRequest({
             path: this.resourceName + '/' + this.get('_id') + '/metrics',
