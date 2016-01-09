@@ -87,7 +87,7 @@ covalic.views.PhaseInputView = covalic.View.extend({
     _uploadFinished: function (info) {
         this.uploadWidget.render();
         girder.events.trigger('g:alert', {
-            text: 'Added ' + info.files.length + ' ground truth files.',
+            text: 'Added ' + info.files.length + ' input files.',
             type: 'success',
             icon: 'ok',
             timeout: 4000

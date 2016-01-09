@@ -113,8 +113,18 @@ covalic.views.PhaseView = covalic.View.extend({
                 _id: this.model.get('groundTruthFolderId')
             });
             gtFolder.once('g:fetched', function () {
-                this.$('.c-download-ground-truth').removeClass('hide')
-                    .attr('href', gtFolder.downloadUrl());
+                this.model.once('c:groundtruthItemsFetched', function (resp) {
+                    var downloadUrl;
+                    if (resp.length === 1) {
+                        downloadUrl = new girder.models.ItemModel({
+                            _id: resp[0]._id
+                        }).downloadUrl();
+                    } else {
+                        downloadUrl = gtFolder.downloadUrl();
+                    }
+                    this.$('.c-download-ground-truth').removeClass('hide')
+                        .attr('href', downloadUrl);
+                }, this).fetchGroundtruthItems();
             }, this).fetch({
                 ignoreError: true
             });
@@ -125,8 +135,16 @@ covalic.views.PhaseView = covalic.View.extend({
                 _id: this.model.get('testDataFolderId')
             });
             testFolder.once('g:fetched', function () {
-                this.$('.c-download-test-data').removeClass('hide')
-                    .attr('href', testFolder.downloadUrl());
+                this.model.once('c:testDataItemsFetched', function (coll) {
+                    var downloadUrl;
+                    if (coll.models.length === 1) {
+                        downloadUrl = coll.models[0].downloadUrl();
+                    } else {
+                        downloadUrl = testFolder.downloadUrl();
+                    }
+                    this.$('.c-download-test-data').removeClass('hide')
+                        .attr('href', downloadUrl);
+                }, this).fetchTestDataItems({limit: 2});
             }, this).fetch({
                 ignoreError: true
             });

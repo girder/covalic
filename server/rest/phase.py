@@ -18,8 +18,8 @@
 ###############################################################################
 
 from girder.api import access
-from girder.api.describe import Description
-from girder.api.rest import loadmodel, getApiUrl
+from girder.api.describe import Description, describeRoute
+from girder.api.rest import filtermodel, loadmodel, getApiUrl
 from girder.constants import AccessType
 from girder.plugins.challenge.rest.phase import Phase
 
@@ -29,12 +29,19 @@ class PhaseExt(Phase):
         Phase.__init__(self)
 
         self.route('GET', (':id', 'groundtruth', 'item'), self.groundtruthItems)
+        self.route('GET', (':id', 'test_data', 'item'), self.testDataItems)
         self.route('PUT', (':id', 'metrics'), self.setMetrics)
         self.route('PUT', (':id', 'scoring_info'), self.setScoringInfo)
         self.route('POST', (':id', 'metrics', 'init'), self.initMetrics)
 
     @access.public
     @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
+    @filtermodel(model='item')
+    @describeRoute(
+        Description('List all ground truth item names for a challenge phase.')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .pagingParams(defaultSort='name')
+    )
     def groundtruthItems(self, phase, params):
         # All participants can see the names of the ground truth items in
         # order to validate their submissions, even if they don't have
@@ -42,11 +49,30 @@ class PhaseExt(Phase):
         folder = self.model('folder').load(
             phase['groundTruthFolderId'], force=True)
 
-        results = self.model('folder').childItems(folder, limit=0)
-        return [{'name': item['name']} for item in results]
-    groundtruthItems.description = (
-        Description('List all ground truth item names for a challenge phase.')
-        .param('id', 'The ID of the phase.', paramType='path'))
+        return list(self.model('folder').childItems(folder, limit=0, fields=(
+            'name', '_id'
+        )))
+
+    @access.public
+    @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
+    @filtermodel(model='item')
+    @describeRoute(
+        Description('List all test data item names for a challenge phase.')
+        .pagingParams(defaultSort='name')
+        .param('id', 'The ID of the phase.', paramType='path')
+    )
+    def testDataItems(self, phase, params):
+        if 'testDataFolderId' not in phase:
+            return ()
+
+        limit, offset, sort = self.getPagingParameters(params, 'name')
+
+        folder = self.model('folder').load(
+            phase['testDataFolderId'], user=self.getCurrentUser(),
+            level=AccessType.READ, exc=True)
+
+        return list(self.model('folder').childItems(
+            folder, limit=limit, offset=offset, sort=sort))
 
     @access.user
     @loadmodel(model='phase', plugin='challenge', level=AccessType.WRITE)
