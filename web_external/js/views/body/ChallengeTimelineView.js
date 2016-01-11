@@ -1,0 +1,145 @@
+covalic.views.ChallengeTimelineView = covalic.View.extend({
+    initialize: function (settings) {
+        this.collection = new covalic.collections.ChallengePhaseCollection();
+        this.collection.on('g:changed', function () {
+            this.render();
+        }, this).fetch({
+            challengeId: settings.challenge.get('_id')
+        });
+        this.challenge = settings.challenge;
+
+        this.pointCompletedClass = 'c-challenge-timeline-point-completed';
+        this.pointUpcomingClass = 'c-challenge-timeline-point-upcoming';
+        this.segmentCompletedClass = 'c-challenge-timeline-segment-completed';
+        this.segmentUpcomingClass = 'c-challenge-timeline-segment-upcoming';
+    },
+
+    render: function () {
+        // Moment.js formatting strings
+        var labelFormat = 'ddd, D MMM YYYY';
+        var tooltipFormat = 'dddd, D MMMM YYYY, h:mm:ss a';
+
+        // Render timeline only when both start and end dates are specified
+        var startDate = moment(this.challenge.get('startDate'));
+        var endDate = moment(this.challenge.get('endDate'));
+        if (startDate.isValid() && endDate.isValid()) {
+
+            // Add points at challenge start and end dates
+            // May be hidden by phase points
+            var now = moment();
+            var points = [];
+            var point;
+
+            point = this._createPoint(startDate, now);
+            point.tooltip = startDate.format(tooltipFormat);
+            points.push(point);
+
+            point = this._createPoint(endDate, now);
+            point.tooltip = endDate.format(tooltipFormat);
+            points.push(point);
+
+            // Add points at phase start and end dates
+            var tooltip;
+            _.each(this.collection.models, function (phase) {
+                var phaseStartDate = moment(phase.get('startDate'));
+                var phaseEndDate = moment(phase.get('endDate'));
+
+                if (phaseStartDate.isValid()) {
+                    point = this._createPoint(phaseStartDate, now);
+                    tooltip = phase.get('name') + ' starts ';
+                    tooltip += ' (' + phaseStartDate.format(tooltipFormat) + ')';
+                    point.tooltip = tooltip;
+                    points.push(point);
+                }
+
+                if (phaseEndDate.isValid()) {
+                    point = this._createPoint(phaseEndDate, now);
+                    tooltip = phase.get('name') + ' ends ';
+                    tooltip += ' (' + phaseEndDate.format(tooltipFormat) + ')';
+                    point.tooltip = tooltip;
+                    points.push(point);
+                }
+            }, this);
+
+            // Add segments to represent progress
+            var segments = this._createSegments(startDate, endDate, now);
+
+            // Set labels
+            // Show time remaining for active challenges
+            var startLabel = moment(startDate).format(labelFormat);
+            var endLabel = moment(endDate).format(labelFormat);
+            if (now.isBetween(startDate, endDate)) {
+                endLabel += ' (' + moment(now).to(endDate, true) + ' remaining)';
+            }
+
+            new girder.views.TimelineWidget({
+                el: this.$el,
+                parentView: this,
+                points: points,
+                segments: segments,
+                startTime: startDate,
+                endTime: endDate,
+                startLabel: startLabel,
+                endLabel: endLabel,
+                numeric: false
+            }).render();
+        }
+
+        return this;
+    },
+
+    _createSegments: function (startDate, endDate, now) {
+        if (!moment.isMoment(startDate) ||
+            !moment.isMoment(endDate) ||
+            !moment.isMoment(now)) {
+            throw new Error('Invalid date(s) specified when creating timeline segments');
+        }
+
+        var segments = [];
+
+        if (now.isBefore(startDate)) {
+            // upcoming
+            segments.push({
+                start: startDate.toDate(),
+                end: endDate.toDate(),
+                class: this.segmentUpcomingClass
+            });
+        } else if (now.isAfter(endDate)) {
+            // completed
+            segments.push({
+                start: startDate.toDate(),
+                end: endDate.toDate(),
+                class: this.segmentCompletedClass
+            });
+        } else {
+            // active
+            segments.push({
+                start: startDate.toDate(),
+                end: now.toDate(),
+                class: this.segmentCompletedClass
+            });
+            segments.push({
+                start: now.toDate(),
+                end: endDate.toDate(),
+                class: this.segmentUpcomingClass
+            });
+        }
+
+        return segments;
+    },
+
+    _createPoint: function (date, now) {
+        if (!moment.isMoment(date) ||
+            !moment.isMoment(now)) {
+            throw new Error('Invalid date(s) specified when creating timeline points');
+        }
+
+        var className = now.isAfter(date) ?
+            this.pointCompletedClass :
+            this.pointUpcomingClass;
+        return {
+            time: date.toDate(),
+            class: className
+        };
+    }
+});

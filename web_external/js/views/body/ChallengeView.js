@@ -54,6 +54,11 @@ covalic.views.ChallengeView = covalic.View.extend({
     },
 
     _initWidgets: function () {
+        this.timelineView = new covalic.views.ChallengeTimelineView({
+            challenge: this.model,
+            parentView: this
+        });
+
         this.phasesView = new covalic.views.ChallengePhasesView({
             challenge: this.model,
             parentView: this
@@ -66,6 +71,8 @@ covalic.views.ChallengeView = covalic.View.extend({
             humanLink: '#challenge/n/' + encodeURIComponent(this.model.transformNameForUrl()),
             girder: girder
         }));
+
+        this.timelineView.setElement(this.$('.c-challenge-timeline-container')).render();
 
         girder.renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
                               this.$('.c-challenge-instructions-container'));
