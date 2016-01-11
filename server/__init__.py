@@ -82,14 +82,13 @@ class CustomAppRoot(ModelImporter):
         <title>${title}</title>
         <link rel="stylesheet"
               href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/bootstrap.min.css">
+        <link rel="stylesheet" href="${staticRoot}/built/bootstrap.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/lib/fontello/css/fontello.css">
         <link rel="stylesheet"
               href="${staticRoot}/lib/fontello/css/animation.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/app.min.css">
+        <link rel="stylesheet" href="${staticRoot}/built/ext.min.css">
+        <link rel="stylesheet" href="${staticRoot}/built/app.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/covalic/covalic.min.css">
         % for plugin in pluginCss:
