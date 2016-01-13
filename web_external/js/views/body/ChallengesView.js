@@ -6,9 +6,9 @@ covalic.views.ChallengesView = covalic.View.extend({
     initialize: function () {
         girder.cancelRestRequests('fetch');
 
-        this.filter = 'all';
+        this.timeframe = 'all';
 
-        var params = { timeframe: this.filter };
+        var params = { timeframe: this.timeframe };
 
         this.collection = new covalic.collections.ChallengeCollection();
         this.collection.on('g:changed', function () {
@@ -40,7 +40,7 @@ covalic.views.ChallengesView = covalic.View.extend({
             challenges: this.collection.models,
             admin: !!(girder.currentUser && girder.currentUser.get('admin')),
             girder: girder,
-            filter: this.filter
+            timeframe: this.timeframe
         }));
 
         this.paginateWidget.setElement(this.$('.c-challenge-pagination')).render();
@@ -74,9 +74,9 @@ covalic.views.ChallengesView = covalic.View.extend({
 
     challengeFilterChanged: function (e) {
         var select = e.currentTarget;
-        this.filter = select.value;
+        this.timeframe = select.value;
 
-        var params = { timeframe: this.filter };
+        var params = { timeframe: this.timeframe };
         // FIXME fetch() ignores params when reset is true
         // Workaround: set params explicitly
         // this.collection.fetch(params, true);

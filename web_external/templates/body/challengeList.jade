@@ -2,9 +2,9 @@
   form.c-challenge-search-form.form-inline(role="form")
     .form-group
       select.c-challenges-filter.form-control.input-sm
-        option(value="all" selected=(filter === 'all')) All challenges
-        option(value="active" selected=(filter === 'active')) Active challenges
-        option(value="upcoming" selected=(filter === 'upcoming')) Upcoming challenges
+        option(value="all" selected=(timeframe === 'all')) All challenges
+        option(value="active" selected=(timeframe === 'active')) Active challenges
+        option(value="upcoming" selected=(timeframe === 'upcoming')) Upcoming challenges
     .form-group.c-challenges-search-container
 
   if girder.currentUser
