@@ -3,10 +3,10 @@ covalic.views.ChallengesView = covalic.View.extend({
         'change .c-challenges-filter': 'challengeFilterChanged'
     },
 
-    initialize: function () {
+    initialize: function (settings) {
         girder.cancelRestRequests('fetch');
 
-        this.timeframe = 'all';
+        this.timeframe = settings.timeframe || 'all';
 
         var params = { timeframe: this.timeframe };
 
@@ -75,6 +75,8 @@ covalic.views.ChallengesView = covalic.View.extend({
     challengeFilterChanged: function (e) {
         var select = e.currentTarget;
         this.timeframe = select.value;
+        covalic.router.navigate('challenges?timeframe=' + this.timeframe, {
+            replace: true});
 
         var params = { timeframe: this.timeframe };
         // FIXME fetch() ignores params when reset is true
@@ -85,6 +87,15 @@ covalic.views.ChallengesView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenges', 'challenges', function () {
-    girder.events.trigger('g:navigateTo', covalic.views.ChallengesView);
+covalic.router.route('challenges', 'challenges', function (params) {
+    params = girder.parseQueryString(params);
+
+    var timeframe = null;
+    if (_.has(params, 'timeframe')) {
+        timeframe = params.timeframe;
+    }
+
+    girder.events.trigger('g:navigateTo', covalic.views.ChallengesView, {
+        timeframe: timeframe
+    });
 });
