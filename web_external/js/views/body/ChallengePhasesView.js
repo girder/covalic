@@ -17,7 +17,6 @@ covalic.views.ChallengePhasesView = covalic.View.extend({
     },
 
     initialize: function (settings) {
-        girder.cancelRestRequests('fetch');
         this.collection = new covalic.collections.ChallengePhaseCollection();
         this.collection.on('g:changed', function () {
             this.render();
