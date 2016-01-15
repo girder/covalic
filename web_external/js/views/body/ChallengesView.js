@@ -3,12 +3,12 @@ covalic.views.ChallengesView = covalic.View.extend({
         'change .c-challenges-filter': 'challengeFilterChanged'
     },
 
-    initialize: function () {
+    initialize: function (settings) {
         girder.cancelRestRequests('fetch');
 
-        this.filter = 'all';
+        this.timeframe = settings.timeframe || 'all';
 
-        var params = { timeframe: this.filter };
+        var params = { timeframe: this.timeframe };
 
         this.collection = new covalic.collections.ChallengeCollection();
         this.collection.on('g:changed', function () {
@@ -40,7 +40,7 @@ covalic.views.ChallengesView = covalic.View.extend({
             challenges: this.collection.models,
             admin: !!(girder.currentUser && girder.currentUser.get('admin')),
             girder: girder,
-            filter: this.filter
+            timeframe: this.timeframe
         }));
 
         this.paginateWidget.setElement(this.$('.c-challenge-pagination')).render();
@@ -74,9 +74,11 @@ covalic.views.ChallengesView = covalic.View.extend({
 
     challengeFilterChanged: function (e) {
         var select = e.currentTarget;
-        this.filter = select.value;
+        this.timeframe = select.value;
+        covalic.router.navigate('challenges?timeframe=' + this.timeframe, {
+            replace: true});
 
-        var params = { timeframe: this.filter };
+        var params = { timeframe: this.timeframe };
         // FIXME fetch() ignores params when reset is true
         // Workaround: set params explicitly
         // this.collection.fetch(params, true);
@@ -85,6 +87,15 @@ covalic.views.ChallengesView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenges', 'challenges', function () {
-    girder.events.trigger('g:navigateTo', covalic.views.ChallengesView);
+covalic.router.route('challenges', 'challenges', function (params) {
+    params = girder.parseQueryString(params);
+
+    var timeframe = null;
+    if (_.has(params, 'timeframe')) {
+        timeframe = params.timeframe;
+    }
+
+    girder.events.trigger('g:navigateTo', covalic.views.ChallengesView, {
+        timeframe: timeframe
+    });
 });
