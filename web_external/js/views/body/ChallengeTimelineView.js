@@ -20,9 +20,12 @@ covalic.views.ChallengeTimelineView = covalic.View.extend({
         var tooltipFormat = 'dddd, D MMMM YYYY, h:mm:ss a';
 
         // Render timeline only when both start and end dates are specified
-        var startDate = moment(this.challenge.get('startDate'));
-        var endDate = moment(this.challenge.get('endDate'));
-        if (startDate.isValid() && endDate.isValid()) {
+        var startDateStr = this.challenge.get('startDate');
+        var endDateStr = this.challenge.get('endDate');
+        var startDate = !_.isEmpty(startDateStr) ? moment(startDateStr) : null;
+        var endDate = !_.isEmpty(endDateStr) ? moment(endDateStr) : null;
+        if (startDate && startDate.isValid() &&
+            endDate && endDate.isValid()) {
 
             // Add points at challenge start and end dates
             // May be hidden by phase points
@@ -41,10 +44,14 @@ covalic.views.ChallengeTimelineView = covalic.View.extend({
             // Add points at phase start and end dates
             var tooltip;
             _.each(this.collection.models, function (phase) {
-                var phaseStartDate = moment(phase.get('startDate'));
-                var phaseEndDate = moment(phase.get('endDate'));
+                var phaseStartDateStr = phase.get('startDate');
+                var phaseEndDateStr = phase.get('endDate');
+                var phaseStartDate = !_.isEmpty(phaseStartDateStr) ?
+                    moment(phaseStartDateStr) : null;
+                var phaseEndDate = !_.isEmpty(phaseEndDateStr) ?
+                    moment(phaseEndDateStr) : null;
 
-                if (phaseStartDate.isValid()) {
+                if (phaseStartDate && phaseStartDate.isValid()) {
                     point = this._createPoint(phaseStartDate, now);
                     tooltip = phase.get('name') + ' starts ';
                     tooltip += ' (' + phaseStartDate.format(tooltipFormat) + ')';
@@ -52,7 +59,7 @@ covalic.views.ChallengeTimelineView = covalic.View.extend({
                     points.push(point);
                 }
 
-                if (phaseEndDate.isValid()) {
+                if (phaseEndDate && phaseEndDate.isValid()) {
                     point = this._createPoint(phaseEndDate, now);
                     tooltip = phase.get('name') + ' ends ';
                     tooltip += ' (' + phaseEndDate.format(tooltipFormat) + ')';
