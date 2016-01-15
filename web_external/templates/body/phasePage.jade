@@ -52,7 +52,10 @@
     if userInChallenge
         a.c-download-test-data.btn.btn-lg.btn-primary.hide
           i.icon-download
-          |  Download test dataset
+          if phase.get('type') === 'training'
+            |  Download training dataset
+          else
+            |  Download test dataset
         a.c-download-ground-truth.btn.btn-lg.btn-primary.hide
           i.icon-target
           |  Download ground truth data
