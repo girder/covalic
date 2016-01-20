@@ -11,7 +11,8 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
                 description: this.$('#c-phase-description').val(),
                 active: this.$('#c-phase-active').is(':checked'),
                 startDate: this.dateTimeRangeWidget.fromDateString(),
-                endDate: this.dateTimeRangeWidget.toDateString()
+                endDate: this.dateTimeRangeWidget.toDateString(),
+                type: this.$('#c-phase-training').is(':checked') ? 'training' : ''
             };
 
             if (this.model) {
@@ -56,6 +57,11 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
                     view.$('#c-phase-active').attr('checked', 'checked');
                 } else {
                     view.$('#c-phase-active').removeAttr('checked');
+                }
+                if (view.model.get('type') === 'training') {
+                    view.$('#c-phase-training').attr('checked', 'checked');
+                } else {
+                    view.$('#c-phase-training').removeAttr('checked');
                 }
 
                 view.dateTimeRangeWidget.setElement(view.$('#c-phase-timeframe')).render();

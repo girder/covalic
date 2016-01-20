@@ -8,7 +8,8 @@ covalic.views.NewPhaseView = covalic.View.extend({
                 description: this.$('#c-challenge-description').val(),
                 active: this.$('#c-phase-active').is(':checked'),
                 startDate: this.dateTimeRangeWidget.fromDateString(),
-                endDate: this.dateTimeRangeWidget.toDateString()
+                endDate: this.dateTimeRangeWidget.toDateString(),
+                type: this.$('#c-phase-training').is(':checked') ? 'training' : ''
             });
 
             phase.on('g:saved', function () {
