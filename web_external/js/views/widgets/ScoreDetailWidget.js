@@ -4,13 +4,8 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
         this.phase = settings.phase;
         this.score = this.submission.get('score');
 
-        this.metrics = _.map(this.score[0].metrics, function (metric) {
-            return metric.name;
-        });
-
-        this.datasets = _.map(this.score, function (dataset) {
-            return dataset.dataset;
-        });
+        this.metrics = _.pluck(this.score[0].metrics, 'name');
+        this.datasets = _.pluck(this.score, 'dataset');
     },
 
     render: function () {
@@ -26,8 +21,9 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
                 metricId = el.attr('metric'),
                 metricInfo = metricsInfo[metricId] || {},
                 title = metricInfo.title || metricId,
-                description = metricInfo.description ?
-                    girder.renderMarkdown(metricInfo.description) : null,
+                description = metricInfo.description
+                    ? girder.renderMarkdown(metricInfo.description)
+                    : null,
                 weight = metricInfo.weight || 0;
 
             el.popover({

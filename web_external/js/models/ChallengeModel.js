@@ -63,7 +63,6 @@ covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
                 return name.replace(/ /g, '_');
             }
         }
-
     },
 
     /**
