@@ -3,4 +3,4 @@ girder_version: master
 covalic_version: master
 challenge_version: master
 covalic_metrics_version: latest
-romanesco_version: master
+girder_worker_version: master

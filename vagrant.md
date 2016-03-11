@@ -50,19 +50,19 @@ submitted from is seen as the host, and this is where the job will have its
 score results uploaded to.  If e.g. the VM port 8080 was forwarded to host port
 9080, then when a scoring job is created, the url would be saved as
 http://localhost:9080/...--assuming the job was submitted from a browser on
-the host--and when the Romanesco celery worker tries to upload the scoring
+the host--and when the girder worker tries to upload the scoring
 results, it would send them to http://localhost:9080/..., but inside the VM,
-Covalic/Girder are running on port 8080, so the Romanesco celery worker
+Covalic/Girder are running on port 8080, so the girder worker
 wouldn't be able to connect since it would try to reach 9080.
 
 
-In a browser on your host machine, navigate to 
+In a browser on your host machine, navigate to
 
     http://localhost:8080
 
 to get to the Covalic web application.
 
-Navigate to 
+Navigate to
 
     http://localhost:8080/girder
 
