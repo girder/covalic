@@ -391,6 +391,7 @@
       name: default
       type: filesystem
       root: /opt/covalic/assetstore
+      current: true
     state: present
   when: girder_assetstore_type == 'filesystem'
   tags:

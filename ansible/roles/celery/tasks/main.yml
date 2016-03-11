@@ -84,7 +84,7 @@
   sudo: yes
   file:
     dest: /opt/girder_worker
-    mode: 755
+    mode: 0755
     owner: "{{worker_exec_user}}"
     group: "{{worker_exec_group}}"
     state: directory
