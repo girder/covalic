@@ -4,7 +4,7 @@ version: 0.1.0
 dependencies:
     - challenge
     - gravatar
-    - romanesco
+    - worker
     - thumbnails
 grunt:
     file: Gruntfile.js

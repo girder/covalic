@@ -25,5 +25,5 @@
     girder_assetstore_local_fs: true
     mongo_private_ip: localhost
     mq_private_ip: localhost
-    romanesco_exec_user: vagrant
-    romanesco_exec_group: vagrant
+    worker_exec_user: vagrant
+    worker_exec_group: vagrant

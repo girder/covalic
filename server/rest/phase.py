@@ -127,7 +127,7 @@ class PhaseExt(Phase):
         title = '%s: metric weight initialization' % phase['name']
         job = jobModel.createJob(
             title=title, type='covalic_weight_init', user=user,
-            handler='romanesco_handler')
+            handler='worker_handler')
         jobToken = jobModel.createJobToken(job)
 
         scoreToken = self.model('token').createToken(user=user, days=7)

@@ -81,16 +81,6 @@
     - girder
     - deploy-update
 
-- name: clone romanesco plugin
-  git:
-    repo: git://github.com/kitware/romanesco.git
-    dest: "{{ girder_root }}/plugins/romanesco"
-    accept_hostkey: yes
-    version: "{{ romanesco_version }}"
-  tags:
-    - girder
-    - deploy-update
-
 - name: get the most recent version of pip
   pip: name=pip extra_args="-U"
   sudo: yes
@@ -293,27 +283,27 @@
 
 # Configure plugin settings
 
-- name: Set romanesco broker
+- name: Set worker broker setting
   girder:
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
     put:
       path: system/setting
       parameters:
-        key: romanesco.broker
+        key: worker.broker
         value: "amqp://guest@{{ mq_private_ip }}//"
   tags:
     - girder
     - rewire
 
-- name: Set romanesco backend
+- name: Set worker backend setting
   girder:
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
     put:
       path: system/setting
       parameters:
-        key: romanesco.backend
+        key: worker.backend
         value: "amqp://guest@{{ mq_private_ip }}//"
   tags:
     - girder
@@ -401,6 +391,7 @@
       name: default
       type: filesystem
       root: /opt/covalic/assetstore
+      current: true
     state: present
   when: girder_assetstore_type == 'filesystem'
   tags:

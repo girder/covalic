@@ -97,7 +97,7 @@ class Submission(Resource):
         jobModel = self.model('job', 'jobs')
 
         job = jobModel.createJob(
-            title=jobTitle, type='covalic_score', handler='romanesco_handler',
+            title=jobTitle, type='covalic_score', handler='worker_handler',
             user=user)
         jobToken = jobModel.createJobToken(job)
         scoreUserId = self.model('setting').get(PluginSettings.SCORING_USER_ID)
