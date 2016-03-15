@@ -132,7 +132,7 @@ covalic.views.SubmissionView = covalic.View.extend({
             adminUser: (girder.currentUser && girder.currentUser.get('admin'))
         }));
 
-        new girder.views.jobs_JobDetailsWidget({
+        new girder.views.jobs_JobDetailsWidget({ // eslint-disable-line new-cap
             el: this.$('.c-job-details-container'),
             parentView: this,
             job: this.job

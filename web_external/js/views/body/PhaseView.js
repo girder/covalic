@@ -182,8 +182,6 @@ covalic.views.PhaseView = covalic.View.extend({
             container: this.$el
         });
 
-
-
         return this;
     }
 });

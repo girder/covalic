@@ -1,8 +1,8 @@
 add_python_style_test(python_static_analysis_covalic
                       "${PROJECT_SOURCE_DIR}/plugins/covalic/server")
 
-add_javascript_style_test(
+add_eslint_test(
   covalic "${PROJECT_SOURCE_DIR}/plugins/covalic/web_external/js"
-  JSHINT_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/covalic/web_external/js/.jshintrc
-  JSSTYLE_EXTRA_CONFIGS ${PROJECT_SOURCE_DIR}/plugins/covalic/web_external/js/.jscsrc
+  ESLINT_CONFIG_FILE "${PROJECT_SOURCE_DIR}/plugins/covalic/web_external/js/.eslintrc"
+  ESLINT_IGNORE_FILE "${PROJECT_SOURCE_DIR}/plugins/covalic/web_external/js/.eslintignore"
   )

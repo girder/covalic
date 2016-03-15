@@ -26,7 +26,6 @@ covalic.views.ChallengeTimelineView = covalic.View.extend({
         var endDate = !_.isEmpty(endDateStr) ? moment(endDateStr) : null;
         if (startDate && startDate.isValid() &&
             endDate && endDate.isValid()) {
-
             // Add points at challenge start and end dates
             // May be hidden by phase points
             var now = moment();
@@ -46,10 +45,10 @@ covalic.views.ChallengeTimelineView = covalic.View.extend({
             _.each(this.collection.models, function (phase) {
                 var phaseStartDateStr = phase.get('startDate');
                 var phaseEndDateStr = phase.get('endDate');
-                var phaseStartDate = !_.isEmpty(phaseStartDateStr) ?
-                    moment(phaseStartDateStr) : null;
-                var phaseEndDate = !_.isEmpty(phaseEndDateStr) ?
-                    moment(phaseEndDateStr) : null;
+                var phaseStartDate = !_.isEmpty(phaseStartDateStr)
+                    ? moment(phaseStartDateStr) : null;
+                var phaseEndDate = !_.isEmpty(phaseEndDateStr)
+                    ? moment(phaseEndDateStr) : null;
 
                 if (phaseStartDate && phaseStartDate.isValid()) {
                     point = this._createPoint(phaseStartDate, now);
@@ -141,9 +140,9 @@ covalic.views.ChallengeTimelineView = covalic.View.extend({
             throw new Error('Invalid date(s) specified when creating timeline points');
         }
 
-        var className = now.isAfter(date) ?
-            this.pointCompletedClass :
-            this.pointUpcomingClass;
+        var className = now.isAfter(date)
+            ? this.pointCompletedClass
+            : this.pointUpcomingClass;
         return {
             time: date.toDate(),
             class: className

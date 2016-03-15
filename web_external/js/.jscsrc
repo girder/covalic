@@ -1,5 +1,0 @@
-{
-    "excludeFiles": [
-        "./ext/**.js"
-    ]
-}
