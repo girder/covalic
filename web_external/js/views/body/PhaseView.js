@@ -171,11 +171,14 @@ covalic.views.PhaseView = covalic.View.extend({
         girder.renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
                               this.$('.c-phase-instructions-container'));
 
-        new covalic.views.LeaderboardWidget({
-            phase: this.model,
-            el: this.$('.c-leaderboard-widget-container'),
-            parentView: this
-        }).render();
+        if (!this.model.get('hideScores') ||
+                this.model.getAccessLevel() >= girder.AccessType.WRITE) {
+            new covalic.views.LeaderboardWidget({
+                phase: this.model,
+                el: this.$('.c-leaderboard-widget-container'),
+                parentView: this
+            }).render();
+        }
 
         this.$('button[title]').tooltip({
             placement: 'left',

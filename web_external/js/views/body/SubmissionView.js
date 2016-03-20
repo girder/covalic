@@ -71,7 +71,6 @@ covalic.views.SubmissionView = covalic.View.extend({
     },
 
     _statusHandler: function (progress) {
-        console.log(progress);
         var status = window.parseInt(progress.data.status);
         if (progress.data._id === this.job.get('_id') &&
                 status === girder.jobs_JobStatus.SUCCESS) {

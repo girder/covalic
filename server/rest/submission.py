@@ -24,10 +24,10 @@ import posixpath
 
 from ..constants import PluginSettings
 from girder.api import access
-from girder.api.describe import Description
-from girder.api.rest import Resource, loadmodel
+from girder.api.describe import Description, describeRoute
+from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
-from girder.models.model_base import ValidationException
+from girder.models.model_base import AccessException, ValidationException
 from girder.utility import mail_utils
 
 
@@ -43,23 +43,24 @@ class Submission(Resource):
         self.route('POST', (), self.postSubmission)
         self.route('POST', (':id', 'score'), self.postScore)
 
+    def _filterScore(self, phase, submission, user):
+        """
+        If the phase is configured to hide scores from participants, removes
+        the relevant score fields from the document. Users with WRITE access
+        or above on the phase will still be able to view the scores.
+        """
+        if (phase.get('hideScores') and
+                not self.model('phase', 'challenge').hasAccess(
+                    phase, user, level=AccessType.WRITE)):
+            submission.pop('score', None)
+            submission.pop('overallScore', None)
+        return submission
+
     @access.public
     @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='challenge',
                level=AccessType.READ)
-    def listSubmissions(self, phase, params):
-        limit, offset, sort = self.getPagingParameters(
-            params, 'overallScore', defaultSortDir=SortDir.DESCENDING)
-
-        userFilter = None
-        if 'userId' in params:
-            userFilter = self.model('user').load(
-                params['userId'], user=self.getCurrentUser(),
-                level=AccessType.READ)
-
-        results = self.model('submission', 'covalic').list(
-            phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter)
-        return [self.model('submission', 'covalic').filter(s) for s in results]
-    listSubmissions.description = (
+    @filtermodel(model='submission', plugin='covalic')
+    @describeRoute(
         Description('List submissions to a challenge phase.')
         .param('phaseId', 'The ID of the phase.')
         .param('userId', 'Show only results for the given user.',
@@ -71,13 +72,46 @@ class Submission(Resource):
         .param('sort', 'Field to sort the result list by ('
                'default=overallScore)', required=False)
         .param('sortdir', "1 for ascending, -1 for descending (default=-1)",
-               required=False, dataType='int'))
+               required=False, dataType='int')
+    )
+    def listSubmissions(self, phase, params):
+        limit, offset, sort = self.getPagingParameters(
+            params, 'overallScore', defaultSortDir=SortDir.DESCENDING)
+        userFilter = None
+        user = self.getCurrentUser()
+
+        # If scores are hidden, do not allow sorting by score fields
+        if (phase.get('hideScores') and
+                not self.model('phase', 'challenge').hasAccess(
+                    phase, user, AccessType.WRITE)):
+            for field, _ in sort:
+                if field == 'overallScore' or field.startswith('score.'):
+                    raise AccessException(
+                        'Scores are hidden from participants in this phase, '
+                        'you may not sort by score fields.')
+
+        if 'userId' in params:
+            userFilter = self.model('user').load(
+                params['userId'], user=user, level=AccessType.READ)
+
+        submissions = self.model('submission', 'covalic').list(
+            phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter)
+        return [self._filterScore(phase, s, user) for s in submissions]
 
     @access.user
     @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='challenge',
                level=AccessType.READ)
     @loadmodel(map={'folderId': 'folder'}, model='folder',
                level=AccessType.ADMIN)
+    @filtermodel(model='submission', plugin='covalic')
+    @describeRoute(
+        Description('Make a submission to the challenge.')
+        .param('phaseId', 'The ID of the challenge phase to submit to.')
+        .param('folderId', 'The folder ID containing the submission data.')
+        .param('title', 'Title for the submission')
+        .errorResponse('You are not a member of the participant group.', 403)
+        .errorResponse('The ID was invalid.')
+    )
     def postSubmission(self, phase, folder, params):
         user = self.getCurrentUser()
 
@@ -206,17 +240,20 @@ class Submission(Resource):
         job = jobModel.save(job)
         jobModel.scheduleJob(job)
 
-        return submission
-    postSubmission.description = (
-        Description('Make a submission to the challenge.')
-        .param('phaseId', 'The ID of the challenge phase to submit to.')
-        .param('folderId', 'The folder ID containing the submission data.')
-        .param('title', 'Title for the submission')
-        .errorResponse('You are not a member of the participant group.', 403)
-        .errorResponse('The ID was invalid.'))
+        return self._filterScore(phase, submission, user)
 
     @access.user
     @loadmodel(model='submission', plugin='covalic')
+    @describeRoute(
+        Description('Post a score for a given submission.')
+        .notes('This should only be called by the scoring service, not by '
+               'end users.')
+        .param('id', 'The ID of the submission being scored.', paramType='path')
+        .param('body', 'The JSON object containing the scores for this '
+               'submission.', paramType='body')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Admin access was denied for the challenge phase.', 403)
+    )
     def postScore(self, submission, params):
         # Ensure admin access on the containing challenge phase
         phase = self.model('phase', 'challenge').load(
@@ -226,7 +263,7 @@ class Submission(Resource):
         submission['score'] = json.loads(cherrypy.request.body.read())
         submission = self.model('submission', 'covalic').save(submission)
 
-        # Delete the scirubg user's job token since the job is now complete.
+        # Delete the scoring user's job token since the job is now complete.
         token = self.getCurrentToken()
         self.model('token').remove(token)
 
@@ -245,30 +282,23 @@ class Submission(Resource):
             text=html)
 
         return submission
-    postScore.description = (
-        Description('Post a score for a given submission.')
-        .notes('This should only be called by the scoring service, not by '
-               'end users.')
-        .param('id', 'The ID of the submission being scored.', paramType='path')
-        .param('body', 'The JSON object containing the scores for this '
-               'submission.', paramType='body')
-        .errorResponse('ID was invalid.')
-        .errorResponse('Admin access was denied for the challenge phase.', 403))
 
     @access.public
     @loadmodel(model='submission', plugin='covalic')
-    def getSubmission(self, submission, params):
-        # Ensure read access on the containing challenge phase
-        self.model('phase', 'challenge').load(
-            submission['phaseId'], user=self.getCurrentUser(), exc=True,
-            level=AccessType.READ)
-
-        return self.model('submission', 'covalic').filter(submission)
-    getSubmission.description = (
+    @filtermodel(model='submission', plugin='covalic')
+    @describeRoute(
         Description('Retrieve a single submission.')
         .param('id', 'The ID of the submission.', paramType='path')
         .errorResponse('ID was invalid.')
-        .errorResponse('Read access was denied for the challenge phase.', 403))
+        .errorResponse('Read access was denied for the challenge phase.', 403)
+    )
+    def getSubmission(self, submission, params):
+        # Ensure read access on the containing challenge phase
+        user = self.getCurrentUser()
+        phase = self.model('phase', 'challenge').load(
+            submission['phaseId'], user=user, exc=True, level=AccessType.READ)
+
+        return self._filterScore(phase, submission, user)
 
     @access.user
     @loadmodel(model='phase', plugin='challenge', level=AccessType.ADMIN)
