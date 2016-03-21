@@ -20,17 +20,16 @@
                         li(role="presentation")
                           a.c-test-data(href="#phase/#{phase.id}/input"
                             role="menuitem") #[i.icon-beaker] Input dataset...
-                        if girder.currentUser && girder.currentUser.get('admin')
-                          li(role="presentation")
-                            a.c-edit-scoring(role="menuitem")
-                              i.icon-code
-                              |  Customize scoring behavior
                         li(role="presentation")
                             a.c-edit-metrics(role="menuitem" href="#phase/#{phase.id}/metrics")
                                 i.icon-chart-bar
                                 |  Scoring metrics
                         if phase.getAccessLevel() >= girder.AccessType.ADMIN
                             li.divider(role="presentation")
+                            li(role="presentation")
+                              a.c-edit-scoring(role="menuitem")
+                                i.icon-code
+                                |  Customize scoring behavior
                             li(role="presentation")
                               a(href="#phase/#{phase.id}/access"
                                 role="menuitem") #[i.icon-lock] Access control
