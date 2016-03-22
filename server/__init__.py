@@ -191,6 +191,6 @@ def load(info):
     ModelImporter.model('phase', 'challenge').exposeFields(
         level=AccessType.READ, fields='metrics')
     ModelImporter.model('phase', 'challenge').exposeFields(
-        level=AccessType.SITE_ADMIN, fields='scoreTask')
+        level=AccessType.ADMIN, fields='scoreTask')
     ModelImporter.model('challenge', 'challenge').exposeFields(
         level=AccessType.READ, fields=('thumbnails', 'thumbnailSourceId'))
