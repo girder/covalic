@@ -18,6 +18,8 @@ covalic.views.SubmissionView = covalic.View.extend({
 
     initialize: function (settings) {
         this.submission = settings.submission;
+        // Must unbind previous fetch handlers to avoid infinite callbacks
+        this.submission.off('g:fetched');
 
         this.phase = new covalic.models.PhaseModel({
             _id: this.submission.get('phaseId')
@@ -50,6 +52,8 @@ covalic.views.SubmissionView = covalic.View.extend({
     render: function () {
         this.$el.html(covalic.templates.submissionPage({
             submission: this.submission,
+            scoreHidden: !!(this.phase.get('hideScores') &&
+                            this.phase.getAccessLevel() < girder.AccessType.WRITE),
             JobStatus: girder.jobs_JobStatus,
             job: this.job,
             created: girder.formatDate(this.submission.get('created'), girder.DATE_SECOND)
@@ -143,7 +147,7 @@ covalic.router.route('submission/:id', 'phase_submission', function (id) {
     var submission = new covalic.models.SubmissionModel();
     submission.set({
         _id: id
-    }).on('g:fetched', function () {
+    }).once('g:fetched', function () {
         girder.events.trigger('g:navigateTo', covalic.views.SubmissionView, {
             submission: submission
         });

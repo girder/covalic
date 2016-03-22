@@ -9,10 +9,7 @@
     .c-details-area
       if submission.get('title')
         .c-submission-title-text= submission.get('title')
-      .c-submission-subtitle Submitted
-        b  #{created}
-        |  by
-        b  #{submission.get('creatorName')}
+      .c-submission-subtitle Submitted #[b= created] by #[b= submission.get('creatorName')]
 
 .c-submission-display-body
   if submission.has('overallScore')
@@ -31,6 +28,10 @@
         else if job.get('status') == JobStatus.RUNNING
           i.icon-spin1.animate-spin.g-running
           .c-text Your submission is being scored, please wait...
+        else if job.get('status') == JobStatus.SUCCESS && scoreHidden
+          .c-text
+            i.icon-ok
+            | Your submission has been scored successfully. Scores are currently hidden from participants.
     .c-score-progress-container
 
   .c-submission-score-detail-container
