@@ -271,15 +271,32 @@ class Submission(Resource):
         challenge = self.model('challenge', 'challenge').load(
             phase['challengeId'], force=True)
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
-        html = mail_utils.renderTemplate('covalic.submissionComplete.mako', {
-            'phase': phase,
-            'challenge': challenge,
-            'submission': submission,
-            'host': covalicHost
-        })
+
+        # Mail user
+        html = mail_utils.renderTemplate(
+            'covalic.submissionCompleteUser.mako',
+            {
+                'phase': phase,
+                'challenge': challenge,
+                'submission': submission,
+                'host': covalicHost
+            })
         mail_utils.sendEmail(
             to=user['email'], subject='Your submission has been scored',
             text=html)
+
+        # Mail admins
+        html = mail_utils.renderTemplate(
+            'covalic.submissionCompleteAdmin.mako',
+            {
+                'user': user,
+                'phase': phase,
+                'challenge': challenge,
+                'submission': submission,
+                'host': covalicHost
+            })
+        mail_utils.sendEmail(
+            toAdmins=True, subject='A submission has been scored', text=html)
 
         return submission
 
