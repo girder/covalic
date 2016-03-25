@@ -162,12 +162,24 @@ def onJobUpdate(event):
             'status' in event.info['params'] and
             int(event.info['params']['status']) == JobStatus.ERROR):
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
-        html = mail_utils.renderTemplate('covalic.submissionError.mako', {
+
+        # Mail admins
+        html = mail_utils.renderTemplate('covalic.submissionErrorAdmin.mako', {
             'submissionId': event.info['job']['covalicSubmissionId'],
             'host': covalicHost
         })
         mail_utils.sendEmail(
             toAdmins=True, subject='Submission processing error', text=html)
+
+        # Mail user
+        user = ModelImporter.model('user').load(event.info['job']['userId'],
+                                                force=True)
+        html = mail_utils.renderTemplate('covalic.submissionErrorUser.mako', {
+            'submissionId': event.info['job']['covalicSubmissionId'],
+            'host': covalicHost
+        })
+        mail_utils.sendEmail(
+            to=user['email'], subject='Submission processing error', text=html)
 
 
 def load(info):
