@@ -1,11 +1,17 @@
+- var matchSubmissions = phase.get('matchSubmissions') === undefined || phase.get('matchSubmissions')
+
 .c-submit-page-title Submit to #{phase.get('name')}
 
 .c-submit-page-description
-  p.
-    To submit to this phase of the challenge, upload your output files here. The
-    output files must map one-to-one to each file from the input dataset. Your
-    files may have different file extensions, but otherwise the names should match
-    each corresponding input file.
+  if matchSubmissions
+    p.
+      To submit to this phase of the challenge, upload your output files here.
+      The output files must map one-to-one to each file from the input
+      dataset. Your files may have different file extensions, but otherwise
+      the names should match each corresponding input file.
+  else
+    p.
+      To submit to this phase of the challenge, upload your output files here.
   p.
     Before you upload your submission, please add a short title that identifies
     either your organization or your algorithm. This title doesn't have to be

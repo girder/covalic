@@ -13,7 +13,8 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
                 hideScores: this.$('#c-phase-hide-scores').is(':checked'),
                 startDate: this.dateTimeRangeWidget.fromDateString(),
                 endDate: this.dateTimeRangeWidget.toDateString(),
-                type: this.$('#c-phase-training').is(':checked') ? 'training' : ''
+                type: this.$('#c-phase-training').is(':checked') ? 'training' : '',
+                matchSubmissions: this.$('#c-phase-match-submissions').is(':checked')
             };
 
             if (this.model) {
@@ -68,6 +69,15 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
                     view.$('#c-phase-hide-scores').attr('checked', 'checked');
                 } else {
                     view.$('#c-phase-hide-scores').removeAttr('checked');
+                }
+                var matchSubmissions = view.model.get('matchSubmissions');
+                if (_.isUndefined(matchSubmissions)) {
+                    matchSubmissions = true;
+                }
+                if (matchSubmissions) {
+                    view.$('#c-phase-match-submissions').attr('checked', 'checked');
+                } else {
+                    view.$('#c-phase-match-submissions').removeAttr('checked');
                 }
 
                 view.dateTimeRangeWidget.setElement(view.$('#c-phase-timeframe')).render();

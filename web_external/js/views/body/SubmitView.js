@@ -57,8 +57,14 @@ covalic.views.SubmitView = covalic.View.extend({
             _.map(this.phase.get('groundtruthItems'), transformName)
         );
 
-        matchInfo.ok = !(matchInfo.unmatchedGroundtruths.length ||
-                         matchInfo.unmatchedInputs.length);
+        var matchSubmissions = this.phase.get('matchSubmissions');
+        if (_.isUndefined(matchSubmissions)) {
+            matchSubmissions = true;
+        }
+
+        matchInfo.ok = !matchSubmissions ||
+                       (_.isEmpty(matchInfo.unmatchedGroundtruths) &&
+                        _.isEmpty(matchInfo.unmatchedInputs));
 
         var titleOk = this.$('input.c-submission-title-input').val().trim().length > 0;
 
