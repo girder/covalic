@@ -10,7 +10,8 @@ covalic.views.NewPhaseView = covalic.View.extend({
                 hideScores: this.$('#c-phase-hide-scores').is(':checked'),
                 startDate: this.dateTimeRangeWidget.fromDateString(),
                 endDate: this.dateTimeRangeWidget.toDateString(),
-                type: this.$('#c-phase-training').is(':checked') ? 'training' : ''
+                type: this.$('#c-phase-training').is(':checked') ? 'training' : '',
+                matchSubmissions: this.$('#c-phase-match-submissions').is(':checked')
             });
 
             phase.on('g:saved', function () {
