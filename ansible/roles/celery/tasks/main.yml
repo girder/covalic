@@ -77,6 +77,13 @@
     - celery
     - deploy-update
 
+- name: Install girder_io plugin pip dependencies
+  pip: requirements=/opt/girder_worker/girder_worker/plugins/girder_io/requirements.txt
+  sudo: yes
+  tags:
+    - celery
+    - deploy-update
+
 - name: Create local worker config file if it does not exist
   sudo: yes
   command: cp /opt/girder_worker/girder_worker/worker.dist.cfg /opt/girder_worker/girder_worker/worker.local.cfg creates=/opt/girder_worker/girder_worker/worker.local.cfg
