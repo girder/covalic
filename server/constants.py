@@ -18,5 +18,9 @@
 ###############################################################################
 
 
+# Prefix for Covalic-specific error messages in job log.
+JOB_LOG_PREFIX = 'covalic.error:'
+
+
 class PluginSettings():
     SCORING_USER_ID = 'covalic.scoring_user_id'

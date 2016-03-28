@@ -30,7 +30,7 @@ from girder.plugins.jobs.constants import JobStatus
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
 from .rest import challenge, submission, phase
-from .constants import PluginSettings
+from .constants import PluginSettings, JOB_LOG_PREFIX
 
 
 def validateSettings(event):
@@ -156,27 +156,52 @@ def deleteSubmissions(event):
 def onJobUpdate(event):
     """
     Hook into job update event so we can look for job failure events and email
-    administrators accordingly.
+    administrators and user accordingly.
     """
     if (event.info['job']['type'] == 'covalic_score' and
             'status' in event.info['params'] and
             int(event.info['params']['status']) == JobStatus.ERROR):
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
 
-        # Mail admins
+        # Create minimal log that contains only Covalic errors.
+        # Use full log if no Covalic-specific errors are found.
+        log = event.info['job'].get('log')
+        minimalLog = None
+        if log:
+            minimalLog = '\n'.join([line[len(JOB_LOG_PREFIX):].strip()
+                                    for line in log.splitlines()
+                                    if line.startswith(JOB_LOG_PREFIX)])
+        if not minimalLog:
+            minimalLog = log
+
+        submission = ModelImporter.model('submission', 'covalic').load(
+            event.info['job']['covalicSubmissionId'])
+        phase = ModelImporter.model('phase', 'challenge').load(
+            submission['phaseId'], force=True)
+        challenge = ModelImporter.model('challenge', 'challenge').load(
+            phase['challengeId'], force=True)
+        user = ModelImporter.model('user').load(
+            event.info['job']['userId'], force=True)
+
+        # Mail admins, include full log
         html = mail_utils.renderTemplate('covalic.submissionErrorAdmin.mako', {
-            'submissionId': event.info['job']['covalicSubmissionId'],
-            'host': covalicHost
+            'submission': submission,
+            'challenge': challenge,
+            'phase': phase,
+            'user': user,
+            'host': covalicHost,
+            'log': log
         })
         mail_utils.sendEmail(
             toAdmins=True, subject='Submission processing error', text=html)
 
-        # Mail user
-        user = ModelImporter.model('user').load(event.info['job']['userId'],
-                                                force=True)
+        # Mail user, include minimal log
         html = mail_utils.renderTemplate('covalic.submissionErrorUser.mako', {
-            'submissionId': event.info['job']['covalicSubmissionId'],
-            'host': covalicHost
+            'submission': submission,
+            'challenge': challenge,
+            'phase': phase,
+            'host': covalicHost,
+            'log': minimalLog
         })
         mail_utils.sendEmail(
             to=user['email'], subject='Submission processing error', text=html)
