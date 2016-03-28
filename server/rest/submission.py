@@ -42,6 +42,7 @@ class Submission(Resource):
         self.route('GET', ('unscored',), self.getUnscoredSubmissions)
         self.route('POST', (), self.postSubmission)
         self.route('POST', (':id', 'score'), self.postScore)
+        self.route('DELETE', (':id',), self.deleteSubmission)
 
     def _filterScore(self, phase, submission, user):
         """
@@ -333,3 +334,24 @@ class Submission(Resource):
                required=False)
         .errorResponse('Phase ID was invalid.')
         .errorResponse('Admin access was denied for the challenge phase.', 403))
+
+    @access.user
+    @loadmodel(model='submission', plugin='covalic')
+    @describeRoute(
+        Description('Remove a submission to a phase.')
+        .notes('You must be either the owner of the submission, or have write '
+               'access to the phase of the submission.')
+        .param('id', 'The ID of the submission.', paramType='path')
+    )
+    def deleteSubmission(self, submission, params):
+        user = self.getCurrentUser()
+        phase = self.model('phase', 'challenge').load(submission['phaseId'],
+                                                      force=True)
+        if (user['_id'] == submission['creatorId'] or
+                self.model('phase', 'challenge').hasAccess(
+                    phase, user, AccessType.WRITE)):
+            self.model('submission', 'covalic').remove(submission)
+        else:
+            raise AccessException(
+                'You may only remove submissions that you made, or those under '
+                'phases that you have permission to edit.')
