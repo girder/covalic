@@ -56,6 +56,9 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
             return true;
         });
 
+        if (score === null) {
+            return '';
+        }
         if (score < 0.0001) {
             return Number(score).toExponential(2);
         } else {
