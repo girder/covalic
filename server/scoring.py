@@ -18,6 +18,7 @@
 ###############################################################################
 
 from collections import defaultdict
+import six
 
 
 def computeAverageScores(score):
@@ -25,18 +26,27 @@ def computeAverageScores(score):
     Compute the average score for each metric and add it to the score list
     under the name "Average".
 
+    Datasets with a score of None are omitted from the average calculation.
+
     :param score: The score object to compute the average of. The result of the
         computation is placed at the head of the list.
     :type score: list
     """
     sums = defaultdict(float)
+    counts = defaultdict(int)
 
     for dataset in score:
         for metric in dataset['metrics']:
-            sums[metric['name']] += float(metric['value'])
+            if metric['value'] is not None:
+                sums[metric['name']] += float(metric['value'])
+                counts[metric['name']] += 1
 
-    n = float(len(score))
-    metrics = [{'name': k, 'value': s / n} for k, s in sums.iteritems()]
+    metrics = [
+        {
+            'name': metricName,
+            'value': sums[metricName] / float(counts[metricName])
+        }
+        for metricName in sorted(six.viewkeys(sums))]
 
     score.insert(0, {
         'dataset': 'Average',
