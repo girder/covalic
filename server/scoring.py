@@ -46,7 +46,7 @@ def computeAverageScores(score):
             'name': metricName,
             'value': sums[metricName] / float(counts[metricName])
         }
-        for metricName in sorted(six.viewkeys())]
+        for metricName in sorted(six.viewkeys(sums))]
 
     score.insert(0, {
         'dataset': 'Average',
