@@ -23,6 +23,7 @@ import os
 import posixpath
 
 from ..constants import PluginSettings
+from ..utility.user_emails import getPhaseUserEmails
 from girder.api import access
 from girder.api.describe import Description, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
@@ -287,6 +288,8 @@ class Submission(Resource):
             text=html)
 
         # Mail admins
+        emails = sorted(getPhaseUserEmails(
+            phase, AccessType.WRITE, includeChallengeUsers=True))
         html = mail_utils.renderTemplate(
             'covalic.submissionCompleteAdmin.mako',
             {
@@ -297,7 +300,7 @@ class Submission(Resource):
                 'host': covalicHost
             })
         mail_utils.sendEmail(
-            toAdmins=True, subject='A submission has been scored', text=html)
+            to=emails, subject='A submission has been scored', text=html)
 
         return submission
 

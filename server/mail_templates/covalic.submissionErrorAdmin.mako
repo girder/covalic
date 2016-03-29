@@ -28,8 +28,8 @@ You can also view these results
 </p>
 
 <p>
-You were sent this alert because you are a site administrator on the Girder
-instance hosting this challenge.
+You were sent this alert because you are an administrator of this
+phase and/or challenge.
 </p>
 
 <%include file="_footer.mako"/>

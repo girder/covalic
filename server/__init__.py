@@ -31,6 +31,7 @@ from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
 from .rest import challenge, submission, phase
 from .constants import PluginSettings, JOB_LOG_PREFIX
+from .utility.user_emails import getPhaseUserEmails
 
 
 def validateSettings(event):
@@ -156,7 +157,8 @@ def deleteSubmissions(event):
 def onJobUpdate(event):
     """
     Hook into job update event so we can look for job failure events and email
-    administrators and user accordingly.
+    the user and challenge/phase administrators accordingly. Here, an
+    administrator is defined to be a user with WRITE access or above.
     """
     if (event.info['job']['type'] == 'covalic_score' and
             'status' in event.info['params'] and
@@ -184,6 +186,8 @@ def onJobUpdate(event):
             event.info['job']['userId'], force=True)
 
         # Mail admins, include full log
+        emails = sorted(getPhaseUserEmails(
+            phase, AccessType.WRITE, includeChallengeUsers=True))
         html = mail_utils.renderTemplate('covalic.submissionErrorAdmin.mako', {
             'submission': submission,
             'challenge': challenge,
@@ -193,7 +197,7 @@ def onJobUpdate(event):
             'log': log
         })
         mail_utils.sendEmail(
-            toAdmins=True, subject='Submission processing error', text=html)
+            to=emails, subject='Submission processing error', text=html)
 
         # Mail user, include minimal log
         html = mail_utils.renderTemplate('covalic.submissionErrorUser.mako', {
