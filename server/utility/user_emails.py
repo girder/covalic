@@ -56,7 +56,7 @@ def getChallengeUserEmails(challenge, accessLevel):
     acl = ModelImporter.model(
         'challenge', 'challenge').getFullAccessList(challenge)
     users = _getUsers(acl, accessLevel)
-    emails = list(map(lambda user: user['email'], users))
+    emails = [user['email'] for user in users]
     return emails
 
 
@@ -75,7 +75,7 @@ def getPhaseUserEmails(phase, accessLevel, includeChallengeUsers=True):
     """
     acl = ModelImporter.model('phase', 'challenge').getFullAccessList(phase)
     users = _getUsers(acl, accessLevel)
-    emails = list(map(lambda user: user['email'], users))
+    emails = [user['email'] for user in users]
 
     if includeChallengeUsers:
         challenge = ModelImporter.model('challenge', 'challenge').load(
