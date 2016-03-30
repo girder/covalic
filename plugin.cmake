@@ -1,3 +1,4 @@
+add_python_test(user_emails PLUGIN covalic)
 add_python_style_test(python_static_analysis_covalic
                       "${PROJECT_SOURCE_DIR}/plugins/covalic/server")
 
