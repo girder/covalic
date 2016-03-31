@@ -1,8 +1,11 @@
 .c-submission-header-bar
   .c-submission-right-buttons.pull-right
     a.c-leaderboard-button(href="#phase/#{submission.get('phaseId')}")
-      |  View leaderboard&nbsp;
-      i.icon-right-big
+      if scoreHidden
+        |  Return to phase&nbsp;
+      else
+        |  View leaderboard&nbsp;
+        i.icon-right-big
 
   .c-header-info-wrapper
     .c-user-portrait
