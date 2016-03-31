@@ -178,6 +178,8 @@ covalic.views.PhaseView = covalic.View.extend({
                 el: this.$('.c-leaderboard-widget-container'),
                 parentView: this
             }).render();
+        } else {
+            this.$('.c-leaderboard-outer-wrapper').hide();
         }
 
         this.$('button[title]').tooltip({
