@@ -19,6 +19,8 @@ table.c-leaderboard-table
         td
           a.c-score-link(
             href="#submission/#{submission.get('_id')}")= Math.round(submission.get('overallScore') * 1000) / 1000
+            span.c-score-icon-container
+              i.icon-angle-circled-right
       - i ++
 
 .c-leaderboard-pagination
