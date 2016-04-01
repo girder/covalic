@@ -25,7 +25,8 @@ covalic.views.SubmissionListWidget = covalic.View.extend({
         this.$el.html(covalic.templates.leaderboard({
             submissions: this.collection.models,
             start: this.collection.offset - this.collection.length,
-            girder: girder
+            girder: girder,
+            moment: moment
         }));
 
         new girder.views.PaginateWidget({
