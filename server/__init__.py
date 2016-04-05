@@ -32,37 +32,8 @@ from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
 from .rest import challenge, submission, phase
 from .constants import PluginSettings, JOB_LOG_PREFIX
+from .utility import getAssetsFolder
 from .utility.user_emails import getPhaseUserEmails
-
-
-def getAssetsFolder(self, challenge, user, testAccess=True):
-    """
-    Get the Assets folder for a given challenge, creating one if it does not
-    already exist. Ensures the specified user has read access on the folder if
-    it already exists.
-
-    :param challenge: The challenge.
-    :type challenge: dict
-    :param user: The user requesting the assets folder info.
-    :type user: dict
-    :param testAccess: Whether to verify that the user has read access to the
-        folder.
-    :type testAccess: bool
-    :returns: The assets folder.
-    """
-    collection = ModelImporter.model('collection').load(
-        challenge['collectionId'], force=True)
-
-    folderModel = ModelImporter.model('folder')
-    folder = folderModel.createFolder(
-        parentType='collection', parent=collection,
-        name='Assets', creator=user, reuseExisting=True,
-        description='Assets related to this challenge.')
-
-    if testAccess:
-        folderModel.requireAccess(folder, user=user, level=AccessType.READ)
-
-    return folder
 
 
 def validateSettings(event):

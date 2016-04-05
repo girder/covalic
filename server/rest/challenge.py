@@ -21,12 +21,12 @@ import cherrypy
 
 from girder import logger
 from girder.api import access
-from girder.api.describe import Description
-from girder.api.rest import loadmodel, RestException
+from girder.api.describe import Description, describeRoute
+from girder.api.rest import filtermodel, loadmodel, RestException
 from girder.constants import AccessType
 from girder.plugins.challenge.rest.challenge import Challenge
-from girder.plugins.covalic import getAssetsFolder
 from girder.plugins.thumbnails.worker import createThumbnail
+from ..utility import getAssetsFolder
 
 
 class ChallengeExt(Challenge):
