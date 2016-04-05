@@ -134,16 +134,14 @@ class Submission(Resource):
         # Site admins may override the submission creation date
         created = None
         if 'date' in params:
-            if not user.get('admin'):
-                raise ValidationException('You may not override the '
-                                          'submission creation date.')
+            self.requireAdmin(user, 'Administrator access required to override '
+                                    'the submission creation date.')
             created = params['date']
 
         # Site admins may submit on behalf of another user
         if 'userId' in params:
-            if not user.get('admin'):
-                raise ValidationException('You may not submit to this phase '
-                                          'on behalf of another user.')
+            self.requireAdmin(user, 'Administrator access required to submit '
+                                    'to this phase on behalf of another user.')
             user = self.model('user').load(params['userId'], force=True,
                                            exc=True)
 
