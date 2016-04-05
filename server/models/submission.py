@@ -21,6 +21,7 @@ import datetime
 
 from girder.constants import AccessType
 from girder.models.model_base import Model
+from girder.plugins.challenge.models.utility import validateDate
 from girder.plugins.covalic import scoring
 from girder.utility.progress import noProgress
 
@@ -40,6 +41,9 @@ class Submission(Model):
         ))
 
     def validate(self, doc):
+        if doc.get('created'):
+            doc['created'] = validateDate(doc.get('created'), 'created')
+
         if doc.get('score') is not None and doc.get('overallScore') is None:
             scoring.computeAverageScores(doc['score'])
             phase = self.model('phase', 'challenge').load(
@@ -104,13 +108,14 @@ class Submission(Model):
         for result in cursor:
             yield result
 
-    def createSubmission(self, creator, phase, folder, job=None, title=None):
+    def createSubmission(self, creator, phase, folder, job=None, title=None,
+                         created=None):
         submission = {
             'creatorId': creator['_id'],
             'creatorName': creator['firstName'] + ' ' + creator['lastName'],
             'phaseId': phase['_id'],
             'folderId': folder['_id'],
-            'created': datetime.datetime.utcnow(),
+            'created': created or datetime.datetime.utcnow(),
             'score': None,
             'title': title
         }

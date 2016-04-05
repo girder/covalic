@@ -111,6 +111,9 @@ class Submission(Resource):
         .param('phaseId', 'The ID of the challenge phase to submit to.')
         .param('folderId', 'The folder ID containing the submission data.')
         .param('title', 'Title for the submission')
+        .param('date', 'The date of the submission.', required=False)
+        .param('userId', 'The ID of the user to submit on behalf of.',
+               required=False)
         .errorResponse('You are not a member of the participant group.', 403)
         .errorResponse('The ID was invalid.')
     )
@@ -127,6 +130,22 @@ class Submission(Resource):
         if phase['participantGroupId'] not in user['groups']:
             self.model('phase', 'challenge').requireAccess(
                 phase, user, level=AccessType.WRITE)
+
+        # Site admins may override the submission creation date
+        created = None
+        if 'date' in params:
+            if not user.get('admin'):
+                raise ValidationException('You may not override the '
+                                          'submission creation date.')
+            created = params['date']
+
+        # Site admins may submit on behalf of another user
+        if 'userId' in params:
+            if not user.get('admin'):
+                raise ValidationException('You may not submit to this phase '
+                                          'on behalf of another user.')
+            user = self.model('user').load(params['userId'], force=True,
+                                           exc=True)
 
         jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
         apiUrl = os.path.dirname(cherrypy.url())
@@ -155,7 +174,7 @@ class Submission(Resource):
 
         title = params['title'].strip()
         submission = self.model('submission', 'covalic').createSubmission(
-            user, phase, folder, job, title)
+            user, phase, folder, job, title, created)
 
         if not self.model('phase', 'challenge').hasAccess(
                 phase, user=scoreUser, level=AccessType.ADMIN):
