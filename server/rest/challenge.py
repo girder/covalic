@@ -25,6 +25,7 @@ from girder.api.describe import Description
 from girder.api.rest import loadmodel, RestException
 from girder.constants import AccessType
 from girder.plugins.challenge.rest.challenge import Challenge
+from girder.plugins.covalic import getAssetsFolder
 from girder.plugins.thumbnails.worker import createThumbnail
 
 
@@ -111,23 +112,13 @@ class ChallengeExt(Challenge):
 
     @access.public
     @loadmodel(model='challenge', plugin='challenge', level=AccessType.READ)
+    @filtermodel(model='folder')
+    @describeRoute(
+        Description('Get the folder containing assets for this challenge.')
+        .param('id', 'The ID of the challenge', paramType='path')
+    )
     def getAssetsFolder(self, challenge, params):
-        user = self.getCurrentUser()
-
-        collection = self.model('collection').load(
-            challenge['collectionId'], force=True)
-
-        folder = self.model('folder').createFolder(
-            parentType='collection', parent=collection,
-            name='Assets', creator=user, reuseExisting=True,
-            description='Assets related to this challenge.')
-        self.model('folder').requireAccess(folder, user=user,
-                                           level=AccessType.READ)
-        return self.model('folder').filter(folder, user)
-    getAssetsFolder.description = (
-        Description('Get the folder containing assets related to this '
-                    'challenge.')
-        .param('id', 'The ID of the challenge', paramType='path'))
+        return getAssetsFolder(challenge, self.getCurrentUser())
 
     @access.user
     @loadmodel(model='challenge', plugin='challenge', level=AccessType.WRITE)
