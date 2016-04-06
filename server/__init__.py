@@ -24,6 +24,7 @@ import posixpath
 import six
 
 from girder import events
+from girder.api.rest import getCurrentUser
 from girder.constants import AccessType, SettingKey, STATIC_ROOT_DIR
 from girder.models.model_base import ValidationException
 from girder.plugins.jobs.constants import JobStatus
@@ -31,6 +32,7 @@ from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
 from .rest import challenge, submission, phase
 from .constants import PluginSettings, JOB_LOG_PREFIX
+from .utility import getAssetsFolder
 from .utility.user_emails import getPhaseUserEmails
 
 
@@ -154,6 +156,17 @@ def deleteSubmissions(event):
         subModel.remove(sub)
 
 
+def challengeSaved(event):
+    """
+    After a challenge is saved, we want to update the Assets folder permissions
+    to be the same as the challenge.
+    """
+    challenge = event.info
+    folder = getAssetsFolder(challenge, getCurrentUser(), False)
+    ModelImporter.model('folder').copyAccessPolicies(
+        challenge, folder, save=True)
+
+
 def onJobUpdate(event):
     """
     Hook into job update event so we can look for job failure events and email
@@ -227,6 +240,8 @@ def load(info):
     events.bind('jobs.job.update', 'covalic', onJobUpdate)
     events.bind('model.setting.validate', 'covalic', validateSettings)
     events.bind('model.challenge_phase.validate', 'covalic', validatePhase)
+    events.bind('model.challenge_challenge.save.after', 'covalic',
+                challengeSaved)
 
     # Expose extended fields on models
     ModelImporter.model('phase', 'challenge').exposeFields(
