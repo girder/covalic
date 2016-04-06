@@ -39,7 +39,12 @@ def getAssetsFolder(challenge, user, testAccess=True):
     collection = ModelImporter.model('collection').load(
         challenge['collectionId'], force=True)
 
+    if user is None and challenge['creatorId']:
+        user = ModelImporter.model('user').load(
+            challenge['creatorId'], force=True)
+
     folderModel = ModelImporter.model('folder')
+
     folder = folderModel.createFolder(
         parentType='collection', parent=collection,
         name='Assets', creator=user, reuseExisting=True,

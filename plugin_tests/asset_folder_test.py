@@ -32,10 +32,42 @@ def tearDownModule():
 
 class AssetFolderTestCase(base.TestCase):
     def testAssetFolder(self):
+        challengeModel = self.model('challenge', 'challenge')
         admin = self.model('user').createUser(
             email='admin@email.com', login='admin', firstName='Admin',
             lastName='Admin', password='passwd')
-        challenge = self.model('challenge', 'challenge').createChallenge(
-            name='challenge 1',
-            creator=self.user1,
-            public=False)
+        challenge = challengeModel.createChallenge(
+            name='challenge 1', creator=admin, public=False)
+        group = self.model('group').createGroup('A group', creator=admin)
+
+        # Make sure asset folder gets created
+        resp = self.request('/challenge/%s/assets_folder' % challenge['_id'],
+                            method='GET', user=admin)
+        self.assertStatusOk(resp)
+        folder = self.model('folder').load(
+            resp.json['_id'], force=True, exc=True)
+        self.assertEqual(folder['name'], 'Assets')
+        self.assertEqual(folder['public'], False)
+        self.assertEqual(folder['creatorId'], admin['_id'])
+        self.assertEqual(folder['access'], {
+            'users': [{
+                'id': admin['_id'],
+                'level': AccessType.ADMIN
+            }],
+            'groups': []
+        })
+
+        # Make sure assets folder tracks challenge ACL
+        challengeModel.setGroupAccess(
+            challenge, group, level=AccessType.WRITE, save=True)
+        folder = self.model('folder').load(folder['_id'], force=True)
+        self.assertEqual(folder['access'], {
+            'users': [{
+                'id': admin['_id'],
+                'level': AccessType.ADMIN
+            }],
+            'groups': [{
+                'id': group['_id'],
+                'level': AccessType.WRITE
+            }]
+        })
