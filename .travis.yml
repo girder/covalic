@@ -25,7 +25,7 @@ before_install:
 install:
     - cd "${HOME}/girder"
     - pip install -e .[thumbnails]
-    - pip install -U -r requirements-dev.txt
+    - pip install -U -r requirements-dev.txt -r plugins/challenge/requirements.txt
     - girder-install web --dev
 script:
     - mkdir _build
