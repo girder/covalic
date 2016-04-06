@@ -24,7 +24,8 @@ before_install:
     - ln -s "${TRAVIS_BUILD_DIR}" covalic
 install:
     - cd "${HOME}/girder"
-    - python setup.py install
+    - pip install .
+    - pip install -U -r requirements-dev.txt
     - girder-install web
 script:
     - mkdir _build
