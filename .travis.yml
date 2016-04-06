@@ -24,11 +24,11 @@ before_install:
     - ln -s "${TRAVIS_BUILD_DIR}" covalic
 install:
     - cd "${HOME}/girder"
-    - pip install .
+    - pip install -e .[thumbnails]
     - pip install -U -r requirements-dev.txt
-    - girder-install web
+    - girder-install web --dev
 script:
     - mkdir _build
     - cd _build
-    - cmake -DRUN_CORE_TESTS:BOOL=OFF -DTEST_PLUGINS:STRING=covalic -DPYTHON_COVERAGE:BOOL=ON -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} "${HOME}/girder"
+    - cmake -DRUN_CORE_TESTS:BOOL=OFF -DBUILD_JAVASCRIPT_TESTS:BOOL=OFF -DTEST_PLUGINS:STRING=covalic -DPYTHON_COVERAGE:BOOL=ON -DCOVERAGE_MINIMUM_PASS:STRING=4 -DPYTHON_VERSION:STRING=${TRAVIS_PYTHON_VERSION} "${HOME}/girder"
     - ctest -V -j3

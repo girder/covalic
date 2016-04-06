@@ -35,7 +35,7 @@ class AssetFolderTestCase(base.TestCase):
         admin = self.model('user').createUser(
             email='admin@email.com', login='admin', firstName='Admin',
             lastName='Admin', password='passwd')
-        challenge = self.challengeModel.createChallenge(
+        challenge = self.model('challenge', 'challenge').createChallenge(
             name='challenge 1',
             creator=self.user1,
             public=False)
