@@ -1,6 +1,6 @@
 - var phaseAdmin = phase.getAccessLevel() >= girder.AccessType.ADMIN
 
-table.c-leaderboard-table
+table.table.table-striped.table-condensed.c-leaderboard-table
   thead
     tr
       th.c-rank Rank
@@ -12,7 +12,7 @@ table.c-leaderboard-table
     - var i = 1
     each submission in submissions
       tr.c-stripe(stripe="#{(i + start) % 2 ? 'even' : 'odd'}")
-        td.c-rank= i + start
+        th.c-rank= i + start
         td
           if phaseAdmin
             a.c-user-link(
