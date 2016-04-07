@@ -1,4 +1,6 @@
-table.c-leaderboard-table
+- var phaseAdmin = phase.getAccessLevel() >= girder.AccessType.ADMIN
+
+table.table.table-striped.table-condensed.c-leaderboard-table
   thead
     tr
       th.c-rank Rank
@@ -10,15 +12,23 @@ table.c-leaderboard-table
     - var i = 1
     each submission in submissions
       tr.c-stripe(stripe="#{(i + start) % 2 ? 'even' : 'odd'}")
-        td.c-rank= i + start
+        th.c-rank= i + start
         td
-          a.c-user-link(
-            user-id="#{submission.get('creatorId')}")= submission.get('creatorName')
+          if phaseAdmin
+            a.c-user-link(
+              href="#user/#{submission.get('creatorId')}")= submission.get('creatorName')
+          else
+            = submission.get('creatorName')
         td= submission.get('title') || '--'
-        td(title="#{submission.get('created')}")= girder.formatDate(submission.get('created'), girder.DATE_DAY)
+        - var date = moment(submission.get('created'))
+        - var dateStr = date.format('ddd, D MMM YYYY, h:mm:ss a')
+        - var dateFromNow = date.fromNow()
+        td(title="#{dateStr} (#{dateFromNow})")= dateStr
         td
           a.c-score-link(
-            href="#submission/#{submission.get('_id')}")= Math.round(submission.get('overallScore') * 1000) / 1000
+            href="#submission/#{submission.get('_id')}")= (Math.round(submission.get('overallScore') * 1000) / 1000).toFixed(3)
+            span.c-score-icon-container
+              i.icon-angle-circled-right
       - i ++
 
 .c-leaderboard-pagination

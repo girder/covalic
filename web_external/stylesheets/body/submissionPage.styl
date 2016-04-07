@@ -40,11 +40,18 @@
     &:hover
       color #77e
 
-  tr.c-stripe[stripe="even"]
-    background-color #eee
-
-  tr.c-stripe:nth-of-type(1)
+  thead>tr
+    color black
     background-color #bfdcf7
+
+  tbody>tr
+    &>td
+      font-size 15px
+    &:nth-of-type(1)
+      background-color #ddd
+    &:nth-child(even)>td
+    &:nth-child(even)>th
+      background-color #f2f2f2
 
 .c-submission-right-buttons
   margin-top 10px

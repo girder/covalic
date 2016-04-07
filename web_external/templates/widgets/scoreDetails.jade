@@ -1,4 +1,4 @@
-table.c-submission-score-table
+table.table.table-striped.table-condensed.c-submission-score-table
   thead
     tr
       th
@@ -8,7 +8,7 @@ table.c-submission-score-table
   tbody
     - var i = 0
     each dataset in datasets
-      tr.c-stripe(stripe="#{i % 2 ? 'even' : 'odd'}")
+      tr
         th= dataset
         each metric in metrics
           td= getScoreForCell(dataset, metric)

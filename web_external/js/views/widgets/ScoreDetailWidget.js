@@ -62,7 +62,7 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
         if (score < 0.0001) {
             return Number(score).toExponential(2);
         } else {
-            return Number(score).toPrecision(4);
+            return Number(score).toFixed(3);
         }
     }
 });
