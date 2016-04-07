@@ -96,7 +96,8 @@ class Submission(Model):
 
         Model.remove(self, doc, progress=progress)
 
-    def list(self, phase, limit=50, offset=0, sort=None, userFilter=None):
+    def list(self, phase, limit=50, offset=0, sort=None, userFilter=None,
+             fields=None):
         q = {'phaseId': phase['_id']}
 
         if userFilter is not None:
@@ -104,7 +105,8 @@ class Submission(Model):
         else:
             q['latest'] = True
 
-        cursor = self.find(q, limit=limit, offset=offset, sort=sort)
+        cursor = self.find(q, limit=limit, offset=offset, sort=sort,
+                           fields=fields)
         for result in cursor:
             yield result
 

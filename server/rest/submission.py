@@ -96,8 +96,12 @@ class Submission(Resource):
             userFilter = self.model('user').load(
                 params['userId'], user=user, level=AccessType.READ)
 
+        # Exclude score field
+        fields = {'score': False}
+
         submissions = self.model('submission', 'covalic').list(
-            phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter)
+            phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter,
+            fields=fields)
         return [self._filterScore(phase, s, user) for s in submissions]
 
     @access.user
