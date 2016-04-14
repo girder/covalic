@@ -1,7 +1,0 @@
----
-mq_instance_ids:
-    - i-abc74b5a
-girder_instance_ids:
-    - i-9f39b46e
-mongo_instance_ids:
-    - i-01c448f0
