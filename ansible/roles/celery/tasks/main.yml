@@ -19,12 +19,10 @@
     - celery
     - deploy-update
 
-# Install celery and necessary dependencies
 - name: Install worker dependencies
   sudo: yes
   apt: update-cache=yes name={{ item }} state=present
   with_items:
-    - rabbitmq-server
     - libffi-dev
     - libssl-dev
     - python-pip
@@ -38,11 +36,6 @@
   tags:
     - celery
     - deploy-update
-
-- name: Enable rabbitmq-server to survive reboot
-  service: name=rabbitmq-server enabled=yes
-  sudo: yes
-  tags: celery
 
 - name: Start docker daemon
   service: name=docker state=started enabled=yes

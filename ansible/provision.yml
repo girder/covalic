@@ -12,8 +12,8 @@
         - girder-update
         - girder-assetstore
         - celery
+        - mq
         - rewire
-
 
 # Mongo needs to be running before Girder or else Girder fails to start
 - name: Mongo
@@ -27,6 +27,14 @@
     - common
     - mongodb
 
+- name: Message queue
+  user: ubuntu
+  hosts: tag_type_mq:mq
+  gather_facts: false
+  roles:
+    - users
+    - common
+    - mq
 
 - name: Girder
   user: ubuntu
