@@ -84,31 +84,14 @@
     - celery
     - deploy-update
 
-- name: Create local worker config file if it does not exist
+- name: Create local worker config file
   sudo: yes
-  command: cp /opt/girder_worker/girder_worker/worker.dist.cfg /opt/girder_worker/girder_worker/worker.local.cfg creates=/opt/girder_worker/girder_worker/worker.local.cfg
-  tags:
-    - celery
-    - deploy-update
-
-- name: Set girder_worker broker URL in config file
-  lineinfile:
+  template:
+    src: worker.local.cfg.j2
     dest: /opt/girder_worker/girder_worker/worker.local.cfg
-    state: present
-    regexp: '^broker='
-    line: "broker=amqp://guest@localhost//"
-  sudo: yes
-  tags:
-    - celery
-    - deploy-update
-
-- name: Activate required plugins in the girder worker
-  lineinfile:
-    dest: /opt/girder_worker/girder_worker/worker.local.cfg
-    state: present
-    regexp: '^plugins_enabled='
-    line: "plugins_enabled=docker,girder_io"
-  sudo: yes
+    mode: 0644
+    owner: "{{worker_exec_user}}"
+    group: "{{worker_exec_group}}"
   tags:
     - celery
     - deploy-update
@@ -117,7 +100,6 @@
   sudo: yes
   file:
     dest: /opt/girder_worker
-    mode: 0755
     owner: "{{worker_exec_user}}"
     group: "{{worker_exec_group}}"
     state: directory
