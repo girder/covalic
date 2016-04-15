@@ -4,3 +4,8 @@ covalic_version: master
 challenge_version: master
 covalic_metrics_version: latest
 girder_worker_version: master
+pod_hosts: "{{ groups.get('tag_pod_' + pod, ['localhost']) }}"
+mongo_hosts: "{{ groups.get('tag_type_mongodb', ['localhost']) | intersect(pod_hosts) }}"
+mq_hosts: "{{ groups.get('tag_type_mq', ['localhost']) | intersect(pod_hosts) }}"
+mq_private_ip: "{{ hostvars[mq_hosts[0]].get('ec2_private_ip_address', 'localhost') }}"
+mongo_private_ip: "{{ hostvars[mongo_hosts[0]].get('ec2_private_ip_address', 'localhost') }}"

@@ -4,6 +4,7 @@
     - vagrant
     - mongodb
     - girder
+    - mq
     - celery
   vars:
     pod: dev  # girder config actually requires pod to be set
@@ -23,7 +24,5 @@
     girder_assetstore_type: filesystem
     girder_assetstore_name: local_fs
     girder_assetstore_local_fs: true
-    mongo_private_ip: localhost
-    mq_private_ip: localhost
     worker_exec_user: vagrant
     worker_exec_group: vagrant

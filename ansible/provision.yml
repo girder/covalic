@@ -1,8 +1,6 @@
 ---
 - hosts: all
-
   tasks:
-
     - name: Require pod to be defined
       fail: msg="You did not define a pod name to manage all resources. Example definition | -e 'pod=dev'"
       when: pod is not defined
@@ -12,25 +10,32 @@
         - girder-update
         - girder-assetstore
         - celery
+        - mq
         - rewire
-
 
 # Mongo needs to be running before Girder or else Girder fails to start
 - name: Mongo
   user: ubuntu
-  hosts: tag_type_mongodb:mongo
+  hosts: tag_type_mongodb:&tag_pod_{{pod}}
   gather_facts: false
-  vars_files:
-    - pod_dynamic_vars/{{pod}}_vars.yml
   roles:
     - users
     - common
     - mongodb
 
+# Message queue should be running before Girder and the worker
+- name: Message queue
+  user: ubuntu
+  hosts: tag_type_mq:&tag_pod_{{pod}}
+  gather_facts: false
+  roles:
+    - users
+    - common
+    - mq
 
 - name: Girder
   user: ubuntu
-  hosts: tag_type_girder:webserver
+  hosts: tag_type_girder:&tag_pod_{{pod}}
   gather_facts: false
   vars:
     girder_admin_user: covalic
@@ -42,7 +47,6 @@
     girder_celery_user: celery
     girder_celery_email: covalic-celery@kitware.com
   vars_files:
-    - pod_dynamic_vars/{{pod}}_vars.yml
     - pod_static_vars/{{pod}}_s3_assetstore.yml
     - pod_static_vars/{{pod}}_girder_passwords.yml
     - pod_static_vars/prod_cert.yml
@@ -54,10 +58,8 @@
 
 - name: Celery
   user: ubuntu
-  hosts: tag_type_celery:celery
+  hosts: tag_type_celery:&tag_pod_{{pod}}
   gather_facts: false
-  vars_files:
-    - pod_dynamic_vars/{{pod}}_vars.yml
   roles:
     - users
     - common

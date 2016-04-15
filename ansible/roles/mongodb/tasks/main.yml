@@ -17,7 +17,7 @@
 
 # TODO this will have to be redone for clustered mongo
 # change the mongodb from listening only on the local ip to the internal ip
-- name: set the mongodb server ip in girder local config
+- name: Make mongo listen on private IP interface
   sudo: yes
   lineinfile:
     dest: /etc/mongod.conf
