@@ -57,7 +57,7 @@
               to_port: all
               cidr_ip: 0.0.0.0/0
 
- 
+
     - name: Create an AWS security group for the internal instances
       ec2_group:
         name: "backend_{{ pod }}"
@@ -87,12 +87,12 @@
             # mq connections from webserver security group
             - proto: tcp
               from_port: "{{ mq_port }}"
-              to_port: "{{ mq_port }}" 
+              to_port: "{{ mq_port }}"
               group_name: "webserver_{{ pod }}"
             # mongo connections from webserver security group
             - proto: tcp
               from_port: "{{ mongo_port }}"
-              to_port: "{{ mongo_port }}" 
+              to_port: "{{ mongo_port }}"
               group_name: "webserver_{{ pod }}"
         rules_egress:
             # egress to everywhere
@@ -156,6 +156,3 @@
            type: mongodb
            pod: "{{ pod }}"
       register: mongodb_server
-
-    - name: create {{pod}}_instance_ids file
-      template: src=templates/pod_instance_ids dest=pod_static_vars/{{pod}}_instance_ids

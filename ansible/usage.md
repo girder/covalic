@@ -1,12 +1,13 @@
 # Usage for Covalic Ansible
 
-This guidance assumes that Covalic will be developing using pods of EC2 instances,
-each pod is a separate group that provides the full functionality of Covalic, which
-at current time is
+This guidance assumes that Covalic will be developed using pods of EC2 instances,
+each of which is a separate group that provides the full functionality of Covalic, which
+at current time is:
 
   * Girder webserver instance
-  * Mongodb instance
-  * RabbitMQ + Celery worker instance
+  * MongoDB instance
+  * Message queue instance
+  * Girder worker instance
 
 The following two environment variables need to be set with your AWS access credentials
 
@@ -16,14 +17,6 @@ The following two environment variables need to be set with your AWS access cred
 The two pods that currently exist are `dev` and `prod`. The `dev` pod is
 for development testing, and is turned off unless it's being actively used for
 testing. The `prod` pod is the main production deployment and is always on.
-
-The first time you want to interact with a running pod from a fresh checkout of this
-codebase, you'll need to use the `utils/build_pod_inventory.sh` script:
-
-    ./utils/build_pod_inventory.sh <POD> <PATH_TO covalic_admin.pem>
-
-That will create the appropriate inventory file for that pod in your `pod_inventory`
-directory, and you will then be able to reference that pod in other operations.
 
 ## SSH to an EC2 instance
 
@@ -40,7 +33,7 @@ common workflows.
 
     python utils/create_pod_s3_assetstore.py <POD>
     ./utils/create.sh <POD>
-    ./utils/provision.sh <POD>
+    ./utils/provision.sh <POD> <PATH_TO covalic_admin.pem>
 
 
 ### Create a pod
@@ -86,33 +79,28 @@ safely added to GitHub.
 To provision a pod fully after creating the pod and the S3 assetstore, or in case
 there are large scale changes to update
 
-    ./utils/provision.sh <POD>
+    ./utils/provision.sh <POD> <PATH_TO covalic_admin.pem>
 
 #### Rewire a pod
 
-After bringing a pod back up, and building the pod inventory and refreshing the
-pod variables, you can rewire the services together.
+After bringing a pod back up, you can rewire the services together.
 
-    ./utils/rewire.sh <POD>
+    ./utils/rewire.sh <POD> <PATH_TO covalic_admin.pem>
 
 #### Update a pod with the latest codebase
 
 To update a pod with the latest codebase from the repos
 
-    ./utils/update.sh <POD>
+    ./utils/update.sh <POD> <PATH_TO covalic_admin.pem>
 
-To update a pod with a specific version of a repo, set an environment variable
-for any of the following.  The default value for each is `master`, except for
+To update a pod with a specific version of a repo, change the following variables
+inside the `group_vars/all` file. The default value for each is `master`, except for
 `covalic_metrics_version`, which defaults to `latest`.
 
     challenge_version
     covalic_version
     girder_version
     covalic_metrics_version
-
-Then run the update like
-
-    ansible-playbook provision.yml -i pod_inventory/<POD>_pod -e pod=<POD> -e covalic_version=<VERSION> -t deploy-update --vault-password vault-password.txt
 
 ### Using Ansible vault for sensitive data
 
@@ -130,4 +118,4 @@ into the Git repo.  **Warning**: this will encrypt the file in place.
 
 The scripts in the `utils` dir make use of encrypted variable files like
 
-    ansible-playbook provision.yml -i <INVENTORY> -e pod=<POD> -t <TAG> --vault-password-file vault-password.txt
+    ansible-playbook provision.yml -i plugins/inventory/ec2.py -e pod=<POD> -t <TAG> --vault-password-file vault-password.txt
