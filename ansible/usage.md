@@ -40,11 +40,12 @@ common workflows.
 
     ./utils/create.sh <POD>
 
-This command will create a pod named <POD> consisting of servers
+This command will create a pod named <POD> consisting of the following servers
 
   1. Girder webserver
   2. Mongodb server
-  3. RabbitMQ server with a Celery worker
+  3. Message queue server
+  4. Girder worker
 
 , create two security groups
 
@@ -52,7 +53,7 @@ This command will create a pod named <POD> consisting of servers
   2. backend_`<POD>`
 
 , place the Girder webserver in the webserver_`<POD>` security group, place the
-Mongodb server and the RabbitMQ servers in the backend_`<POD>` security groups,
+Mongodb server, MQ server, and worker node in the backend_`<POD>` security groups,
 and register the instance ids for the servers in `pod_static_vars/<POD>_instance_ids`.
 
 
