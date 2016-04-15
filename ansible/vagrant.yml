@@ -4,8 +4,8 @@
     - vagrant
     - mongodb
     - girder
-    - celery
     - mq
+    - celery
   vars:
     pod: dev  # girder config actually requires pod to be set
     vagrant: true
