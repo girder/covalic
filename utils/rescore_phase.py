@@ -47,7 +47,7 @@ class CovalicClient(object):
         self.phaseId = phaseId
 
     def getPhase(self):
-        return self.client.get('challenge_phase/{}'.format(self.phaseId), {})
+        return self.client.get('challenge_phase/' + self.phaseId, {})
 
     def getSubmissions(self):
         return self.client.get(
@@ -60,7 +60,7 @@ class CovalicClient(object):
             })
 
     def getJob(self, jobId):
-        return self.client.get('job/{}'.format(jobId), {})
+        return self.client.get('job/' + jobId, {})
 
     def resubmitSubmission(self, submission):
         return self.client.post(
@@ -79,7 +79,7 @@ def printSubmission(submission):
     fields = ('_id', 'title', 'jobId', 'creatorId', 'creatorName')
     titleWidth = max(map(len, fields))
     for field in fields:
-        print('{:>{}s}: {}'.format(field, titleWidth, submission[field]))
+        print('%*s: %s' % (titleWidth, field, submission[field]))
 
 
 def printSubmissions(submissions):
@@ -127,13 +127,13 @@ def pollJobStatus(client, submissions, pollFrequency):
         completed = statusCount[3] + statusCount[4] + statusCount[5]
         remaining = numSubmissions - completed
 
-        print('[{}] {} of {} completed...'.format(
+        print('[%s] %d of %d completed...' % (
             timestamp(), completed, numSubmissions))
 
         if not remaining:
             if failedSubmissions:
-                print('\nERROR: {} submissions failed:\n'.format(
-                      len(failedSubmissions)))
+                print('\nERROR: %d submissions failed:\n' %
+                      len(failedSubmissions))
                 printSubmissions(failedSubmissions)
 
             break
@@ -145,18 +145,18 @@ def run(apiUrl, username, password, token, phaseId, dryRun, pollFrequency):
 
     # Get phase
     phase = client.getPhase()
-    print('Found phase "{}" (id: {})'.format(phase['name'], phaseId))
+    print('Found phase "%s" (id: %s)' % (phase['name'], phaseId))
 
     # Get phase submissions
     submissions = client.getSubmissions()
-    print('Found {} submissions:\n'.format(len(submissions)))
+    print('Found %d submissions:\n' % len(submissions))
     printSubmissions(submissions)
 
     # Resubmit submissions
     newSubmissions = []
     for submission in submissions:
-        print('Resubmitting "{s[title]}" from "{s[creatorName]}" '
-              '(id: {s[_id]})...'.format(s=submission))
+        print('Resubmitting "%s" from "%s" (id: %s)...' % (
+            submission['title'], submission['creatorName'], submission['_id']))
         if dryRun:
             continue
 
