@@ -47,12 +47,11 @@ class CovalicClient(object):
         self.phaseId = phaseId
 
     def getPhase(self):
-        return self.client.sendRestRequest(
-            'GET', 'challenge_phase/{}'.format(self.phaseId), {})
+        return self.client.get('challenge_phase/{}'.format(self.phaseId), {})
 
     def getSubmissions(self):
-        return self.client.sendRestRequest(
-            'GET', 'covalic_submission',
+        return self.client.get(
+            'covalic_submission',
             {
                 'phaseId': self.phaseId,
                 'limit': 0,
@@ -61,12 +60,11 @@ class CovalicClient(object):
             })
 
     def getJob(self, jobId):
-        return self.client.sendRestRequest(
-            'GET', 'job/{}'.format(jobId), {})
+        return self.client.get('job/{}'.format(jobId), {})
 
     def resubmitSubmission(self, submission):
-        return self.client.sendRestRequest(
-            'POST', 'covalic_submission',
+        return self.client.post(
+            'covalic_submission',
             {
                 'phaseId': self.phaseId,
                 'folderId': submission['folderId'],
