@@ -9,3 +9,4 @@ mongo_hosts: "{{ groups.get('tag_type_mongodb', ['localhost']) | intersect(pod_h
 mq_hosts: "{{ groups.get('tag_type_mq', ['localhost']) | intersect(pod_hosts) }}"
 mq_private_ip: "{{ hostvars[mq_hosts[0]].get('ec2_private_ip_address', 'localhost') }}"
 mongo_private_ip: "{{ hostvars[mongo_hosts[0]].get('ec2_private_ip_address', 'localhost') }}"
+mongo_dbpath: /mongodata
