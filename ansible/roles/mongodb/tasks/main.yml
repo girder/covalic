@@ -12,8 +12,26 @@
 
 - name: MongoDB | Install latest mongodb
   sudo: yes
-  apt: pkg=mongodb-org-server update-cache=yes
+  apt: pkg={{ item }} update-cache=yes
+  with_items:
+    - mongodb-org-server
+    - mongodb-org-tools
+    - python-pip
   tags: mongodb
+
+- name: Get the most recent version of pip
+  pip: name=pip extra_args="-U"
+  sudo: yes
+  tags:
+    - mongodb
+    - deploy-update
+
+- name: Get boto pip package
+  pip: name=boto version=2.39.0
+  sudo: yes
+  tags:
+    - mongodb
+    - deploy-update
 
 # TODO this will have to be redone for clustered mongo
 # change the mongodb from listening only on the local ip to the internal ip
@@ -28,9 +46,28 @@
     - mongodb
     - rewire
 
-- name: MongoDB | Run mongo daemon
+- name: Run mongo daemon
   sudo: yes
   service: name=mongod state=restarted
   tags:
     - mongodb
     - rewire
+
+- name: Install backup_db.sh script
+  sudo: yes
+  template:
+    dest: /home/ubuntu/backup_db.sh
+    src: backup_db.sh
+    mode: 0755
+  tags:
+    - mongodb
+    - deploy-update
+
+- name: Install S3 upload script
+  sudo: yes
+  template:
+    dest: /home/ubuntu/upload_to_s3.py
+    src: upload_to_s3.py
+  tags:
+    - mongodb
+    - deploy-update
