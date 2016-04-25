@@ -33,6 +33,7 @@
   apt: name={{ item }} state=present
   sudo: yes
   with_items:
+    - libssl-dev
     - python-pip
     - python2.7-dev
     - build-essential
@@ -285,6 +286,7 @@
 
 - name: Set worker broker setting
   girder:
+    port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
     put:
@@ -298,6 +300,7 @@
 
 - name: Set worker backend setting
   girder:
+    port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
     put:
@@ -311,6 +314,7 @@
 
 - name: Set config for the scoring user
   girder:
+    port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
     put:

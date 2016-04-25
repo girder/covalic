@@ -120,3 +120,13 @@ into the Git repo.  **Warning**: this will encrypt the file in place.
 The scripts in the `utils` dir make use of encrypted variable files like
 
     ansible-playbook provision.yml -i plugins/inventory/ec2.py -e pod=<POD> -t <TAG> --vault-password-file vault-password.txt
+
+## Backing up the production database
+
+To create a backup of the production database, SSH into the database machine and
+export your `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. Then, run:
+
+    ~/backup_db.sh
+
+The backup archive will then be uploaded into S3
+[here](https://console.aws.amazon.com/s3/home?region=us-east-1#&bucket=covalic-backup&prefix=).
