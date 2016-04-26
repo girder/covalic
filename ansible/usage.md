@@ -123,8 +123,7 @@ The scripts in the `utils` dir make use of encrypted variable files like
 
 ## Backing up the production database
 
-To create a backup of the production database, SSH into the database machine and
-export your `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. Then, run:
+To create a backup of the production database, SSH into the database machine and run:
 
     ~/backup_db.sh
 

@@ -46,6 +46,16 @@
     - mongodb
     - rewire
 
+- name: Make mongo use the larger EBS volume for the database
+  sudo: yes
+  lineinfile:
+    dest: /etc/mongod.conf
+    state: present
+    regexp: 'dbpath=(.*)'
+    line: "dbpath={{ mongo_dbpath }}"
+  tags:
+    - mongodb
+
 - name: Run mongo daemon
   sudo: yes
   service: name=mongod state=restarted
