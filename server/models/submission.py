@@ -27,6 +27,11 @@ from girder.utility.progress import noProgress
 
 
 class Submission(Model):
+    @staticmethod
+    def getUserName(user):
+        """Get a user's full name."""
+        return user['firstName'] + ' ' + user['lastName']
+
     def initialize(self):
         self.name = 'covalic_submission'
         leaderboardIdx = ([
@@ -114,7 +119,7 @@ class Submission(Model):
                          created=None):
         submission = {
             'creatorId': creator['_id'],
-            'creatorName': creator['firstName'] + ' ' + creator['lastName'],
+            'creatorName': self.getUserName(creator),
             'phaseId': phase['_id'],
             'folderId': folder['_id'],
             'created': created or datetime.datetime.utcnow(),
