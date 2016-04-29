@@ -8,7 +8,7 @@ ul.c-phase-list
   each phase in phases
     li.c-phase-list-entry
       .c-challenge-phase-header
-      a.c-phase-link(c-phase-cid="#{phase.cid}")
+      a.c-phase-link(c-phase-cid="#{phase.cid}" href="#phase/#{phase.get('_id')}")
         i.icon-clock
         | #{phase.get('name')}
       i.c-phase-reorder.icon-menu(title="Drag to re-order")

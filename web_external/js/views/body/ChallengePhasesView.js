@@ -1,9 +1,5 @@
 covalic.views.ChallengePhasesView = covalic.View.extend({
     events: {
-        'click a.c-phase-link': function (event) {
-            var cid = $(event.currentTarget).attr('c-phase-cid');
-            covalic.router.navigate('phase/' + this.collection.get(cid).id, {trigger: true});
-        },
         'c:update-phase-ordinals .c-phase-list': function (event) {
             var collection = this.collection;
             $('li a.c-phase-link', $(event.currentTarget)).each(function (ordinal) {
