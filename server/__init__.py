@@ -224,6 +224,25 @@ def onJobUpdate(event):
             to=user['email'], subject='Submission processing error', text=html)
 
 
+def onUserSave(event):
+    """
+    Hook into user save event and update the user's name in their submissions.
+    """
+    user = event.info
+    subModel = ModelImporter.model('submission', 'covalic')
+    userName = subModel.getUserName(user)
+
+    query = {
+        'creatorId': user['_id']
+    }
+    update = {
+        '$set': {
+            'creatorName': userName
+        }
+    }
+    subModel.update(query, update)
+
+
 def load(info):
     # Extend challenge_phase resource
     info['apiRoot'].challenge = challenge.ChallengeExt()
@@ -242,6 +261,7 @@ def load(info):
     events.bind('model.challenge_phase.validate', 'covalic', validatePhase)
     events.bind('model.challenge_challenge.save.after', 'covalic',
                 challengeSaved)
+    events.bind('model.user.save.after', 'covalic', onUserSave)
 
     # Expose extended fields on models
     ModelImporter.model('phase', 'challenge').exposeFields(
