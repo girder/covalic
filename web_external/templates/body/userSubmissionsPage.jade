@@ -1,0 +1,90 @@
+- var hasSubmissions = submissions.length > 0
+- var hasSuccessfulSubmission = false
+- var endOfSubmissions = !submissions.hasNextPage()
+
+- function getShortLog(job, numLines) {
+-   var logLines = job.get('log').split('\n')
+-   var shortLog = logLines.slice(0, numLines)
+-   if (logLines.length > numLines && numLines > 0) {
+-     shortLog.push('...')
+-   }
+-   return shortLog.join('\n')
+-  }
+
+.c-user-submissions-panel.panel.panel-default
+  .c-user-submissions-user-info.panel-heading.clearfix
+    - var fullName = user.get('firstName') + ' ' + user.get('lastName')
+    - var login = user.get('login')
+    - var email = user.get('email')
+    span.c-user-name= fullName
+    a.c-user-login(href="#user/#{user.id}")= login
+    a.c-user-email(href="mailto:#{email}")= email
+    span.c-user-submissions-pagination.pull-right
+
+  if hasSubmissions
+    table.table.table-striped.table-condensed.c-user-submissions-table
+      thead
+        tr
+          th Title
+          th Latest
+          th Status
+          th Date
+          th Score
+          th
+          th
+      tbody
+        each submission in submissions.models
+          - var hasScore = submission.get('overallScore') !== undefined
+          - var date = moment(submission.get('created'))
+          - var dateStr = date.format('ddd, D MMM YYYY, h:mm:ss a')
+          - var downloadUrl = girder.apiRoot + '/folder/' + submission.get('folderId') + '/download'
+          - var rawUrl = girder.apiRoot + '/covalic_submission/' + submission.id
+          tr
+            td.c-submission-title= submission.get('title') || '--'
+            td.c-submission-latest
+              if submission.get('latest')
+                i.icon-ok
+            td.c-submission-status
+              a(href="#job/#{submission.get('jobId')}")
+                if hasScore
+                  // 3: Success
+                  - var jobStatus = 3
+                  = girder.jobs_JobStatus.text(jobStatus)
+                  - hasSuccessfulSubmission = true
+                else
+                  - var job = jobs !== undefined && jobs[submission.get('jobId')]
+                  if job
+                    - var jobStatus = job.get('status')
+                    span.c-job-log-tooltip(
+                      title="#{getShortLog(job, 5)}")
+                       = girder.jobs_JobStatus.text(jobStatus)
+                  else
+                    | --
+            td.c-submission-date= dateStr
+            td.c-submission-score
+              if hasScore
+                a.c-score-link(
+                    href="#submission/#{submission.id}")= (Math.round(submission.get('overallScore') * 1000) / 1000).toFixed(3)
+            td.c-submission-download
+              a.c-tooltip(
+                title="Download submission data"
+                href="#{downloadUrl}")
+                  | download
+            td.c-submission-raw
+              a.c-tooltip(
+                title="View raw submission JSON"
+                href="#{rawUrl}")
+                  | view raw
+
+  if !hasSubmissions || !hasSuccessfulSubmission || (hasSubmissions && endOfSubmissions)
+    .c-user-submissions-footer.panel-footer
+      if !hasSubmissions
+        .c-no-submit.text-warning
+          i.icon-attention
+          |  No submissions
+      else if !hasSuccessfulSubmission
+        .c-no-success.text-danger
+          i.icon-cancel
+          |  No successful submissions on this page
+      if hasSubmissions && endOfSubmissions
+          | &ndash; end of submissions &ndash;
