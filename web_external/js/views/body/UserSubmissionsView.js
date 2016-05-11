@@ -17,7 +17,7 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
 
         var submissionLimit = 5;
         if (!_.isNull(settings.submissionLimit)) {
-            submissionLimit = Math.max(1, parseInt(settings.submissionLimit, 10));
+            submissionLimit = Math.max(1, window.parseInt(settings.submissionLimit, 10));
         }
 
         new girder.views.LoadingAnimation({
