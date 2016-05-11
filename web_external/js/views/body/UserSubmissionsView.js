@@ -65,6 +65,7 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
         this.$el.html(covalic.templates.userSubmissionsPage({
             user: this.user,
             submissions: this.submissions,
+            getShortLog: this._getShortLog,
             girder: girder,
             moment: moment,
             jobs: params && params.jobs
@@ -86,5 +87,18 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
         }));
 
         return this;
+    },
+
+    /**
+     * Return a string that contains the first numLines lines of a job's log.
+     * The string ends in an ellipsis if any lines were omitted.
+     */
+    _getShortLog: function (job, numLines) {
+        var logLines = job.get('log').split('\n');
+        var shortLog = logLines.slice(0, numLines);
+        if (logLines.length > numLines && numLines > 0) {
+            shortLog.push('...');
+        }
+        return shortLog.join('\n');
     }
 });

@@ -2,15 +2,6 @@
 - var hasSuccessfulSubmission = false
 - var endOfSubmissions = !submissions.hasNextPage()
 
-- function getShortLog(job, numLines) {
--   var logLines = job.get('log').split('\n')
--   var shortLog = logLines.slice(0, numLines)
--   if (logLines.length > numLines && numLines > 0) {
--     shortLog.push('...')
--   }
--   return shortLog.join('\n')
--  }
-
 .c-user-submissions-panel.panel.panel-default
   .c-user-submissions-user-info.panel-heading.clearfix
     - var fullName = user.get('firstName') + ' ' + user.get('lastName')
