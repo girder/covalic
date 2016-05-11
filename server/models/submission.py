@@ -20,7 +20,7 @@
 import datetime
 
 from girder.constants import AccessType
-from girder.models.model_base import Model
+from girder.models.model_base import Model, ValidationException
 from girder.plugins.challenge.models.utility import validateDate
 from girder.plugins.covalic import scoring
 from girder.utility.progress import noProgress
@@ -130,4 +130,54 @@ class Submission(Model):
         if job is not None:
             submission['jobId'] = job['_id']
 
-        return self.save(submission)
+        submission = self.save(submission)
+        self.updateFolderAccess(phase, (submission,))
+        return submission
+
+    def updateFolderAccess(self, phase, submissions):
+        """
+        Synchronize access control between the phase and submission folders for
+        the phase. Phase admins should have read access on the submission
+        folders.
+        """
+        folderModel = self.model('folder')
+        userModel = self.model('user')
+        phaseModel = self.model('phase', 'challenge')
+
+        # Get phase admin users
+        phaseAcl = phaseModel.getFullAccessList(phase)
+        phaseAdminUserIds = set([user['id']
+                                 for user in phaseAcl.get('users')
+                                 if user['level'] >= AccessType.WRITE])
+        phaseAdminUsers = [userModel.load(userId, force=True, exc=True)
+                           for userId in phaseAdminUserIds]
+
+        # Update submission folder ACL for current phase admins
+        try:
+            for sub in submissions:
+                folder = folderModel.load(sub['folderId'], force=True)
+                if not folder:
+                    continue
+                folderAcl = folderModel.getFullAccessList(folder)
+
+                # Revoke access to users who are not phase admins; ignore folder
+                # owner
+                usersToRemove = [userModel.load(user['id'], force=True,
+                                                exc=True)
+                                 for user in folderAcl.get('users')
+                                 if (user['id'] not in phaseAdminUserIds and
+                                     user['id'] != folder['creatorId'])]
+                for user in usersToRemove:
+                    folderModel.setUserAccess(folder, user, None)
+
+                # Add access to phase admins; ignore folder owner
+                usersToAdd = [user for user in phaseAdminUsers
+                              if user['_id'] != folder['creatorId']]
+                for user in usersToAdd:
+                    folderModel.setUserAccess(folder, user, AccessType.READ)
+
+                # Save folder if access changed
+                if usersToRemove or usersToAdd:
+                    folderModel.save(folder, validate=False)
+        except TypeError:
+            raise ValidationException('A list of submissions is required.')

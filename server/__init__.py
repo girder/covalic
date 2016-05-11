@@ -167,6 +167,17 @@ def challengeSaved(event):
         challenge, folder, save=True)
 
 
+def onPhaseSave(event):
+    """
+    Hook into phase save event to synchronize access control between the phase
+    and submission folders for the phase.
+    """
+    phase = event.info
+    submissionModel = ModelImporter.model('submission', 'covalic')
+    submissions = submissionModel.getAllSubmissions(phase)
+    submissionModel.updateFolderAccess(phase, submissions)
+
+
 def onJobUpdate(event):
     """
     Hook into job update event so we can look for job failure events and email
@@ -261,6 +272,8 @@ def load(info):
     events.bind('model.challenge_phase.validate', 'covalic', validatePhase)
     events.bind('model.challenge_challenge.save.after', 'covalic',
                 challengeSaved)
+    events.bind('model.challenge_phase.save.after', 'covalic',
+                onPhaseSave)
     events.bind('model.user.save.after', 'covalic', onUserSave)
 
     # Expose extended fields on models
