@@ -59,7 +59,7 @@ covalic.views.PhaseSubmissionsView = covalic.View.extend({
 covalic.router.route('phase/:id/submissions', 'phaseSubmissions', function (id, params) {
     var phase = new covalic.models.PhaseModel({
         _id: id
-    }).on('g:fetched', function () {
+    }).once('g:fetched', function () {
         if (phase.getAccessLevel() < girder.AccessType.WRITE) {
             covalic.router.navigate('challenges', {trigger: true});
         } else {
