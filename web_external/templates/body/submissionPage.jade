@@ -15,6 +15,11 @@
       .c-submission-subtitle Submitted #[b= created] by #[b= submission.get('creatorName')]
 
 .c-submission-display-body
+  if download
+    .c-submission-download-container
+      a.c-download-submission-data.btn.btn-lg.btn-primary
+        i.icon-download
+        |  Download submission
   if submission.has('overallScore')
     .c-submission-overall-score-container
       .c-pre-text Overall score:
