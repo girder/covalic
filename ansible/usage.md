@@ -98,7 +98,6 @@ To update a pod with a specific version of a repo, change the following variable
 inside the `group_vars/all` file. The default value for each is `master`, except for
 `covalic_metrics_version`, which defaults to `latest`.
 
-    challenge_version
     covalic_version
     girder_version
     covalic_metrics_version

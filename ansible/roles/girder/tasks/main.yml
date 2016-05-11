@@ -72,16 +72,6 @@
     - girder
     - deploy-update
 
-- name: clone challenge plugin
-  git:
-    repo: git://github.com/girder/challenge.git
-    dest: "{{ girder_root }}/plugins/challenge"
-    accept_hostkey: yes
-    version: "{{ challenge_version }}"
-  tags:
-    - girder
-    - deploy-update
-
 - name: get the most recent version of pip
   pip: name=pip extra_args="-U"
   sudo: yes
@@ -96,8 +86,8 @@
     - girder
     - deploy-update
 
-- name: install challenge python requirements
-  pip: requirements="{{ girder_root }}/plugins/challenge/requirements.txt"
+- name: install covalic python requirements
+  pip: requirements="{{ girder_root }}/plugins/covalic/requirements.txt"
   sudo: yes
   tags:
     - girder

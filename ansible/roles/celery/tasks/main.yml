@@ -44,13 +44,6 @@
     - celery
     - deploy-update
 
-- name: Pull latest covalic metrics Docker image
-  sudo: yes
-  command: docker pull girder/covalic-metrics:{{ covalic_metrics_version }}
-  tags:
-    - celery
-    - deploy-update
-
 - name: Clone girder_worker
   sudo: yes
   git:

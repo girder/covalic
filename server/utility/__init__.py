@@ -17,7 +17,11 @@
 #  limitations under the License.
 ###############################################################################
 
+import dateutil.parser
+import dateutil.tz
+
 from girder.constants import AccessType
+from girder.models.model_base import ValidationException
 from girder.utility.model_importer import ModelImporter
 
 
@@ -54,3 +58,18 @@ def getAssetsFolder(challenge, user, testAccess=True):
         folderModel.requireAccess(folder, user=user, level=AccessType.READ)
 
     return folder
+
+
+def validateDate(date, field):
+    """
+    Helper to convert datetime objects or ISO 8601-formatted strings to
+    datetime objects in UTC.
+    """
+    date = str(date).strip()
+    try:
+        date = dateutil.parser.parse(date)
+        if date.tzinfo is None:
+            date = date.replace(tzinfo=dateutil.tz.tzutc())
+    except ValueError:
+        raise ValidationException('Invalid date format.', field=field)
+    return date

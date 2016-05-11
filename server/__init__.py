@@ -25,12 +25,13 @@ import six
 
 from girder import events
 from girder.api.rest import getCurrentUser
+from girder.api.v1 import resource
 from girder.constants import AccessType, SettingKey, STATIC_ROOT_DIR
 from girder.models.model_base import ValidationException
 from girder.plugins.jobs.constants import JobStatus
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
-from .rest import challenge, submission, phase
+from .rest import challenge, phase, submission
 from .constants import PluginSettings, JOB_LOG_PREFIX
 from .utility import getAssetsFolder
 from .utility.user_emails import getPhaseUserEmails
@@ -202,9 +203,9 @@ def onJobUpdate(event):
 
         submission = ModelImporter.model('submission', 'covalic').load(
             event.info['job']['covalicSubmissionId'])
-        phase = ModelImporter.model('phase', 'challenge').load(
+        phase = ModelImporter.model('phase', 'covalic').load(
             submission['phaseId'], force=True)
-        challenge = ModelImporter.model('challenge', 'challenge').load(
+        challenge = ModelImporter.model('challenge', 'covalic').load(
             phase['challengeId'], force=True)
         user = ModelImporter.model('user').load(
             event.info['job']['userId'], force=True)
@@ -255,9 +256,10 @@ def onUserSave(event):
 
 
 def load(info):
-    # Extend challenge_phase resource
-    info['apiRoot'].challenge = challenge.ChallengeExt()
-    info['apiRoot'].challenge_phase = phase.PhaseExt()
+    resource.allowedSearchTypes.add('covalic.challenge')
+
+    info['apiRoot'].challenge = challenge.Challenge()
+    info['apiRoot'].challenge_phase = phase.Phase()
     info['apiRoot'].covalic_submission = submission.Submission()
 
     # Move girder app to /girder, serve covalic app from /
@@ -275,11 +277,3 @@ def load(info):
     events.bind('model.challenge_phase.save.after', 'covalic',
                 onPhaseSave)
     events.bind('model.user.save.after', 'covalic', onUserSave)
-
-    # Expose extended fields on models
-    ModelImporter.model('phase', 'challenge').exposeFields(
-        level=AccessType.READ, fields='metrics')
-    ModelImporter.model('phase', 'challenge').exposeFields(
-        level=AccessType.ADMIN, fields='scoreTask')
-    ModelImporter.model('challenge', 'challenge').exposeFields(
-        level=AccessType.READ, fields=('thumbnails', 'thumbnailSourceId'))

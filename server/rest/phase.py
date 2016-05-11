@@ -17,17 +17,30 @@
 #  limitations under the License.
 ###############################################################################
 
+import json
+
 from girder.api import access
 from girder.api.describe import Description, describeRoute
-from girder.api.rest import filtermodel, loadmodel, getApiUrl
+from girder.api.rest import filtermodel, loadmodel, getApiUrl, Resource, \
+    RestException
 from girder.constants import AccessType
-from girder.plugins.challenge.rest.phase import Phase
+from girder.utility.progress import ProgressContext
 
 
-class PhaseExt(Phase):
+class Phase(Resource):
     def __init__(self):
-        Phase.__init__(self)
+        super(Phase, self).__init__()
 
+        self.resourceName = 'challenge_phase'
+
+        self.route('GET', (), self.listPhases)
+        self.route('GET', (':id',), self.getPhase)
+        self.route('GET', (':id', 'access'), self.getAccess)
+        self.route('POST', (), self.createPhase)
+        self.route('POST', (':id', 'participant'), self.joinPhase)
+        self.route('PUT', (':id',), self.updatePhase)
+        self.route('PUT', (':id', 'access'), self.updateAccess)
+        self.route('DELETE', (':id',), self.deletePhase)
         self.route('GET', (':id', 'groundtruth', 'item'), self.groundtruthItems)
         self.route('GET', (':id', 'test_data', 'item'), self.testDataItems)
         self.route('PUT', (':id', 'metrics'), self.setMetrics)
@@ -35,7 +48,278 @@ class PhaseExt(Phase):
         self.route('POST', (':id', 'metrics', 'init'), self.initMetrics)
 
     @access.public
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
+    @loadmodel(map={'challengeId': 'challenge'}, model='challenge',
+               plugin='covalic', level=AccessType.READ)
+    @describeRoute(
+        Description('List phases for a challenge.')
+        .param('challengeId', 'The ID of the challenge.')
+        .param('limit', "Result set size limit (default=50).", required=False,
+               dataType='int')
+        .param('offset', "Offset into result set (default=0).", required=False,
+               dataType='int')
+        .param('sort', "Field to sort the result list by (default=ordinal)",
+               required=False)
+        .param('sortdir', "1 for ascending, -1 for descending (default=1)",
+               required=False, dataType='int')
+    )
+    def listPhases(self, challenge, params):
+        limit, offset, sort = self.getPagingParameters(params, 'ordinal')
+
+        user = self.getCurrentUser()
+        results = self.model('phase', 'covalic').list(
+            challenge, user=user, offset=offset, limit=limit, sort=sort)
+        return [self.model('phase', 'covalic').filter(p, user)
+                for p in results]
+
+    @access.user
+    @loadmodel(map={'challengeId': 'challenge'}, level=AccessType.WRITE,
+               model='challenge', plugin='covalic')
+    @describeRoute(
+        Description('Add a phase to an existing challenge.')
+        .param('challengeId', 'The ID of the challenge to add the phase to.')
+        .param('name', 'The name for this phase.')
+        .param('description', 'Description for this phase.', required=False)
+        .param('instructions', 'Instructions to participants for this phase.',
+               required=False)
+        .param('participantGroupId', 'If you wish to use an existing '
+               'group as the participant group, pass its ID in this parameter.'
+               ' If you omit this, a participant group will be automatically '
+               'created for this phase.', required=False)
+        .param('public', 'Whether the phase should be publicly visible.',
+               dataType='boolean')
+        .param('active', 'Whether the phase will accept and score additional '
+               'submissions.', dataType='boolean', required=False)
+        .param('startDate', 'The start date of the phase (ISO 8601 format).',
+               dataType='dateTime', required=False)
+        .param('endDate', 'The end date of the phase (ISO 8601 format).',
+               dataType='dateTime', required=False)
+        .param('type', 'The type of the phase.', required=False)
+        .param('hideScores', 'Whether submission scores should be hidden from '
+               'participants.', dataType='boolean', default=False,
+               required=False)
+        .param('matchSubmissions', 'Whether to require that submission '
+               'filenames match ground truth filenames', dataType='boolean',
+               default=True, required=False)
+    )
+    def createPhase(self, challenge, params):
+        self.requireParams('name', params)
+
+        user = self.getCurrentUser()
+        public = self.boolParam('public', params, default=False)
+        active = self.boolParam('active', params, default=False)
+        hideScores = self.boolParam('hideScores', params, default=False)
+        matchSubmissions = self.boolParam('matchSubmissions', params,
+                                          default=True)
+        description = params.get('description', '').strip()
+        instructions = params.get('instructions', '').strip()
+
+        participantGroupId = params.get('participantGroupId')
+        if participantGroupId:
+            group = self.model('group').load(
+                participantGroupId, user=user, level=AccessType.READ)
+        else:
+            group = None
+
+        ordinal = len([self.model('phase', 'covalic').filter(p, user)
+                       for p in self.model('phase', 'covalic').list(
+                           challenge, user=user)])
+
+        startDate = params.get('startDate')
+        endDate = params.get('endDate')
+
+        type = params.get('type', '').strip()
+
+        phase = self.model('phase', 'covalic').createPhase(
+            name=params['name'].strip(), description=description,
+            instructions=instructions, active=active, public=public,
+            creator=user, challenge=challenge, participantGroup=group,
+            ordinal=ordinal, startDate=startDate, endDate=endDate,
+            type=type, hideScores=hideScores, matchSubmissions=matchSubmissions)
+
+        return phase
+
+    @access.user
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
+    @describeRoute(
+        Description('Get the access control list for a phase.')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Admin access was denied for the phase.', 403)
+    )
+    def getAccess(self, phase, params):
+        return self.model('phase', 'covalic').getFullAccessList(phase)
+
+    @access.user
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
+    @describeRoute(
+        Description('Set the access control list for a challenge phase.')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .param('access', 'The access control list as JSON.')
+        .param('public', 'Whether the phase should be publicly visible.',
+               dataType='boolean')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Admin permission denied on the phase.', 403)
+    )
+    def updateAccess(self, phase, params):
+        self.requireParams('access', params)
+
+        folderModel = self.model('folder')
+        phaseModel = self.model('phase', 'covalic')
+        folder = folderModel.load(phase['folderId'], force=True)
+        public = self.boolParam('public', params, default=False)
+        phaseModel.setPublic(phase, public)
+        folderModel.setPublic(folder, public)
+
+        try:
+            access = json.loads(params['access'])
+            folderModel.setAccessList(folder, access, save=True)
+            return phaseModel.setAccessList(phase, access, save=True)
+        except ValueError:
+            raise RestException('The access parameter must be JSON.')
+
+    @access.user
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.WRITE)
+    @filtermodel(model='phase', plugin='covalic')
+    @describeRoute(
+        Description('Update the properties of a challenge phase.')
+        .responseClass('Phase')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .param('name', 'The name for this phase.', required=False)
+        .param('description', 'Description for this phase.', required=False)
+        .param('instructions', 'Instructions to participants for this phase.',
+               required=False)
+        .param('folderId', 'ID of the backing folder for this phase.',
+               required=False)
+        .param('participantGroupId', 'ID of an existing group to set as the '
+               'participant group for this phase.', required=False)
+        .param('groundTruthFolderId', 'ID of the ground truth folder for this '
+               'phase.', required=False)
+        .param('testDataFolderId', 'ID of the test dataset folder for this '
+               'phase.', required=False)
+        .param(
+            'active', 'Whether the phase will accept and score additional '
+            'submissions.', dataType='boolean', required=False)
+        .param('hideScores', 'Whether submission scores should be hidden from '
+               'participants.', dataType='boolean', default=False,
+               required=False)
+        .param('startDate', 'The start date of the phase (ISO 8601 format).',
+               dataType='dateTime', required=False)
+        .param('endDate', 'The end date of the phase (ISO 8601 format).',
+               dataType='dateTime', required=False)
+        .param('type', 'The type of the phase.', required=False)
+        .param('matchSubmissions', 'Whether to require that submission '
+               'filenames match ground truth filenames', dataType='boolean',
+               default=True, required=False)
+        .errorResponse('ID was invalid.')
+        .errorResponse('Write permission denied on the phase.', 403)
+    )
+    def updatePhase(self, phase, params):
+        user = self.getCurrentUser()
+
+        phase['active'] = self.boolParam('active', params, phase['active'])
+        phase['hideScores'] = self.boolParam('hideScores', params,
+                                             phase.get('hideScores', False))
+        phase['matchSubmissions'] = self.boolParam(
+            'matchSubmissions', params, phase.get('matchSubmissions', True))
+        phase['name'] = params.get('name', phase['name']).strip()
+        phase['description'] = params.get('description',
+                                          phase.get('description', '')).strip()
+        phase['instructions'] = params.get(
+            'instructions', phase.get('instructions', '')).strip()
+
+        if 'ordinal' in params:
+            phase['ordinal'] = int(params.get('ordinal').strip())
+        if ('participantGroupId' in params and params['participantGroupId'] !=
+                str(phase.get('participantGroupId'))):
+            group = self.model('group').load(
+                params['participantGroupId'],
+                user=user, level=AccessType.READ, exc=True)
+            phase['participantGroupId'] = group['_id']
+        if ('folderId' in params and
+                params['folderId'] != str(phase['folderId'])):
+            folder = self.model('folder').load(
+                params['folderId'], user=user,
+                level=AccessType.READ, exc=True)
+            phase['folderId'] = folder['_id']
+        if ('groundTruthFolderId' in params and params['groundTruthFolderId'] !=
+                str(phase.get('groundTruthFolderId'))):
+            folder = self.model('folder').load(
+                params['groundTruthFolderId'], user=user,
+                level=AccessType.READ, exc=True)
+            phase['groundTruthFolderId'] = folder['_id']
+        if ('testDataFolderId' in params and params['testDataFolderId'] !=
+                str(phase.get('testDataFolderId'))):
+            folder = self.model('folder').load(
+                params['testDataFolderId'], user=user, level=AccessType.READ,
+                exc=True)
+            phase['testDataFolderId'] = folder['_id']
+
+        phase['startDate'] = params.get(
+            'startDate', phase.get('startDate', None))
+        phase['endDate'] = params.get(
+            'endDate', phase.get('endDate', None))
+
+        phase['type'] = params.get('type', phase.get('type', '')).strip()
+
+        return self.model('phase', 'covalic').updatePhase(phase)
+
+    @access.public
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.READ)
+    @describeRoute(
+        Description('Get a phase by ID.')
+        .responseClass('Phase')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read permission denied on the phase.', 403)
+    )
+    def getPhase(self, phase, params):
+        return self.model('phase', 'covalic').filter(
+            phase, self.getCurrentUser())
+
+    @access.user
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.READ)
+    @describeRoute(
+        Description('Join a phase as a competitor.')
+        .responseClass('Phase')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read permission denied on the phase.', 403)
+    )
+    def joinPhase(self, phase, params):
+        user = self.getCurrentUser()
+        phase = self.model('phase', 'covalic').filter(
+            phase, self.getCurrentUser())
+        participantGroupId = phase['participantGroupId']
+        if 'groups' not in user or participantGroupId not in user['groups']:
+            participantGroup = self.model('group').load(
+                participantGroupId, force=True, exc=True)
+            self.model('group').addUser(participantGroup, user,
+                                        level=AccessType.READ)
+        return phase
+
+    @access.user
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
+    @describeRoute(
+        Description('Delete a phase.')
+        .param('id', 'The ID of the phase to delete.', paramType='path')
+        .param('progress', 'Whether to record progress on this task. Default '
+               'is false.', required=False, dataType='boolean')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Admin access was denied for the phase.', 403)
+    )
+    def deletePhase(self, phase, params):
+        progress = self.boolParam('progress', params, default=False)
+        with ProgressContext(progress, user=self.getCurrentUser(),
+                             title=u'Deleting phase ' + phase['name'],
+                             message='Calculating total size...') as ctx:
+            if progress:
+                ctx.update(
+                    total=self.model('phase', 'covalic').subtreeCount(phase))
+            self.model('phase', 'covalic').remove(phase, progress=ctx)
+        return {'message': 'Deleted phase %s.' % phase['name']}
+
+    @access.public
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.READ)
     @filtermodel(model='item')
     @describeRoute(
         Description('List all ground truth item names for a challenge phase.')
@@ -54,7 +338,7 @@ class PhaseExt(Phase):
         )))
 
     @access.public
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.READ)
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.READ)
     @filtermodel(model='item')
     @describeRoute(
         Description('List all test data item names for a challenge phase.')
@@ -75,15 +359,25 @@ class PhaseExt(Phase):
             folder, limit=limit, offset=offset, sort=sort))
 
     @access.user
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.WRITE)
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.WRITE)
+    @describeRoute(
+        Description('Set the metric information set for this phase.')
+        .notes('If the metrics have changed, this will recompute all of the '
+               'overall scores for this phase.')
+        .param('id', 'ID of the phase to set metric info on.', paramType='path')
+        .param('copyFrom', 'To copy the metric info from another phase, set '
+               'this parameter to the ID of that phase.', required=False)
+        .param('metrics', 'A JSON object representing the set of metrics for '
+               'the challenge.', required=False, paramType='body')
+    )
     def setMetrics(self, phase, params):
-        phaseModel = self.model('phase', 'challenge')
+        phaseModel = self.model('phase', 'covalic')
         user = self.getCurrentUser()
 
         oldMetrics = phase.get('metrics', {})
 
         if 'copyFrom' in params:
-            srcPhase = self.model('phase', 'challenge').load(
+            srcPhase = self.model('phase', 'covalic').load(
                 params['copyFrom'], level=AccessType.READ, exc=True, user=user)
 
             phase['metrics'] = srcPhase.get('metrics', {})
@@ -106,18 +400,16 @@ class PhaseExt(Phase):
             self.model('submission', 'covalic').recomputeOverallScores(phase)
 
         return phaseModel.filter(phaseModel.save(phase), user)
-    setMetrics.description = (
-        Description('Set the metric information set for this phase.')
-        .notes('If the metrics have changed, this will recompute all of the '
-               'overall scores for this phase.')
-        .param('id', 'ID of the phase to set metric info on.', paramType='path')
-        .param('copyFrom', 'To copy the metric info from another phase, set '
-               'this parameter to the ID of that phase.', required=False)
-        .param('metrics', 'A JSON object representing the set of metrics for '
-               'the challenge.', required=False, paramType='body'))
 
     @access.user
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.WRITE)
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.WRITE)
+    @describeRoute(
+        Description('Test ground truth data to set initial metric weights.')
+        .notes('Runs perturbation on the ground truth images and then scores '
+               'the results in order to automatically initialize the metric '
+               'weights to sensible values.')
+        .param('id', 'The ID of the phase.', paramType='path')
+    )
     def initMetrics(self, phase, params):
         user = self.getCurrentUser()
 
@@ -193,15 +485,9 @@ class PhaseExt(Phase):
         jobModel.scheduleJob(job)
 
         return jobModel.filter(job, user)
-    initMetrics.description = (
-        Description('Test ground truth data to set initial metric weights.')
-        .notes('Runs perturbation on the ground truth images and then scores '
-               'the results in order to automatically initialize the metric '
-               'weights to sensible values.')
-        .param('id', 'The ID of the phase.', paramType='path'))
 
     @access.user
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.ADMIN)
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
     @describeRoute(
         Description('Customize submission scoring behavior for this phase.')
         .param('id', 'The ID of the phase.', paramType='path')
@@ -218,6 +504,6 @@ class PhaseExt(Phase):
         if 'dockerArgs' in params:
             phase['scoreTask']['dockerArgs'] = params['dockerArgs']
 
-        phaseModel = self.model('phase', 'challenge')
-        return self.model('phase', 'challenge').filter(
+        phaseModel = self.model('phase', 'covalic')
+        return self.model('phase', 'covalic').filter(
             phaseModel.save(phase), self.getCurrentUser())

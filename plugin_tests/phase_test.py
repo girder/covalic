@@ -1,0 +1,297 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+###############################################################################
+#  Copyright Kitware Inc.
+#
+#  Licensed under the Apache License, Version 2.0 ( the "License" );
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+###############################################################################
+
+import datetime
+import dateutil.parser
+import dateutil.tz
+
+from tests import base
+
+
+def setUpModule():
+    base.enabledPlugins.append('covalic')
+    base.startServer()
+
+
+def tearDownModule():
+    base.stopServer()
+
+
+class PhaseTestCase(base.TestCase):
+    def setUp(self):
+        base.TestCase.setUp(self)
+
+        user = {
+            'email': 'good@email.com',
+            'login': 'goodlogin',
+            'firstName': 'First',
+            'lastName': 'Last',
+            'password': 'goodpassword',
+            'admin': False
+        }
+        self.user = self.model('user').createUser(**user)
+
+        self.challenge = self.model('challenge', 'covalic').createChallenge(
+            name='challenge 1',
+            creator=self.user,
+            public=False)
+
+    def testPhaseCreationMinimal(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'phase'
+        }
+        resp = self.request(path='/challenge_phase', method='POST',
+                            user=self.user, params=params)
+        self.assertStatusOk(resp)
+
+    def testPhaseCreation(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'phase',
+            'description': 'description',
+            'instructions': 'instructions',
+            'active': True
+        }
+        resp = self.request(path='/challenge_phase', method='POST',
+                            user=self.user, params=params)
+        self.assertStatusOk(resp)
+
+    def testPhaseCreationNoDates(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'challenge',
+            'startDate': '',
+            'endDate': ''
+        }
+        resp = self.request(path='/challenge_phase', method='POST',
+                            user=self.user, params=params)
+        self.assertStatusOk(resp)
+
+    def testPhaseCreationStartDateOnly(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'challenge',
+            'startDate': '2015-11-01T00:00:00.000Z'
+        }
+        resp = self.request(path='/challenge_phase', method='POST',
+                            user=self.user, params=params)
+        self.assertStatusOk(resp)
+
+    def testPhaseCreationEndDateOnly(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'challenge',
+            'endDate': '2015-11-01T00:00:00.000Z'
+        }
+        resp = self.request(path='/challenge_phase', method='POST',
+                            user=self.user, params=params)
+        self.assertStatusOk(resp)
+
+    def testPhaseCreationStartAndEndDates(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'challenge',
+            'startDate': '2015-11-01T00:00:00.000Z',
+            'endDate': '2015-12-01T00:00:00.000Z'
+        }
+        resp = self.request(path='/challenge', method='POST', user=self.user,
+                            params=params)
+        self.assertStatusOk(resp)
+
+    def testPhaseCreationStartAndEndDatesWrongOrder(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'challenge',
+            'startDate': '2015-12-01T00:00:00.000Z',
+            'endDate': '2015-11-01T00:00:00.000Z'
+        }
+        resp = self.request(path='/challenge', method='POST', user=self.user,
+                            params=params)
+        self.assertValidationError(resp, 'startDate')
+
+    def testPhaseCreationStartDateValidation(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'challenge',
+            'startDate': 'invalid',
+            'endDate': '2015-12-01T00:00:00.000Z'
+        }
+        resp = self.request(path='/challenge', method='POST', user=self.user,
+                            params=params)
+        self.assertValidationError(resp, 'startDate')
+
+    def testPhaseCreationEndDateValidation(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'challenge',
+            'startDate': '2015-12-01T00:00:00.000Z',
+            'endDate': 'invalid'
+        }
+        resp = self.request(path='/challenge', method='POST', user=self.user,
+                            params=params)
+        self.assertValidationError(resp, 'endDate')
+
+    def testListPhase(self):
+        self.model('phase', 'covalic').createPhase(
+            challenge=self.challenge,
+            name='phase 1',
+            creator=self.user,
+            ordinal=0)
+
+        params = {
+            'challengeId': str(self.challenge['_id'])
+        }
+        resp = self.request(path='/challenge_phase', user=self.user,
+            params=params)
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 1)
+
+        self.model('phase', 'covalic').createPhase(
+            challenge=self.challenge,
+            name='phase 2',
+            creator=self.user,
+            ordinal=1)
+
+        resp = self.request(path='/challenge_phase', user=self.user,
+            params=params)
+        self.assertStatusOk(resp)
+        self.assertEqual(len(resp.json), 2)
+
+    def testGetPhase(self):
+        phase = self.model('phase', 'covalic').createPhase(
+            challenge=self.challenge,
+            name='phase 1',
+            creator=self.user,
+            ordinal=1,
+            description='description',
+            instructions='instructions',
+            active=True,
+            startDate='2015-11-01T14:00:00.000Z',
+            endDate='2015-12-01T14:00:00.000Z',
+            type='type',
+            hideScores=True,
+            matchSubmissions=False)
+
+        resp = self.request(path='/challenge_phase/%s' % phase['_id'],
+                            user=self.user)
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['challengeId'], str(self.challenge['_id']))
+        self.assertEqual(resp.json['name'], 'phase 1')
+        self.assertEqual(resp.json['ordinal'], 1)
+        self.assertEqual(resp.json['description'], 'description')
+        self.assertEqual(resp.json['instructions'], 'instructions')
+        self.assertTrue(resp.json['active'])
+        startDate = dateutil.parser.parse(resp.json['startDate'])
+        startDate = startDate.replace(tzinfo=dateutil.tz.tzutc())
+        self.assertEqual(startDate, datetime.datetime(2015, 11, 1, 14, 0, 0, 0,
+                                                      dateutil.tz.tzutc()))
+        endDate = dateutil.parser.parse(resp.json['endDate'])
+        endDate = endDate.replace(tzinfo=dateutil.tz.tzutc())
+        self.assertEqual(endDate, datetime.datetime(2015, 12, 1, 14, 0, 0, 0,
+                                                    dateutil.tz.tzutc()))
+        self.assertEqual(resp.json['type'], 'type')
+        self.assertTrue(resp.json['hideScores'])
+        self.assertFalse(resp.json['matchSubmissions'])
+
+    def testGetPhaseInvalid(self):
+        resp = self.request(path='/challenge_phase/1', user=self.user)
+        self.assertValidationError(resp, field='id')
+
+    def testUpdatePhase(self):
+        phase = self.model('phase', 'covalic').createPhase(
+            challenge=self.challenge,
+            name='phase 1',
+            creator=self.user,
+            ordinal=1,
+            description='description',
+            instructions='instructions',
+            active=True,
+            startDate='2015-11-01T14:00:00.000Z',
+            endDate='2015-12-01T14:00:00.000Z',
+            type='type',
+            hideScores=True,
+            matchSubmissions=False)
+
+        params = {
+            'name': 'phase 1 updated',
+            'ordinal': 2,
+            'description': 'description updated',
+            'instructions': 'instructions updated',
+            'active': False,
+            'startDate': '2015-03-01T14:00:00.000Z',
+            'endDate': '2015-04-01T14:00:00.000Z',
+            'type': 'type updated',
+            'hideScores': False,
+            'matchSubmissions': True
+        }
+        resp = self.request(path='/challenge_phase/%s' % phase['_id'],
+                            method='PUT', user=self.user, params=params)
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['name'], 'phase 1 updated')
+        self.assertEqual(resp.json['ordinal'], 2)
+        self.assertEqual(resp.json['description'], 'description updated')
+        self.assertEqual(resp.json['instructions'], 'instructions updated')
+        self.assertFalse(resp.json['active'])
+        startDate = dateutil.parser.parse(resp.json['startDate'])
+        startDate = startDate.replace(tzinfo=dateutil.tz.tzutc())
+        self.assertEqual(startDate, datetime.datetime(2015, 3, 1, 14, 0, 0, 0,
+                                                      dateutil.tz.tzutc()))
+        endDate = dateutil.parser.parse(resp.json['endDate'])
+        endDate = endDate.replace(tzinfo=dateutil.tz.tzutc())
+        self.assertEqual(endDate, datetime.datetime(2015, 4, 1, 14, 0, 0, 0,
+                                                    dateutil.tz.tzutc()))
+        self.assertEqual(resp.json['type'], 'type updated')
+        self.assertFalse(resp.json['hideScores'])
+        self.assertTrue(resp.json['matchSubmissions'])
+
+    def testPhaseClearDates(self):
+        phase = self.model('phase', 'covalic').createPhase(
+            challenge=self.challenge,
+            name='phase',
+            creator=self.user,
+            ordinal=1,
+            startDate='2015-11-01T14:00:00.000Z',
+            endDate='2015-12-01T14:00:00.000Z')
+
+        params = {
+            'startDate': '',
+            'endDate': ''
+        }
+        resp = self.request(path='/challenge_phase/%s' % phase['_id'],
+                            method='PUT', user=self.user, params=params)
+        self.assertStatusOk(resp)
+        self.assertTrue(not resp.json['startDate'])
+        self.assertTrue(not resp.json['endDate'])
+
+    def testPhaseDeletion(self):
+        phase = self.model('phase', 'covalic').createPhase(
+            challenge=self.challenge,
+            name='phase',
+            creator=self.user,
+            ordinal=0)
+
+        resp = self.request(path='/challenge_phase/%s' % phase['_id'],
+                            method='DELETE', user=self.user)
+        self.assertStatusOk(resp)
+
+    def testPhaseDeletionInvalid(self):
+        resp = self.request(path='/challenge_phase/1', method='DELETE',
+                            user=self.user)
+        self.assertValidationError(resp, 'id')

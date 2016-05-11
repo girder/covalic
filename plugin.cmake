@@ -1,3 +1,6 @@
+add_python_test(challenge PLUGIN covalic)
+add_python_test(challenge_timeframe PLUGIN covalic)
+add_python_test(phase PLUGIN covalic)
 add_python_test(user_emails PLUGIN covalic)
 add_python_test(asset_folder PLUGIN covalic)
 add_python_test(submission_folder_access PLUGIN covalic)
