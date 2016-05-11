@@ -22,31 +22,35 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
         this.submissions.sortDir = girder.SORT_DESC;
         this.submissions.pageLimit = submissionLimit;
         this.submissions.on('g:changed', function () {
-            // Assume submissions that have overallScore were successful.
-            // Fetch jobs for all other submissions.
-            var unscoredSubmissions =
-                _.filter(this.submissions.models, function (submission) {
-                    return _.isUndefined(submission.get('overallScore'));
-                });
-            if (unscoredSubmissions.length > 0) {
-                var jobs = [];
-                var promises = [];
-                _.each(unscoredSubmissions, function (submission) {
-                    var deferred = $.Deferred();
-                    var job = new girder.models.JobModel({
-                        _id: submission.get('jobId')
-                    }).on('g:fetched', function () {
-                        deferred.resolve();
-                    }, this).on('g:error', function () {
-                        deferred.reject();
-                    }, this).fetch();
-                    jobs.push(job);
-                    promises.push(deferred.promise());
-                });
-                $.when.apply($, promises).done(_.bind(function () {
-                    var jobMap = _.indexBy(jobs, 'id');
-                    this.render({jobs: jobMap});
-                }, this));
+            if (girder.currentUser.get('admin')) {
+                // Assume submissions that have overallScore were successful.
+                // Fetch jobs for all other submissions.
+                var unscoredSubmissions =
+                    _.filter(this.submissions.models, function (submission) {
+                        return _.isUndefined(submission.get('overallScore'));
+                    });
+                if (unscoredSubmissions.length > 0) {
+                    var jobs = [];
+                    var promises = [];
+                    _.each(unscoredSubmissions, function (submission) {
+                        var deferred = $.Deferred();
+                        var job = new girder.models.JobModel({
+                            _id: submission.get('jobId')
+                        }).on('g:fetched', function () {
+                            deferred.resolve();
+                        }, this).on('g:error', function () {
+                            deferred.reject();
+                        }, this).fetch();
+                        jobs.push(job);
+                        promises.push(deferred.promise());
+                    });
+                    $.when.apply($, promises).done(_.bind(function () {
+                        var jobMap = _.indexBy(jobs, 'id');
+                        this.render({jobs: jobMap});
+                    }, this));
+                } else {
+                    this.render();
+                }
             } else {
                 this.render();
             }
@@ -68,6 +72,7 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
             getShortLog: this._getShortLog,
             girder: girder,
             moment: moment,
+            siteAdmin: girder.currentUser.get('admin'),
             jobs: params && params.jobs
         }));
 

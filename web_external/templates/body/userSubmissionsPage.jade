@@ -1,6 +1,7 @@
 - var hasSubmissions = submissions.length > 0
 - var hasSuccessfulSubmission = false
 - var endOfSubmissions = !submissions.hasNextPage()
+- var successText = girder.jobs_JobStatus.text(girder.jobs_JobStatus.SUCCESS)
 
 .c-user-submissions-panel.panel.panel-default
   .c-user-submissions-user-info.panel-heading.clearfix
@@ -35,18 +36,18 @@
               if submission.get('latest')
                 i.icon-ok
             td.c-submission-status
-              a(href="#job/#{submission.get('jobId')}")
                 if hasScore
-                  = girder.jobs_JobStatus.text(girder.jobs_JobStatus.SUCCESS)
                   - hasSuccessfulSubmission = true
+                  if siteAdmin
+                    a(href="#job/#{submission.get('jobId')}")= successText
+                  else
+                    = successText
                 else
                   - var job = jobs !== undefined && jobs[submission.get('jobId')]
                   if job
-                    span.c-job-log-tooltip(
+                    a(href="#job/#{submission.get('jobId')}").c-job-log-tooltip(
                       title=getShortLog(job, 5))
                        = girder.jobs_JobStatus.text(job.get('status'))
-                  else
-                    | --
             td.c-submission-date= dateStr
             td.c-submission-score
               if hasScore
