@@ -2,6 +2,15 @@
 * View for a user's submissions to a phase.
 */
 covalic.views.UserSubmissionsView = covalic.View.extend({
+    events: {
+        'click a.c-submission-json-link': function (event) {
+            var submissionId = $(event.currentTarget).attr('c-submission-id');
+            var submission = this.submissions.get(submissionId);
+            var submissionJson = JSON.stringify(submission, null, 4);
+            console.info(submissionJson);
+        }
+    },
+
     initialize: function (settings) {
         this.phase = settings.phase;
         this.user = settings.user;
