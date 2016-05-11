@@ -167,77 +167,15 @@ def challengeSaved(event):
         challenge, folder, save=True)
 
 
-def onSubmissionCreated(event):
-    """
-    Hook into submission created event to set up access control on the
-    submission folder. Phase admins should have read access.
-    """
-    submission = event.info
-
-    folderModel = ModelImporter.model('folder')
-    userModel = ModelImporter.model('user')
-    phaseModel = ModelImporter.model('phase', 'challenge')
-
-    # Get phase admin user ids
-    folder = folderModel.load(submission['folderId'], force=True, exc=True)
-    phase = phaseModel.load(submission['phaseId'], force=True, exc=True)
-    phaseAcl = phaseModel.getFullAccessList(phase)
-    phaseAdminUsers = [userModel.load(user['id'], force=True, exc=True)
-                       for user in phaseAcl.get('users')
-                       if (user['level'] >= AccessType.WRITE and
-                           user['id'] != folder['creatorId'])]
-
-    # Update phase submission folder ACL for phase admins
-    for user in phaseAdminUsers:
-        folderModel.setUserAccess(folder, user, AccessType.READ)
-    if phaseAdminUsers:
-        folderModel.save(folder, validate=False)
-
-
 def onPhaseSave(event):
     """
     Hook into phase save event to synchronize access control between the phase
-    and submission folders for the phase. Phase admins should have read access
-    on the submission folders.
+    and submission folders for the phase.
     """
     phase = event.info
-
-    folderModel = ModelImporter.model('folder')
-    userModel = ModelImporter.model('user')
-    phaseModel = ModelImporter.model('phase', 'challenge')
     submissionModel = ModelImporter.model('submission', 'covalic')
-
-    # Get phase admin users
-    phaseAcl = phaseModel.getFullAccessList(phase)
-    phaseAdminUserIds = [user['id']
-                         for user in phaseAcl.get('users')
-                         if user['level'] >= AccessType.WRITE]
-    phaseAdminUsers = [userModel.load(userId, force=True, exc=True)
-                       for userId in phaseAdminUserIds]
-
-    # Update phase submission folder ACL for current phase admins
     submissions = submissionModel.getAllSubmissions(phase)
-    for sub in submissions:
-        folder = folderModel.load(sub['folderId'], force=True)
-        if not folder:
-            continue
-        folderAcl = folderModel.getFullAccessList(folder)
-
-        # Revoke access to users who are not phase admins
-        usersToRemove = [userModel.load(user['id'], force=True, exc=True)
-                         for user in folderAcl.get('users')
-                         if (user['id'] not in phaseAdminUserIds and
-                             user['id'] != folder['creatorId'])]
-        for user in usersToRemove:
-            folderModel.setUserAccess(folder, user, None)
-
-        # Add access to phase admins
-        for user in phaseAdminUsers:
-            folderModel.setUserAccess(folder, user, AccessType.READ)
-
-        # Save folder if access changed
-        if usersToRemove or phaseAdminUsers:
-            folderModel.save(folder, validate=False)
+    submissionModel.updateFolderAccess(phase, submissions)
 
 
 def onJobUpdate(event):
@@ -334,8 +272,6 @@ def load(info):
     events.bind('model.challenge_phase.validate', 'covalic', validatePhase)
     events.bind('model.challenge_challenge.save.after', 'covalic',
                 challengeSaved)
-    events.bind('model.covalic_submission.save.created', 'covalic',
-                onSubmissionCreated)
     events.bind('model.challenge_phase.save.after', 'covalic',
                 onPhaseSave)
     events.bind('model.user.save.after', 'covalic', onUserSave)

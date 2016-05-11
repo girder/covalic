@@ -17,6 +17,8 @@
 #  limitations under the License.
 ###############################################################################
 
+import six
+
 from tests import base
 from girder.constants import AccessType
 
@@ -31,6 +33,21 @@ def tearDownModule():
 
 
 class SubmissionFolderAccessTestCase(base.TestCase):
+    @staticmethod
+    def _filterUserAccessKeys(folder):
+        """
+        Filter a folder's user access control list to contain only keys relevant
+        for this test. In certain workflows,
+        AccessControlledModel.getFullAccessList() adds additional keys such as
+        'login' and 'name'. Removing the additional keys simplifies writing
+        equality assertions.
+        """
+        for item in folder['access']['users']:
+            toDelete = [key for key in six.viewkeys(item)
+                        if key not in ('id', 'level')]
+            for key in toDelete:
+                del item[key]
+
     def testSubmissionFolderAccess(self):
         # Create users
         challengeAdmin = self.model('user').createUser(
@@ -71,18 +88,21 @@ class SubmissionFolderAccessTestCase(base.TestCase):
         submissionFolder = folderModel.load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 3)
-        self.assertEqual(submissionFolder['access']['users'][0]['id'],
-                         user1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][0]['level'],
-                         AccessType.ADMIN)
-        self.assertEqual(submissionFolder['access']['users'][1]['id'],
-                         phaseAdmin1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][1]['level'],
-                         AccessType.READ)
-        self.assertEqual(submissionFolder['access']['users'][2]['id'],
-                         phaseAdmin2['_id'])
-        self.assertEqual(submissionFolder['access']['users'][2]['level'],
-                         AccessType.READ)
+        self._filterUserAccessKeys(submissionFolder)
+        six.assertCountEqual(self, submissionFolder['access']['users'], [
+            {
+                'id': user1['_id'],
+                'level': AccessType.ADMIN
+            },
+            {
+                'id': phaseAdmin1['_id'],
+                'level': AccessType.READ
+            },
+            {
+                'id': phaseAdmin2['_id'],
+                'level': AccessType.READ
+            }
+        ])
 
         # Remove user1 as phase admin. This shouldn't change folder ACL because
         # user1 is the folder's owner.
@@ -90,18 +110,21 @@ class SubmissionFolderAccessTestCase(base.TestCase):
         submissionFolder = folderModel.load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 3)
-        self.assertEqual(submissionFolder['access']['users'][0]['id'],
-                         user1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][0]['level'],
-                         AccessType.ADMIN)
-        self.assertEqual(submissionFolder['access']['users'][1]['id'],
-                         phaseAdmin1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][1]['level'],
-                         AccessType.READ)
-        self.assertEqual(submissionFolder['access']['users'][2]['id'],
-                         phaseAdmin2['_id'])
-        self.assertEqual(submissionFolder['access']['users'][2]['level'],
-                         AccessType.READ)
+        self._filterUserAccessKeys(submissionFolder)
+        six.assertCountEqual(self, submissionFolder['access']['users'], [
+            {
+                'id': user1['_id'],
+                'level': AccessType.ADMIN
+            },
+            {
+                'id': phaseAdmin1['_id'],
+                'level': AccessType.READ
+            },
+            {
+                'id': phaseAdmin2['_id'],
+                'level': AccessType.READ
+            }
+        ])
 
         # Remove phaseAdmin2 as a phase admin. This should remove phaseAdmin2
         # from the submission folder ACL.
@@ -109,14 +132,17 @@ class SubmissionFolderAccessTestCase(base.TestCase):
         submissionFolder = folderModel.load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 2)
-        self.assertEqual(submissionFolder['access']['users'][0]['id'],
-                         user1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][0]['level'],
-                         AccessType.ADMIN)
-        self.assertEqual(submissionFolder['access']['users'][1]['id'],
-                         phaseAdmin1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][1]['level'],
-                         AccessType.READ)
+        self._filterUserAccessKeys(submissionFolder)
+        six.assertCountEqual(self, submissionFolder['access']['users'], [
+            {
+                'id': user1['_id'],
+                'level': AccessType.ADMIN
+            },
+            {
+                'id': phaseAdmin1['_id'],
+                'level': AccessType.READ
+            }
+        ])
 
         # Re-add phaseAdmin2 as phase admin. This should add phaseAdmin2 back to
         # the submission folder ACL.
@@ -124,18 +150,21 @@ class SubmissionFolderAccessTestCase(base.TestCase):
         submissionFolder = folderModel.load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 3)
-        self.assertEqual(submissionFolder['access']['users'][0]['id'],
-                         user1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][0]['level'],
-                         AccessType.ADMIN)
-        self.assertEqual(submissionFolder['access']['users'][1]['id'],
-                         phaseAdmin1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][1]['level'],
-                         AccessType.READ)
-        self.assertEqual(submissionFolder['access']['users'][2]['id'],
-                         phaseAdmin2['_id'])
-        self.assertEqual(submissionFolder['access']['users'][2]['level'],
-                         AccessType.READ)
+        self._filterUserAccessKeys(submissionFolder)
+        six.assertCountEqual(self, submissionFolder['access']['users'], [
+            {
+                'id': user1['_id'],
+                'level': AccessType.ADMIN
+            },
+            {
+                'id': phaseAdmin1['_id'],
+                'level': AccessType.READ
+            },
+            {
+                'id': phaseAdmin2['_id'],
+                'level': AccessType.READ
+            }
+        ])
 
         # Change phaseAdmin2's access to read-only. This should remove
         # phaseAdmin2 from the submission folder ACL.
@@ -143,14 +172,17 @@ class SubmissionFolderAccessTestCase(base.TestCase):
         submissionFolder = folderModel.load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 2)
-        self.assertEqual(submissionFolder['access']['users'][0]['id'],
-                         user1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][0]['level'],
-                         AccessType.ADMIN)
-        self.assertEqual(submissionFolder['access']['users'][1]['id'],
-                         phaseAdmin1['_id'])
-        self.assertEqual(submissionFolder['access']['users'][1]['level'],
-                         AccessType.READ)
+        self._filterUserAccessKeys(submissionFolder)
+        six.assertCountEqual(self, submissionFolder['access']['users'], [
+            {
+                'id': user1['_id'],
+                'level': AccessType.ADMIN
+            },
+            {
+                'id': phaseAdmin1['_id'],
+                'level': AccessType.READ
+            }
+        ])
 
         # Verify that the phase can be modified and saved successfully if a
         # submission folder has been deleted
