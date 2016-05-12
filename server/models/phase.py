@@ -18,6 +18,8 @@
 ###############################################################################
 
 import datetime
+import json
+import six
 
 from bson.objectid import ObjectId
 from girder.constants import AccessType
@@ -72,15 +74,41 @@ class Phase(AccessControlledModel):
                 raise ValidationException('Invalid start and end dates.',
                                           field='startDate')
 
+        # Ensure dockerArgs is a proper JSON list. If not, convert it to one.
+        if doc.get('scoreTask', {}).get('dockerArgs'):
+            args = doc['scoreTask']['dockerArgs']
+            if isinstance(args, six.string_types):
+                try:
+                    doc['scoreTask']['dockerArgs'] = json.loads(args)
+                except ValueError:
+                    raise ValidationException(
+                        'Docker arguments must be specified as a JSON list.')
+
+            if not isinstance(doc['scoreTask']['dockerArgs'], list):
+                raise ValidationException('Docker arguments must be a list.')
+
         return doc
 
     def subtreeCount(self, phase):
-        # TODO if we refactor to move submission into challenge, count them here
-        return 1
+        """
+        Returns the subtree count of this phase, which is the number of
+        submissions, plus one record for the phase itself.
+        """
+        return self.model(
+            'submission', 'covalic').getAllSubmissions(phase).count() + 1
 
     def remove(self, phase, progress=noProgress):
-        AccessControlledModel.remove(self, phase, progress=progress)
-        progress.update(increment=1, message='Deleted phase ' + phase['name'])
+        """
+        Remove this phase, which also removes all submissions to it.
+        """
+        subModel = self.model('submission', 'covalic')
+        for sub in subModel.getAllSubmissions(phase):
+            subModel.remove(sub)
+            progress.update(increment=1,
+                            message='Deleted submission %s' % sub['name'])
+
+        super(Phase, self).remove(phase, progress=progress)
+        progress.update(increment=1, message='Deleted phase %s' % phase['name'])
 
     def createPhase(self, name, challenge, creator, ordinal, description='',
                     instructions='', active=False, public=True,
