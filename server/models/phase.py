@@ -105,7 +105,7 @@ class Phase(AccessControlledModel):
         for sub in subModel.getAllSubmissions(phase):
             subModel.remove(sub)
             progress.update(increment=1,
-                            message='Deleted submission %s' % sub['name'])
+                            message='Deleted submission %s' % sub['title'])
 
         super(Phase, self).remove(phase, progress=progress)
         progress.update(increment=1, message='Deleted phase %s' % phase['name'])
