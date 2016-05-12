@@ -52,14 +52,14 @@ class Submission(Resource):
         or above on the phase will still be able to view the scores.
         """
         if (phase.get('hideScores') and
-                not self.model('phase', 'challenge').hasAccess(
+                not self.model('phase', 'covalic').hasAccess(
                     phase, user, level=AccessType.WRITE)):
             submission.pop('score', None)
             submission.pop('overallScore', None)
         return submission
 
     @access.public
-    @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='challenge',
+    @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='covalic',
                level=AccessType.READ)
     @filtermodel(model='submission', plugin='covalic')
     @describeRoute(
@@ -84,7 +84,7 @@ class Submission(Resource):
 
         # If scores are hidden, do not allow sorting by score fields
         if (phase.get('hideScores') and
-                not self.model('phase', 'challenge').hasAccess(
+                not self.model('phase', 'covalic').hasAccess(
                     phase, user, AccessType.WRITE)):
             for field, _ in sort:
                 if field == 'overallScore' or field.startswith('score.'):
@@ -105,7 +105,7 @@ class Submission(Resource):
         return [self._filterScore(phase, s, user) for s in submissions]
 
     @access.user
-    @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='challenge',
+    @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='covalic',
                level=AccessType.READ)
     @loadmodel(map={'folderId': 'folder'}, model='folder',
                level=AccessType.ADMIN)
@@ -132,7 +132,7 @@ class Submission(Resource):
 
         # Only users in the participant group (or with write access) may submit
         if phase['participantGroupId'] not in user['groups']:
-            self.model('phase', 'challenge').requireAccess(
+            self.model('phase', 'covalic').requireAccess(
                 phase, user, level=AccessType.WRITE)
 
         # Site admins may override the submission creation date
@@ -178,9 +178,9 @@ class Submission(Resource):
         submission = self.model('submission', 'covalic').createSubmission(
             user, phase, folder, job, title, created)
 
-        if not self.model('phase', 'challenge').hasAccess(
+        if not self.model('phase', 'covalic').hasAccess(
                 phase, user=scoreUser, level=AccessType.ADMIN):
-            self.model('phase', 'challenge').setUserAccess(
+            self.model('phase', 'covalic').setUserAccess(
                 phase, user=scoreUser, level=AccessType.ADMIN, save=True)
 
         if not self.model('folder').hasAccess(
@@ -279,7 +279,7 @@ class Submission(Resource):
     )
     def postScore(self, submission, params):
         # Ensure admin access on the containing challenge phase
-        phase = self.model('phase', 'challenge').load(
+        phase = self.model('phase', 'covalic').load(
             submission['phaseId'], user=self.getCurrentUser(), exc=True,
             level=AccessType.ADMIN)
 
@@ -291,7 +291,7 @@ class Submission(Resource):
         self.model('token').remove(token)
 
         user = self.model('user').load(submission['creatorId'], force=True)
-        challenge = self.model('challenge', 'challenge').load(
+        challenge = self.model('challenge', 'covalic').load(
             phase['challengeId'], force=True)
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
 
@@ -337,13 +337,13 @@ class Submission(Resource):
     def getSubmission(self, submission, params):
         # Ensure read access on the containing challenge phase
         user = self.getCurrentUser()
-        phase = self.model('phase', 'challenge').load(
+        phase = self.model('phase', 'covalic').load(
             submission['phaseId'], user=user, exc=True, level=AccessType.READ)
 
         return self._filterScore(phase, submission, user)
 
     @access.user
-    @loadmodel(model='phase', plugin='challenge', level=AccessType.ADMIN)
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
     def getUnscoredSubmissions(self, params):
         # TODO implement
         pass
@@ -369,10 +369,10 @@ class Submission(Resource):
     )
     def deleteSubmission(self, submission, params):
         user = self.getCurrentUser()
-        phase = self.model('phase', 'challenge').load(submission['phaseId'],
+        phase = self.model('phase', 'covalic').load(submission['phaseId'],
                                                       force=True)
         if (user['_id'] == submission['creatorId'] or
-                self.model('phase', 'challenge').hasAccess(
+                self.model('phase', 'covalic').hasAccess(
                     phase, user, AccessType.WRITE)):
             self.model('submission', 'covalic').remove(submission)
         else:
