@@ -16,5 +16,9 @@ covalic.models.SubmissionModel = girder.Model.extend({
         }, this)).error(_.bind(function (err) {
             this.trigger('c:error', err);
         }, this));
+    },
+
+    downloadUrl: function () {
+        return girder.apiRoot + '/folder/' + this.get('folderId') + '/download';
     }
 });

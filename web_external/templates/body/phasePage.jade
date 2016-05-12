@@ -75,3 +75,7 @@
 .c-leaderboard-outer-wrapper
   .c-section-header Leaderboard
   .c-leaderboard-widget-container
+
+  if phase.getAccessLevel() >= girder.AccessType.WRITE
+    a.btn.btn-default.btn-sm(href="#phase/#{phase.id}/submissions")
+      | View all submissions

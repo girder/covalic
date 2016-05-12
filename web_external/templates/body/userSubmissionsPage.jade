@@ -1,0 +1,77 @@
+- var hasSubmissions = submissions.length > 0
+- var hasSuccessfulSubmission = false
+- var endOfSubmissions = !submissions.hasNextPage()
+- var successText = girder.jobs_JobStatus.text(girder.jobs_JobStatus.SUCCESS)
+
+.c-user-submissions-panel.panel.panel-default
+  .c-user-submissions-user-info.panel-heading.clearfix
+    i.icon-user
+    span.c-user-name= user.name()
+    a.c-user-login(href="#user/#{user.id}")= user.get('login')
+    if user.has('email')
+      - var email = user.get('email')
+      a.c-user-email(href="mailto:#{email}")= email
+    span.c-user-submissions-pagination.pull-right
+
+  if hasSubmissions
+    table.table.table-striped.table-condensed.c-user-submissions-table
+      thead
+        tr
+          th Title
+          th Latest
+          th Status
+          th Date
+          th Score
+          th
+          th
+      tbody
+        each submission in submissions.models
+          - var hasScore = submission.has('overallScore')
+          - var date = moment(submission.get('created'))
+          - var dateStr = date.format('ddd, D MMM YYYY, h:mm:ss a')
+          tr
+            td.c-submission-title= submission.get('title') || '--'
+            td.c-submission-latest
+              if submission.get('latest')
+                i.icon-ok
+            td.c-submission-status
+                if hasScore
+                  - hasSuccessfulSubmission = true
+                  if siteAdmin
+                    a(href="#job/#{submission.get('jobId')}")= successText
+                  else
+                    = successText
+                else
+                  - var job = jobs !== undefined && jobs[submission.get('jobId')]
+                  if job
+                    a(href="#job/#{submission.get('jobId')}").c-job-log-tooltip(
+                      title=getShortLog(job, 5))
+                       = girder.jobs_JobStatus.text(job.get('status'))
+            td.c-submission-date= dateStr
+            td.c-submission-score
+              if hasScore
+                a.c-score-link(
+                    href="#submission/#{submission.id}")= (Math.round(submission.get('overallScore') * 1000) / 1000).toFixed(3)
+            td.c-submission-download
+              a.c-tooltip(
+                title="Download submission data",
+                href=submission.downloadUrl())
+                  | download
+            td.c-submission-json
+              a.c-submission-json-link.c-tooltip(
+                title="Dump submission JSON to console"
+                c-submission-id="#{submission.id}")
+                  | dump json
+
+  if !hasSubmissions || !hasSuccessfulSubmission || (hasSubmissions && endOfSubmissions)
+    .c-user-submissions-footer.panel-footer
+      if !hasSubmissions
+        .c-no-submit.text-warning
+          i.icon-attention
+          |  No submissions
+      else if !hasSuccessfulSubmission
+        .c-no-success.text-danger
+          i.icon-cancel
+          |  No successful submissions on this page
+      if hasSubmissions && endOfSubmissions
+          | &ndash; end of submissions &ndash;
