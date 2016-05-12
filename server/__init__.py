@@ -221,7 +221,7 @@ def onUserSave(event):
 
 
 def load(info):
-    resource.allowedSearchTypes.add('covalic.challenge')
+    resource.allowedSearchTypes.add('challenge.covalic')
 
     info['apiRoot'].challenge = challenge.Challenge()
     info['apiRoot'].challenge_phase = phase.Phase()

@@ -22,9 +22,9 @@ covalic.views.ChallengesView = covalic.View.extend({
 
         this.searchWidget = new girder.views.SearchFieldWidget({
             placeholder: 'Search challenges...',
-            types: ['covalic.challenge'],
+            types: ['challenge.covalic'],
             getInfoCallback: function (type, obj) {
-                if (type === 'covalic.challenge') {
+                if (type === 'challenge.covalic') {
                     return {
                         text: obj.name,
                         icon: 'flag-checkered'
