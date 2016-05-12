@@ -13,6 +13,45 @@ covalic.views.SubmissionView = covalic.View.extend({
                 folderId: this.submission.get('folderId'),
                 title: this.submission.get('title')
             });
+        },
+
+        'click .c-download-submission-data': function (event) {
+            // Get submission folder with details
+            var submissionFolder = new girder.models.FolderModel({
+                _id: this.submission.get('folderId')
+            });
+            submissionFolder.once('g:fetched', function () {
+                submissionFolder.once('g:fetched.details', function () {
+                    this._downloadSubmissionData(submissionFolder);
+                }, this).fetch({
+                    extraPath: 'details'
+                });
+            }, this).fetch();
+        }
+    },
+
+    /**
+     * Download submission data from folder. If folder contains only one item,
+     * download the item directly.
+     */
+    _downloadSubmissionData: function (folder) {
+        var numFolders = folder.get('nFolders');
+        var numItems = folder.get('nItems');
+        if (numFolders === 0 && numItems === 1) {
+            // Download item
+            var items = new girder.collections.ItemCollection();
+            items.once('g:changed', function () {
+                var item = new girder.models.ItemModel({
+                    _id: items.at(0).id
+                }).once('g:fetched', function () {
+                    item.download();
+                }, this).fetch();
+            }, this).fetch({
+                folderId: folder.id
+            });
+        } else {
+            // Download folder
+            folder.download();
         }
     },
 
@@ -56,7 +95,8 @@ covalic.views.SubmissionView = covalic.View.extend({
                             this.phase.getAccessLevel() < girder.AccessType.WRITE),
             JobStatus: girder.jobs_JobStatus,
             job: this.job,
-            created: girder.formatDate(this.submission.get('created'), girder.DATE_SECOND)
+            created: girder.formatDate(this.submission.get('created'), girder.DATE_SECOND),
+            download: this.phase.getAccessLevel() > girder.AccessType.READ
         }));
 
         var userModel = new girder.models.UserModel();
