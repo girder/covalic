@@ -370,7 +370,7 @@ class Submission(Resource):
     def deleteSubmission(self, submission, params):
         user = self.getCurrentUser()
         phase = self.model('phase', 'covalic').load(submission['phaseId'],
-                                                      force=True)
+                                                    force=True)
         if (user['_id'] == submission['creatorId'] or
                 self.model('phase', 'covalic').hasAccess(
                     phase, user, AccessType.WRITE)):
