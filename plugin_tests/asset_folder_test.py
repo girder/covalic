@@ -32,7 +32,7 @@ def tearDownModule():
 
 class AssetFolderTestCase(base.TestCase):
     def testAssetFolder(self):
-        challengeModel = self.model('challenge', 'challenge')
+        challengeModel = self.model('challenge', 'covalic')
         admin = self.model('user').createUser(
             email='admin@email.com', login='admin', firstName='Admin',
             lastName='Admin', password='passwd')

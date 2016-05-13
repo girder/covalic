@@ -7,3 +7,4 @@ tmp
 .worker_pids
 *~
 /.vagrant/
+__pycache__/

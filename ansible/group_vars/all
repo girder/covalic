@@ -1,7 +1,6 @@
 ---
 girder_version: master
 covalic_version: master
-challenge_version: master
 covalic_metrics_version: latest
 girder_worker_version: master
 pod_hosts: "{{ groups.get('tag_pod_' + pod, ['localhost']) }}"

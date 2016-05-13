@@ -54,7 +54,7 @@ def getChallengeUserEmails(challenge, accessLevel):
     :type accessLevel: girder.AccessType
     """
     acl = ModelImporter.model(
-        'challenge', 'challenge').getFullAccessList(challenge)
+        'challenge', 'covalic').getFullAccessList(challenge)
     users = _getUsers(acl, accessLevel)
     emails = [user['email'] for user in users]
     return emails
@@ -73,12 +73,12 @@ def getPhaseUserEmails(phase, accessLevel, includeChallengeUsers=True):
         users with on the phase's challenge. Duplicates are removed.
     :type includeChallengeUsers: bool
     """
-    acl = ModelImporter.model('phase', 'challenge').getFullAccessList(phase)
+    acl = ModelImporter.model('phase', 'covalic').getFullAccessList(phase)
     users = _getUsers(acl, accessLevel)
     emails = [user['email'] for user in users]
 
     if includeChallengeUsers:
-        challenge = ModelImporter.model('challenge', 'challenge').load(
+        challenge = ModelImporter.model('challenge', 'covalic').load(
             phase['challengeId'], force=True)
         emails.extend(getChallengeUserEmails(challenge, accessLevel))
         emails = list(set(emails))

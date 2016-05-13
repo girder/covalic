@@ -21,7 +21,7 @@ import datetime
 
 from girder.constants import AccessType
 from girder.models.model_base import Model, ValidationException
-from girder.plugins.challenge.models.utility import validateDate
+from girder.plugins.covalic.utility import validateDate
 from girder.plugins.covalic import scoring
 from girder.utility.progress import noProgress
 
@@ -51,7 +51,7 @@ class Submission(Model):
 
         if doc.get('score') is not None and doc.get('overallScore') is None:
             scoring.computeAverageScores(doc['score'])
-            phase = self.model('phase', 'challenge').load(
+            phase = self.model('phase', 'covalic').load(
                 doc['phaseId'], force=True)
             doc['overallScore'] = scoring.computeOverallScore(doc, phase)
             doc['latest'] = True
@@ -142,7 +142,7 @@ class Submission(Model):
         """
         folderModel = self.model('folder')
         userModel = self.model('user')
-        phaseModel = self.model('phase', 'challenge')
+        phaseModel = self.model('phase', 'covalic')
 
         # Get phase admin users
         phaseAcl = phaseModel.getFullAccessList(phase)

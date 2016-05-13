@@ -2,7 +2,6 @@ name: COVALIC Challenges
 description: An application for hosting grand challenges.
 version: 0.1.0
 dependencies:
-    - challenge
     - gravatar
     - worker
     - thumbnails

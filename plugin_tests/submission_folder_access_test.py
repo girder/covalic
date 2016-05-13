@@ -63,8 +63,8 @@ class SubmissionFolderAccessTestCase(base.TestCase):
             email='user1@email.com', login='user1',
             firstName='User', lastName='1', password='passwd')
 
-        challengeModel = self.model('challenge', 'challenge')
-        phaseModel = self.model('phase', 'challenge')
+        challengeModel = self.model('challenge', 'covalic')
+        phaseModel = self.model('phase', 'covalic')
         folderModel = self.model('folder')
         submissionModel = self.model('submission', 'covalic')
 
@@ -72,10 +72,12 @@ class SubmissionFolderAccessTestCase(base.TestCase):
         challenge = challengeModel.createChallenge(
             name='challenge 1', creator=challengeAdmin, public=False)
         phase = phaseModel.createPhase(
-            name='phase 1', challenge=challenge, creator=phaseAdmin1, ordinal=1)
+            name='phase 1', challenge=challenge, creator=phaseAdmin1,
+            ordinal=1)
 
         # Add phaseAdmin2 and user 1 as phase admins
-        phaseModel.setUserAccess(phase, phaseAdmin2, AccessType.WRITE, save=True)
+        phaseModel.setUserAccess(phase, phaseAdmin2, AccessType.WRITE,
+                                 save=True)
         phaseModel.setUserAccess(phase, user1, AccessType.WRITE, save=True)
 
         # Create folder and submission as user1
@@ -146,7 +148,8 @@ class SubmissionFolderAccessTestCase(base.TestCase):
 
         # Re-add phaseAdmin2 as phase admin. This should add phaseAdmin2 back to
         # the submission folder ACL.
-        phaseModel.setUserAccess(phase, phaseAdmin2, AccessType.WRITE, save=True)
+        phaseModel.setUserAccess(phase, phaseAdmin2, AccessType.WRITE,
+                                 save=True)
         submissionFolder = folderModel.load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 3)

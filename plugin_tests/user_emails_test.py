@@ -97,8 +97,8 @@ class EmailUtilityTestCase(base.TestCase):
         }
         self.user5 = self.model('user').createUser(**user)
 
-        self.challengeModel = self.model('challenge', 'challenge')
-        self.phaseModel = self.model('phase', 'challenge')
+        self.challengeModel = self.model('challenge', 'covalic')
+        self.phaseModel = self.model('phase', 'covalic')
 
     def testGetChallengeUserEmails(self):
         challenge = self.challengeModel.createChallenge(
