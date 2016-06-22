@@ -89,8 +89,14 @@ covalic.views.SubmissionView = covalic.View.extend({
     },
 
     render: function () {
+        var overallScore = this.submission.get('overallScore');
+        if (!_.contains(['inf', '-inf', 'nan'], overallScore)) {
+            overallScore = Math.round(this.submission.get('overallScore') * 1000) / 1000;
+        }
+
         this.$el.html(covalic.templates.submissionPage({
             submission: this.submission,
+            overallScore: overallScore,
             scoreHidden: !!(this.phase.get('hideScores') &&
                             this.phase.getAccessLevel() < girder.AccessType.WRITE),
             JobStatus: girder.jobs_JobStatus,

@@ -59,6 +59,9 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
         if (score === null) {
             return '';
         }
+        if (_.contains(['inf', '-inf', 'nan'], score)) {
+            return score;
+        }
         if (score < 0.0001) {
             return Number(score).toExponential(2);
         } else {

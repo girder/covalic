@@ -62,12 +62,12 @@ class Submission(Resource):
             submission.pop('overallScore', None)
         else:
             # coerce any nans or infs to strings
-            for dataset in submission.get('score', ()):
+            for dataset in (submission.get('score') or ()):
                 for metric in dataset['metrics']:
                     v = float(metric['value'])
                     if math.isnan(v) or math.isinf(v):
                         metric['value'] = str(v)
-            v = submission.get('overallScore', 0)
+            v = submission.get('overallScore') or 0
             if math.isnan(v) or math.isinf(v):
                 submission['overallScore'] = str(v)
 

@@ -13,6 +13,14 @@ covalic.views.SubmissionListWidget = covalic.View.extend({
 
         this.collection = new covalic.collections.SubmissionCollection();
         this.collection.on('g:changed', function () {
+            this.collection.each(function (submission) {
+                var score = submission.get('overallScore');
+                if (_.contains(['inf', '-inf', 'nan'], score)) {
+                    submission.displayScore = score;
+                } else {
+                    submission.displayScore = (Math.round(score * 1000) / 1000).toFixed(3);
+                }
+            });
             this.render();
         }, this).fetch({
             phaseId: this.phase.get('_id'),

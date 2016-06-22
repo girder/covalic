@@ -23,7 +23,7 @@
   if submission.has('overallScore')
     .c-submission-overall-score-container
       .c-pre-text Overall score:
-      .c-overall-score= Math.round(submission.get('overallScore') * 1000) / 1000
+      .c-overall-score= overallScore
   else
     .c-score-pending-container
       if job
