@@ -338,7 +338,7 @@ class Submission(Resource):
         mail_utils.sendEmail(
             to=emails, subject='A submission has been scored', text=html)
 
-        return submission
+        return self._filterScore(phase, submission, user)
 
     @access.public
     @loadmodel(model='submission', plugin='covalic')
