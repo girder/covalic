@@ -19,6 +19,7 @@
 
 import cherrypy
 import json
+import math
 import os
 import posixpath
 
@@ -50,12 +51,26 @@ class Submission(Resource):
         If the phase is configured to hide scores from participants, removes
         the relevant score fields from the document. Users with WRITE access
         or above on the phase will still be able to view the scores.
+
+        Additionally, ensures that any NaN or Infinity score values are coerced
+        to corresponding strings so they can be JSON encoded.
         """
         if (phase.get('hideScores') and
                 not self.model('phase', 'covalic').hasAccess(
                     phase, user, level=AccessType.WRITE)):
             submission.pop('score', None)
             submission.pop('overallScore', None)
+        else:
+            # coerce any nans or infs to strings
+            for dataset in (submission.get('score') or ()):
+                for metric in dataset['metrics']:
+                    v = float(metric['value'])
+                    if math.isnan(v) or math.isinf(v):
+                        metric['value'] = str(v)
+            v = submission.get('overallScore') or 0
+            if math.isnan(v) or math.isinf(v):
+                submission['overallScore'] = str(v)
+
         return submission
 
     @access.public
@@ -323,7 +338,7 @@ class Submission(Resource):
         mail_utils.sendEmail(
             to=emails, subject='A submission has been scored', text=html)
 
-        return submission
+        return self._filterScore(phase, submission, user)
 
     @access.public
     @loadmodel(model='submission', plugin='covalic')

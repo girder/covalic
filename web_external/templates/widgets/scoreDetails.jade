@@ -4,7 +4,7 @@ table.table.table-striped.table-condensed.c-submission-score-table
       th
       each metric in metrics
         th
-          a.c-metric-heading(metric="#{metric}", tabindex="0")= metric
+          a.c-metric-heading(metric=metric, tabindex="0")= metric
   tbody
     - var i = 0
     each dataset in datasets
