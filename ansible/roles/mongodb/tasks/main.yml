@@ -56,11 +56,31 @@
   tags:
     - mongodb
 
+- name: Ensure db directory exists
+  sudo: yes
+  file:
+    path: "{{ mongo_dbpath }}"
+    state: directory
+    owner: mongodb
+    group: mongodb
+  tags:
+    - mongodb
+    - rewire
+
 - name: Run mongo daemon
   sudo: yes
   service: name=mongod state=restarted
   tags:
     - mongodb
+    - rewire
+
+- name: Wait for Mongo startup
+  wait_for:
+    port: 27017
+    timeout: 15
+  tags:
+    - mongodb
+    - deploy-update
     - rewire
 
 - name: Install backup_db.sh script

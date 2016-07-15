@@ -27,4 +27,4 @@
     girder_assetstore_local_fs: true
     worker_exec_user: vagrant
     worker_exec_group: vagrant
-    mongo_dbpath: /vagrant/mongodata
+    mongo_dbpath: /data/db
