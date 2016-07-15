@@ -4,6 +4,7 @@ covalic.collections.SubmissionCollection = girder.Collection.extend({
 
     sortField: 'overallScore',
     sortDir: girder.SORT_DESC,
+    comparator: null,
 
     pageLimit: 100
 });
