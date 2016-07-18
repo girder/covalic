@@ -238,19 +238,20 @@ class Submission(Resource):
             },
             'inputs': {
                 'submission': {
-                    'mode': 'http',
-                    'method': 'GET',
-                    'url': '/'.join((
-                        apiUrl, 'folder', str(folder['_id']), 'download')),
-                    'headers': {'Girder-Token': scoreToken['_id']}
+                    'mode': 'girder',
+                    'api_url': apiUrl,
+                    'token': scoreToken['_id'],
+                    'id': str(folder['_id']),
+                    'name': folder['name'],
+                    'resource_type': 'folder'
                 },
                 'groundtruth': {
-                    'mode': 'http',
-                    'method': 'GET',
-                    'url': '/'.join((
-                        apiUrl, 'folder', str(groundTruth['_id']),
-                        'download')),
-                    'headers': {'Girder-Token': scoreToken['_id']}
+                    'mode': 'girder',
+                    'api_url': apiUrl,
+                    'token': scoreToken['_id'],
+                    'id': str(groundTruth['_id']),
+                    'name': groundTruth['name'],
+                    'resource_type': 'folder'
                 }
             },
             'outputs': {
