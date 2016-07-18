@@ -30,6 +30,7 @@ from girder.api.describe import Description, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
 from girder.models.model_base import AccessException, ValidationException
+from girder.plugins.worker.server import utils
 from girder.utility import mail_utils
 
 
@@ -237,22 +238,10 @@ class Submission(Resource):
                 }]
             },
             'inputs': {
-                'submission': {
-                    'mode': 'girder',
-                    'api_url': apiUrl,
-                    'token': scoreToken['_id'],
-                    'id': str(folder['_id']),
-                    'name': folder['name'],
-                    'resource_type': 'folder'
-                },
-                'groundtruth': {
-                    'mode': 'girder',
-                    'api_url': apiUrl,
-                    'token': scoreToken['_id'],
-                    'id': str(groundTruth['_id']),
-                    'name': groundTruth['name'],
-                    'resource_type': 'folder'
-                }
+                'submission': utils.girderInputSpec(
+                    folder, 'folder', token=scoreToken['_id']),
+                'groundtruth': utils.girderInputSpec(
+                    groundTruth, 'folder', token=scoreToken['_id'])
             },
             'outputs': {
                 '_stdout': {
