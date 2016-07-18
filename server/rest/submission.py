@@ -30,7 +30,7 @@ from girder.api.describe import Description, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
 from girder.models.model_base import AccessException, ValidationException
-from girder.plugins.worker.server import utils
+from girder.plugins.worker import utils
 from girder.utility import mail_utils
 
 
