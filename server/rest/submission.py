@@ -239,9 +239,9 @@ class Submission(Resource):
             },
             'inputs': {
                 'submission': utils.girderInputSpec(
-                    folder, 'folder', token=scoreToken['_id']),
+                    folder, 'folder', token=scoreToken),
                 'groundtruth': utils.girderInputSpec(
-                    groundTruth, 'folder', token=scoreToken['_id'])
+                    groundTruth, 'folder', token=scoreToken)
             },
             'outputs': {
                 '_stdout': {
@@ -253,12 +253,7 @@ class Submission(Resource):
                     'headers': {'Girder-Token': scoreToken['_id']}
                 }
             },
-            'jobInfo': {
-                'method': 'PUT',
-                'url': '/'.join((apiUrl, 'job', str(job['_id']))),
-                'headers': {'Girder-Token': jobToken['_id']},
-                'logPrint': True
-            },
+            'jobInfo': utils.jobInfoSpec(job, token=jobToken),
             'validate': False,
             'auto_convert': False,
             'cleanup': True
