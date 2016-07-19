@@ -220,13 +220,13 @@ class Submission(Resource):
                 'inputs': [{
                     'id': 'submission',
                     'type': 'string',
-                    'format': 'string',
+                    'format': 'text',
                     'target': 'filepath',
                     'filename': 'submission.zip'
                 }, {
                     'id': 'groundtruth',
                     'type': 'string',
-                    'format': 'string',
+                    'format': 'text',
                     'target': 'filepath',
                     'filename': 'groundtruth.zip'
                 }],
