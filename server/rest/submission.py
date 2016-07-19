@@ -172,7 +172,6 @@ class Submission(Resource):
         job = jobModel.createJob(
             title=jobTitle, type='covalic_score', handler='worker_handler',
             user=user)
-        jobToken = jobModel.createJobToken(job)
         scoreUserId = self.model('setting').get(PluginSettings.SCORING_USER_ID)
 
         if not scoreUserId:
@@ -253,7 +252,7 @@ class Submission(Resource):
                     'headers': {'Girder-Token': scoreToken['_id']}
                 }
             },
-            'jobInfo': utils.jobInfoSpec(job, token=jobToken),
+            'jobInfo': utils.jobInfoSpec(job),
             'validate': False,
             'auto_convert': False,
             'cleanup': True
