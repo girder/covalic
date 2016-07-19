@@ -30,6 +30,7 @@ from girder.api.describe import Description, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
 from girder.models.model_base import AccessException, ValidationException
+from girder.plugins.worker import utils
 from girder.utility import mail_utils
 
 
@@ -171,7 +172,6 @@ class Submission(Resource):
         job = jobModel.createJob(
             title=jobTitle, type='covalic_score', handler='worker_handler',
             user=user)
-        jobToken = jobModel.createJobToken(job)
         scoreUserId = self.model('setting').get(PluginSettings.SCORING_USER_ID)
 
         if not scoreUserId:
@@ -237,21 +237,10 @@ class Submission(Resource):
                 }]
             },
             'inputs': {
-                'submission': {
-                    'mode': 'http',
-                    'method': 'GET',
-                    'url': '/'.join((
-                        apiUrl, 'folder', str(folder['_id']), 'download')),
-                    'headers': {'Girder-Token': scoreToken['_id']}
-                },
-                'groundtruth': {
-                    'mode': 'http',
-                    'method': 'GET',
-                    'url': '/'.join((
-                        apiUrl, 'folder', str(groundTruth['_id']),
-                        'download')),
-                    'headers': {'Girder-Token': scoreToken['_id']}
-                }
+                'submission': utils.girderInputSpec(
+                    folder, 'folder', token=scoreToken),
+                'groundtruth': utils.girderInputSpec(
+                    groundTruth, 'folder', token=scoreToken)
             },
             'outputs': {
                 '_stdout': {
@@ -263,12 +252,7 @@ class Submission(Resource):
                     'headers': {'Girder-Token': scoreToken['_id']}
                 }
             },
-            'jobInfo': {
-                'method': 'PUT',
-                'url': '/'.join((apiUrl, 'job', str(job['_id']))),
-                'headers': {'Girder-Token': jobToken['_id']},
-                'logPrint': True
-            },
+            'jobInfo': utils.jobInfoSpec(job),
             'validate': False,
             'auto_convert': False,
             'cleanup': True
