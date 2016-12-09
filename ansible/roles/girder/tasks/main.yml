@@ -80,14 +80,14 @@
     - deploy-update
 
 - name: install girder core python requirements
-  pip: requirements="{{ girder_root }}/requirements.txt"
+  pip: extra_args="-e" name="{{ girder_root }}"
   sudo: yes
   tags:
     - girder
     - deploy-update
 
-- name: install covalic python requirements
-  pip: requirements="{{ girder_root }}/plugins/covalic/requirements.txt"
+- name: install plugin python requirements
+  pip: extra_args="-e" name="{{ girder_root }}[plugins]"
   sudo: yes
   tags:
     - girder
