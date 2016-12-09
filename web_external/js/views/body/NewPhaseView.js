@@ -5,7 +5,7 @@ covalic.views.NewPhaseView = covalic.View.extend({
             phase.set({
                 challengeId: this.challenge.id,
                 name: this.$('#c-phase-name').val(),
-                description: this.$('#c-challenge-description').val(),
+                description: this.$('#c-phase-description').val(),
                 active: this.$('#c-phase-active').is(':checked'),
                 hideScores: this.$('#c-phase-hide-scores').is(':checked'),
                 startDate: this.dateTimeRangeWidget.fromDateString(),
