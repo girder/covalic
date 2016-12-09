@@ -107,6 +107,13 @@
     - girder
     - deploy-update
 
+- name: update npm
+  command: npm install -g npm
+  sudo: yes
+  tags:
+    - girder
+    - deploy-update
+
 - name: run npm install
   npm: path={{ girder_root }} production=yes
   tags:
