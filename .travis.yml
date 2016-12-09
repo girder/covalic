@@ -10,7 +10,7 @@ compiler:
 before_install:
     - cd "${HOME}"
     - npm install -g npm
-    - git clone git://github.com/girder/girder
+    - git clone -b 1.x-maintenance git://github.com/girder/girder
     - curl "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.0.2.tgz" | gunzip -c | tar x
     - cd mongodb-*/bin && export PATH="${PWD}:${PATH}"
     - mkdir /tmp/db
