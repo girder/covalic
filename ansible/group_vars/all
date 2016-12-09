@@ -1,5 +1,5 @@
 ---
-girder_version: master
+girder_version: 1.x-maintenance
 covalic_version: master
 covalic_metrics_version: latest
 girder_worker_version: master
