@@ -20,11 +20,9 @@ covalic.views.NewPhaseView = covalic.View.extend({
                     this.wizard.total, {trigger: true});
             }, this).off('g:error').on('g:error', function (err) {
                 this.$('.g-validation-failed-message').text(err.responseJSON.message);
-                this.$('button.c-save-challenge').removeClass('disabled');
                 this.$('#c-phase-' + err.responseJSON.field).focus();
             }, this).save();
 
-            this.$('button.c-save-challenge').addClass('disabled');
             this.$('.g-validation-failed-message').text('');
         }
     },
