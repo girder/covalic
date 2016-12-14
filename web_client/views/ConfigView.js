@@ -1,7 +1,15 @@
+import View from 'girder/views/View';
+import SearchFieldWidget from 'girder/views/widgets/SearchFieldWidget';
+import PluginConfigBreadcrumbWidget from 'girder/views/widgets/PluginConfigBreadcrumbWidget';
+import { restRequest } from 'girder/rest';
+import events from 'girder/events';
+import template from '../templates/config.pug';
+import '../stylesheets/config.styl';
+
 /**
  * Administrative configuration view.
  */
-girder.views.covalic_ConfigView = girder.View.extend({
+const ConfigView = View.extend({
     events: {
         'submit #g-covalic-config-form': function (event) {
             event.preventDefault();
@@ -15,7 +23,7 @@ girder.views.covalic_ConfigView = girder.View.extend({
     },
 
     initialize: function () {
-        girder.restRequest({
+        restRequest({
             type: 'GET',
             path: 'system/setting',
             data: {
@@ -29,20 +37,20 @@ girder.views.covalic_ConfigView = girder.View.extend({
 
         }, this));
 
-        this.searchWidget = new girder.views.SearchFieldWidget({
+        this.searchWidget = new SearchFieldWidget({
             placeholder: 'Search for scoring user...',
             types: ['user'],
             parentView: this
         }).on('g:resultClicked', this._setCeleryUser, this);
 
-        this.breadcrumb = new girder.views.PluginConfigBreadcrumbWidget({
+        this.breadcrumb = new PluginConfigBreadcrumbWidget({
             pluginName: 'COVALIC challenges',
             parentView: this
         });
     },
 
     render: function () {
-        this.$el.html(girder.templates.covalic_config());
+        this.$el.html(template());
 
         this.searchWidget.setElement(this.$('.g-scoring-user-select-container')).render();
         this.breadcrumb.setElement( this.$('.g-config-breadcrumb-container')).render();
@@ -56,15 +64,15 @@ girder.views.covalic_ConfigView = girder.View.extend({
     },
 
     _saveSettings: function (settings) {
-        girder.restRequest({
+        restRequest({
             type: 'PUT',
             path: 'system/setting',
             data: {
                 list: JSON.stringify(settings)
             },
             error: null
-        }).done(_.bind(function (resp) {
-            girder.events.trigger('g:alert', {
+        }).done(_.bind(function () {
+            events.trigger('g:alert', {
                 icon: 'ok',
                 text: 'Settings saved.',
                 type: 'success',
@@ -77,6 +85,4 @@ girder.views.covalic_ConfigView = girder.View.extend({
     }
 });
 
-girder.router.route('plugins/covalic/config', 'covalicConfig', function () {
-    girder.events.trigger('g:navigateTo', girder.views.covalic_ConfigView);
-});
+export default ConfigView;

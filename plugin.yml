@@ -5,7 +5,3 @@ dependencies:
     - gravatar
     - worker
     - thumbnails
-grunt:
-    file: Gruntfile.js
-    defaultTargets:
-        - covalic-web
