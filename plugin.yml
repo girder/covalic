@@ -5,3 +5,7 @@ dependencies:
     - gravatar
     - worker
     - thumbnails
+webpack:
+  main:
+    plugin: web_client/main.js
+    covalic: web_external/main.js
