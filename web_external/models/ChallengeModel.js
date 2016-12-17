@@ -1,43 +1,44 @@
-covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
+import AccessControlledModel from 'girder/models/AccessControlledModel';
+import { apiRoot, restRequest } from 'girder/rest';
+
+var ChallengeModel = AccessControlledModel.extend({
     resourceName: 'challenge',
     DEFAULT_THUMB_SIZE: 200,
 
     getThumbnailUrl: function (opts) {
         opts = opts || {};
         opts.size = opts.size || this.DEFAULT_THUMB_SIZE;
-
-        return girder.apiRoot + '/challenge/' + this.id +
-            '/thumbnail/download?size=' + opts.size + '&ts=' +
-            new Date().getTime();
+        var ts = new Date().getTime();
+        return `${apiRoot}/challenge/${this.id}/thumbnail/download?size=${opts.size}&ts=${ts}`;
     },
 
     fetchAssetsFolder: function () {
-        girder.restRequest({
-            path: this.resourceName + '/' + this.id + '/assets_folder',
+        restRequest({
+            path: `${this.resourceName}/${this.id}/assets_folder`,
             type: 'GET'
-        }).done(_.bind(function (resp) {
+        }).done((resp) => {
             this.trigger('c:assetsFolderFetched', resp);
-        }, this)).error(_.bind(function (err) {
+        }).error((err) => {
             this.trigger('c:error', err);
-        }, this));
+        });
     },
 
     createThumbnail: function (fileId, size) {
         size = size || this.DEFAULT_THUMB_SIZE;
 
         girder.restRequest({
-            path: this.resourceName + '/' + this.id + '/thumbnail',
+            path: `${this.resourceName}/${this.id}/thumbnail`,
             type: 'POST',
             data: {
                 fileId: fileId,
                 size: size
             },
             error: null
-        }).done(_.bind(function () {
+        }).done(() => {
             this.trigger('c:thumbnailCreated');
-        }, this)).error(_.bind(function (err) {
+        }).error((err) => {
             this.trigger('c:error', err);
-        }, this));
+        });
     },
 
     /**
@@ -72,21 +73,23 @@ covalic.models.ChallengeModel = girder.AccessControlledModel.extend({
      * @param name The challenge name to lookup.
      */
     findByName: function (name) {
-        girder.restRequest({
+        restRequest({
             path: this.resourceName,
             type: 'GET',
             data: {
                 name: this.transformNameForUrl(name, true)
             }
-        }).done(_.bind(function (resp) {
+        }).done((resp) => {
             if (resp.length) {
                 this.set(resp[0]);
                 this.trigger('c:found');
             } else {
                 this.trigger('c:notFound');
             }
-        }, this));
+        });
 
         return this;
     }
 });
+
+export default ChallengeModel;

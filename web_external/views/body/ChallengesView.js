@@ -1,26 +1,38 @@
-covalic.views.ChallengesView = covalic.View.extend({
+import { getCurrentUser } from 'girder/auth';
+import { AccessType } from 'girder/constants';
+import { cancelRestRequests } from 'girder/rest';
+import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+import SearchFieldWidget from 'girder/views/widgets/SearchFieldWidget';
+
+import router from '../../router';
+import View from '../view';
+import ChallengeCollection from '../../collections/ChallengeCollection';
+import template from '../../templates/body/challengeList.pug';
+import '../../stylesheets/body/challengeList.styl';
+
+var ChallengesView = View.extend({
     events: {
         'change .c-challenges-filter': 'challengeFilterChanged'
     },
 
     initialize: function (settings) {
-        girder.cancelRestRequests('fetch');
+        cancelRestRequests('fetch');
 
         this.timeframe = settings.timeframe || 'all';
 
         var params = { timeframe: this.timeframe };
 
-        this.collection = new covalic.collections.ChallengeCollection();
+        this.collection = new ChallengeCollection();
         this.collection.on('g:changed', function () {
             this.render();
         }, this).fetch(params);
 
-        this.paginateWidget = new girder.views.PaginateWidget({
+        this.paginateWidget = new PaginateWidget({
             collection: this.collection,
             parentView: this
         });
 
-        this.searchWidget = new girder.views.SearchFieldWidget({
+        this.searchWidget = new SearchFieldWidget({
             placeholder: 'Search challenges...',
             types: ['challenge.covalic'],
             getInfoCallback: function (type, obj) {
@@ -36,10 +48,12 @@ covalic.views.ChallengesView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.challengeList({
+        var currentUser = getCurrentUser();
+        this.$el.html(template({
             challenges: this.collection.models,
-            admin: !!(girder.currentUser && girder.currentUser.get('admin')),
-            girder: girder,
+            admin: !!(currentUser && currentUser.get('admin')),
+            currentUser,
+            AccessType,
             timeframe: this.timeframe
         }));
 
@@ -57,26 +71,16 @@ covalic.views.ChallengesView = covalic.View.extend({
         return this;
     },
 
-    createDialog: function () {
-        new covalic.views.EditChallengeWidget({
-            el: $('#g-dialog-container'),
-            parentView: this
-        }).on('g:saved', function (challenge) {
-            covalic.router.navigate('challenge/' + challenge.get('_id'), {
-                trigger: true
-            });
-        }, this).render();
-    },
-
     _gotoChallenge: function (challenge) {
-        covalic.router.navigate('challenge/' + challenge.id, {trigger: true});
+        router.navigate(`challenge/${challenge.id}`, {trigger: true});
     },
 
     challengeFilterChanged: function (e) {
         var select = e.currentTarget;
         this.timeframe = select.value;
-        covalic.router.navigate('challenges?timeframe=' + this.timeframe, {
-            replace: true});
+        router.navigate(`challenges?timeframe=${this.timeframe}`, {
+            replace: true
+        });
 
         var params = { timeframe: this.timeframe };
         // FIXME fetch() ignores params when reset is true
@@ -87,15 +91,4 @@ covalic.views.ChallengesView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenges', 'challenges', function (params) {
-    params = girder.parseQueryString(params);
-
-    var timeframe = null;
-    if (_.has(params, 'timeframe')) {
-        timeframe = params.timeframe;
-    }
-
-    girder.events.trigger('g:navigateTo', covalic.views.ChallengesView, {
-        timeframe: timeframe
-    });
-});
+export default ChallengesView;
