@@ -1,32 +1,18 @@
-covalic.views.FrontPageView = girder.views.FrontPageView.extend({
-    events: {
-        'click .c-participate-button': function () {
-            covalic.router.navigate('challenges', {trigger: true});
-        },
-        'click .c-create-challenge-button': function () {
-            covalic.router.navigate('challenges/learn', {trigger: true});
-        }
-    },
+import { cancelRestRequests } from 'girder/rest';
+import GirderFrontPageView from 'girder/views/body/FrontPageView';
+import template from '../../templates/body/frontPage.pug';
+import '../../stylesheets/body/frontPage.styl';
 
+var FrontPageView = GirderFrontPageView.extend({
     initialize: function () {
-        girder.cancelRestRequests('fetch');
+        cancelRestRequests('fetch');
         this.render();
     },
 
     render: function () {
-        this.$el.addClass('c-body-nopad');
-
-        this.$el.html(covalic.templates.frontPage({
-            apiRoot: girder.apiRoot,
-            staticRoot: girder.staticRoot,
-            currentUser: girder.currentUser,
-            versionInfo: girder.versionInfo
-        }));
-
+        this.$el.addClass('c-body-nopad').html(template());
         return this;
     }
 });
 
-covalic.router.route('', 'index', function () {
-    girder.events.trigger('g:navigateTo', covalic.views.FrontPageView);
-});
+export default FrontPageView;

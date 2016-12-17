@@ -9,7 +9,6 @@ import template from '../../templates/layout/layoutHeaderUser.pug';
 import '../../stylesheets/layout.styl';
 
 var HeaderUserView = View.extend({
-
     events: {
         'click a.g-login': function () {
             events.trigger('g:loginUi');
