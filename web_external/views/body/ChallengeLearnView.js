@@ -1,12 +1,17 @@
-covalic.views.ChallengeLearnView = covalic.View.extend({
+import { cancelRestRequests, staticRoot } from 'girder/rest';
+import View from '../view';
+import template from '../../templates/body/challengeLearn.pug';
+import '../../stylesheets/body/challengeLearn.styl';
+
+var ChallengeLearnView = View.extend({
     initialize: function () {
-        girder.cancelRestRequests('fetch');
+        cancelRestRequests('fetch');
         this.render();
     },
 
     render: function () {
-        this.$el.html(covalic.templates.challengeLearn({
-            imgRoot: girder.staticRoot + '/built/plugins/covalic/extra/img'
+        this.$el.html(template({
+            imgRoot: `${staticRoot}/built/plugins/covalic/extra/img`
         }));
         var jumboHeight = $('.jumbotron').outerHeight();
         var parallax = function () {
@@ -19,9 +24,6 @@ covalic.views.ChallengeLearnView = covalic.View.extend({
             parallax();
         });
     }
-
 });
 
-covalic.router.route('challenges/learn', 'challenges/learn', function () {
-    girder.events.trigger('g:navigateTo', covalic.views.ChallengeLearnView);
-});
+export default ChallengeLearnView;

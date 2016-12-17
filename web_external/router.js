@@ -56,3 +56,8 @@ router.route('challenge/n/:name', 'challengeByName', function (name) {
         router.navigate('challenges', {trigger: true});
     });
 });
+
+import ChallengeLearnView from './views/body/ChallengeLearnView';
+router.route('challenges/learn', 'challengesLearn', function () {
+    events.trigger('g:navigateTo', ChallengeLearnView);
+});
