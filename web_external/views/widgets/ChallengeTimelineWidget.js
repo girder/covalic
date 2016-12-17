@@ -1,10 +1,17 @@
-covalic.views.ChallengeTimelineView = covalic.View.extend({
+import _ from 'underscore';
+import moment from 'moment';
+import TimelineWidget from 'girder/views/widgets/TimelineWidget';
+import View from '../view';
+import ChallengePhaseCollection from '../../collections/ChallengePhaseCollection';
+import '../../stylesheets/widgets/challengeTimeline.styl';
+
+var ChallengeTimelineWidget = View.extend({
     initialize: function (settings) {
-        this.collection = new covalic.collections.ChallengePhaseCollection();
+        this.collection = new ChallengePhaseCollection();
         this.collection.on('g:changed', function () {
             this.render();
         }, this).fetch({
-            challengeId: settings.challenge.get('_id')
+            challengeId: settings.challenge.id
         });
         this.challenge = settings.challenge;
 
@@ -74,11 +81,11 @@ covalic.views.ChallengeTimelineView = covalic.View.extend({
             // Show time remaining for active challenges
             var startLabel = moment(startDate).format(labelFormat);
             var endLabel = moment(endDate).format(labelFormat);
-            if (now.isBetween(startDate, endDate)) {
+            if (now.isBefore(endDate) && now.isAfter(startDate)) {
                 endLabel += ' (' + moment(now).to(endDate, true) + ' remaining)';
             }
 
-            new girder.views.TimelineWidget({
+            new TimelineWidget({
                 el: this.$el,
                 parentView: this,
                 points: points,
@@ -149,3 +156,5 @@ covalic.views.ChallengeTimelineView = covalic.View.extend({
         };
     }
 });
+
+export default ChallengeTimelineWidget;

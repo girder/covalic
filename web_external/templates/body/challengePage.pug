@@ -8,14 +8,14 @@
     ul.c-challenge-actions-menu.dropdown-menu.pull-right(role="menu")
       li(role="presentation")
         a(href=humanLink) #[i.icon-link] Human-readable link
-      if challenge.getAccessLevel() >= girder.AccessType.WRITE
+      if challenge.getAccessLevel() >= AccessType.WRITE
         li.divider(role="presentation")
         li(role="presentation")
           a.c-edit-challenge(role="menuitem") #[i.icon-edit] Edit info
-      if challenge.getAccessLevel() >= girder.AccessType.ADMIN
+      if challenge.getAccessLevel() >= AccessType.ADMIN
         li.divider(role="presentation")
         li(role="presentation")
-          a.c-challenge-access-control(role="menuitem" href="#challenge/#{challenge.id}/access")
+          a.c-challenge-access-control(role="menuitem", href=`#challenge/${challenge.id}/access`)
             i.icon-lock
             | Access control
         li(role="presentation")
@@ -32,9 +32,9 @@
 .c-overview-container
   .c-section-header
     | Overview
-    if challenge.getAccessLevel() >= girder.AccessType.WRITE
+    if challenge.getAccessLevel() >= AccessType.WRITE
       a.c-edit-instructions(
-        href="#challenge/#{challenge.id}/instructions"): i.icon-pencil
+        href=`#challenge/${challenge.id}/instructions`): i.icon-pencil
   .c-challenge-instructions-container
 
 

@@ -1,8 +1,24 @@
-covalic.views.ChallengeView = covalic.View.extend({
+import { getCurrentUser } from 'girder/auth';
+import { AccessType } from 'girder/constants';
+import { confirm } from 'girder/dialog';
+import events from 'girder/events';
+import { renderMarkdown } from 'girder/misc';
+import { cancelRestRequests } from 'girder/rest';
+
+import router from '../../router';
+import View from '../view';
+import ChallengeModel from '../../models/ChallengeModel';
+import ChallengePhasesWidget from '../widgets/ChallengePhasesWidget';
+import ChallengeTimelineWidget from '../widgets/ChallengeTimelineWidget';
+import EditChallengeWidget from '../widgets/EditChallengeWidget';
+import template from '../../templates/body/challengePage.pug';
+import '../../stylesheets/body/challengePage.styl';
+
+var ChallengeView = View.extend({
     events: {
         'click a.c-edit-challenge': function () {
             if (!this.editChallengeWidget) {
-                this.editChallengeWidget = new covalic.views.EditChallengeWidget({
+                this.editChallengeWidget = new EditChallengeWidget({
                     el: $('#g-dialog-container'),
                     model: this.model,
                     parentView: this
@@ -14,36 +30,36 @@ covalic.views.ChallengeView = covalic.View.extend({
         },
 
         'click .c-delete-challenge': function () {
-            girder.confirm({
+            confirm({
                 text: 'Are you sure you want to delete the challenge <b>' +
                       this.model.escape('name') + '</b>?',
                 yesText: 'Delete',
                 escapedHtml: true,
-                confirmCallback: _.bind(function () {
+                confirmCallback: () => {
                     this.model.destroy({
                         progress: true
                     }).on('g:deleted', function () {
-                        girder.events.trigger('g:alert', {
+                        events.trigger('g:alert', {
                             icon: 'ok',
                             text: 'Challenge deleted.',
                             type: 'success',
                             timeout: 4000
                         });
-                        covalic.router.navigate('challenges', {trigger: true});
+                        router.navigate('challenges', {trigger: true});
                     });
-                }, this)
+                }
             });
         }
     },
 
     initialize: function (settings) {
-        girder.cancelRestRequests('fetch');
+        cancelRestRequests('fetch');
         if (settings.challenge) {
             this.model = settings.challenge;
             this._initWidgets();
             this.render();
         } else if (settings.id) {
-            this.model = new girder.models.ChallengeModel();
+            this.model = new ChallengeModel();
             this.model.set('_id', settings.id);
 
             this.model.on('g:fetched', function () {
@@ -54,28 +70,28 @@ covalic.views.ChallengeView = covalic.View.extend({
     },
 
     _initWidgets: function () {
-        this.timelineView = new covalic.views.ChallengeTimelineView({
+        this.timelineView = new ChallengeTimelineWidget({
             challenge: this.model,
             parentView: this
         });
 
-        this.phasesView = new covalic.views.ChallengePhasesView({
+        this.phasesView = new ChallengePhasesWidget({
             challenge: this.model,
             parentView: this
         });
     },
 
     render: function () {
-        this.$el.html(covalic.templates.challengePage({
+        this.$el.html(template({
             challenge: this.model,
             humanLink: '#challenge/n/' + encodeURIComponent(this.model.transformNameForUrl()),
-            girder: girder
+            AccessType
         }));
 
         this.timelineView.setElement(this.$('.c-challenge-timeline-container')).render();
 
-        girder.renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
-                              this.$('.c-challenge-instructions-container'));
+        renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
+                       this.$('.c-challenge-instructions-container'));
 
         this.phasesView.setElement(this.$('.c-challenge-phase-container')).render();
 
@@ -83,27 +99,4 @@ covalic.views.ChallengeView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenge/:id', 'challenge', function (id) {
-    // Fetch the challenge by id, then render the view.
-    var challenge = new covalic.models.ChallengeModel();
-    challenge.set({
-        _id: id
-    }).on('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.ChallengeView, {
-            challenge: challenge
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
-
-covalic.router.route('challenge/n/:name', 'challengeByName', function (name) {
-    var challenge = new covalic.models.ChallengeModel();
-    challenge.findByName(name).once('c:found', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.ChallengeView, {
-            challenge: challenge
-        });
-    }).once('c:notFound', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    });
-});
+export default ChallengeView;

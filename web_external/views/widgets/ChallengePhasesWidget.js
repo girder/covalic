@@ -1,4 +1,12 @@
-covalic.views.ChallengePhasesView = covalic.View.extend({
+import $ from 'jquery';
+import { AccessType } from 'girder/constants';
+import View from '../view';
+import ChallengePhaseCollection from '../../collections/ChallengePhaseCollection';
+import template from '../../templates/widgets/challengePhases.pug';
+import '../../stylesheets/body/challengePage.styl';
+import '../../ext/html.sortable';
+
+var ChallengePhasesWidget = View.extend({
     events: {
         'c:update-phase-ordinals .c-phase-list': function (event) {
             var collection = this.collection;
@@ -13,24 +21,24 @@ covalic.views.ChallengePhasesView = covalic.View.extend({
     },
 
     initialize: function (settings) {
-        this.collection = new covalic.collections.ChallengePhaseCollection();
+        this.collection = new ChallengePhaseCollection();
         this.collection.on('g:changed', function () {
             this.render();
         }, this).fetch({
-            challengeId: settings.challenge.get('_id')
+            challengeId: settings.challenge.id
         });
         this.challenge = settings.challenge;
     },
 
     render: function () {
-        this.$el.html(covalic.templates.challengePhasesPage({
+        this.$el.html(template({
             phases: this.collection.models,
             challenge: this.challenge,
-            canCreate: this.challenge.getAccessLevel() >= girder.AccessType.WRITE
+            canCreate: this.challenge.getAccessLevel() >= AccessType.WRITE
         }));
 
-        if (this.challenge.getAccessLevel() >= girder.AccessType.ADMIN) {
-            $('.c-phase-list').sortable({
+        if (this.challenge.getAccessLevel() >= AccessType.ADMIN) {
+            this.$('.c-phase-list').sortable({
                 placeholder: '<li class="c-phase-list-entry"><a class="c-phase-link">&nbsp;</a></li>'
             }).bind('sortstart', function (e, ui) {
                 $('.c-phase-reorder', ui.item).tooltip('hide');
@@ -53,3 +61,5 @@ covalic.views.ChallengePhasesView = covalic.View.extend({
         return this;
     }
 });
+
+export default ChallengePhasesWidget;

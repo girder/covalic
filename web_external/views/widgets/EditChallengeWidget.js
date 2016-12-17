@@ -1,7 +1,12 @@
-/**
-* This widget is used to create a new challenge or edit an existing one.
-*/
-covalic.views.EditChallengeWidget = covalic.View.extend({
+import $ from 'jquery';
+import { handleClose, handleOpen } from 'girder/dialog';
+import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
+import 'girder/utilities/jquery/girderModal';
+import View from '../view';
+import ChallengeModel from '../../models/ChallengeModel';
+import template from '../../templates/widgets/editChallenge.pug';
+
+var EditChallengeWidget = View.extend({
     events: {
         'submit #c-challenge-edit-form': function (e) {
             e.preventDefault();
@@ -28,57 +33,56 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
     initialize: function (settings) {
         this.model = settings.model || null;
 
-        this.dateTimeRangeWidget = new girder.views.DateTimeRangeWidget({
+        this.dateTimeRangeWidget = new DateTimeRangeWidget({
             parentView: this
         });
     },
 
     render: function () {
-        var view = this;
-        var modal = this.$el.html(covalic.templates.editChallengeWidget({
+        var modal = this.$el.html(template({
             challenge: this.model
-        })).girderModal(this).on('shown.bs.modal', function () {
-            view.$('#c-challenge-name').focus();
-        }).on('hidden.bs.modal', function () {
-            if (view.create) {
-                girder.dialogs.handleClose('create');
+        })).girderModal(this).on('shown.bs.modal', () => {
+            this.$('#c-challenge-name').focus();
+        }).on('hidden.bs.modal', () => {
+            if (this.create) {
+                handleClose('create');
             } else {
-                girder.dialogs.handleClose('edit');
+                handleClose('edit');
             }
-        }).on('ready.girder.modal', function () {
-            if (view.model) {
-                view.$('#c-challenge-name').val(view.model.get('name'));
-                view.$('#c-challenge-description').val(view.model.get('description'));
-                view.$('#c-challenge-organizers').val(view.model.get('organizers'));
+        }).on('ready.girder.modal', () => {
+            if (this.model) {
+                this.$('#c-challenge-name').val(this.model.get('name'));
+                this.$('#c-challenge-description').val(this.model.get('description'));
+                this.$('#c-challenge-organizers').val(this.model.get('organizers'));
 
-                view.dateTimeRangeWidget.setElement(view.$('#c-challenge-timeframe')).render();
-                view.dateTimeRangeWidget.setFromDate(view.model.get('startDate'));
-                view.dateTimeRangeWidget.setToDate(view.model.get('endDate'));
+                this.dateTimeRangeWidget.setElement(this.$('#c-challenge-timeframe')).render();
+                this.dateTimeRangeWidget.setFromDate(this.model.get('startDate'));
+                this.dateTimeRangeWidget.setToDate(this.model.get('endDate'));
 
-                view.create = false;
+                this.create = false;
             } else {
-                view.create = true;
+                this.create = true;
             }
         });
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
         this.$('#c-challenge-name').focus();
 
-        if (view.model) {
-            girder.dialogs.handleOpen('edit');
+        if (this.model) {
+            handleOpen('edit');
         } else {
-            girder.dialogs.handleOpen('create');
+            handleOpen('create');
         }
 
         return this;
     },
 
     createChallenge: function (fields) {
-        var challenge = new covalic.models.ChallengeModel();
+        var challenge = ChallengeModel();
         challenge.set(fields);
         challenge.on('g:saved', function () {
-            this.$el.on('hidden.bs.modal', _.bind(function () {
+            this.$el.on('hidden.bs.modal', () => {
                 this.trigger('g:saved', challenge);
-            }, this)).modal('hide');
+            }).modal('hide');
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.c-save-challenge').removeClass('disabled');
@@ -89,9 +93,9 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
     updateChallenge: function (fields) {
         this.model.set(fields);
         this.model.on('g:saved', function () {
-            this.$el.on('hidden.bs.modal', _.bind(function () {
+            this.$el.on('hidden.bs.modal', () => {
                 this.trigger('g:saved', this.model);
-            }, this)).modal('hide');
+            }).modal('hide');
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.c-save-challenge').removeClass('disabled');
@@ -99,3 +103,5 @@ covalic.views.EditChallengeWidget = covalic.View.extend({
         }, this).save();
     }
 });
+
+export default EditChallengeWidget;
