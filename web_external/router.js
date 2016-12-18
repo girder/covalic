@@ -61,3 +61,25 @@ import ChallengeLearnView from './views/body/ChallengeLearnView';
 router.route('challenges/learn', 'challengesLearn', function () {
     events.trigger('g:navigateTo', ChallengeLearnView);
 });
+
+import NewChallengeView from './views/body/NewChallengeView';
+router.route('challenge/new', 'newChallenge', function () {
+    events.trigger('g:navigateTo', NewChallengeView, {
+        wizard: {
+            total: 4
+        }
+    });
+});
+
+import NewPhaseView from './views/body/NewPhaseView';
+router.route('challenge/:id/phase/new', 'newPhase', function (id) {
+    var challenge = new ChallengeModel({
+        _id: id
+    });
+    events.trigger('g:navigateTo', NewPhaseView, {
+        challenge: challenge,
+        wizard: {
+            total: 5
+        }
+    });
+});

@@ -1,8 +1,16 @@
-covalic.views.NewChallengeView = covalic.View.extend({
+import _ from 'underscore';
+import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
+import router from '../../router';
+import View from '../view';
+import ChallengeModel from '../../models/ChallengeModel';
+import template from '../../templates/body/newChallengePage.pug';
+import '../../stylesheets/widgets/wizards.styl';
+import '../../stylesheets/body/newChallengePage.styl';
+
+var NewChallengeView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
-            var challenge = new covalic.models.ChallengeModel();
-            challenge.set({
+            var challenge = new ChallengeModel({
                 name: this.$('#c-challenge-name').val(),
                 description: this.$('#c-challenge-description').val(),
                 organizers: this.$('#c-challenge-organizers').val(),
@@ -11,9 +19,9 @@ covalic.views.NewChallengeView = covalic.View.extend({
             });
 
             challenge.on('g:saved', function () {
-                covalic.router.navigate('challenge/' + challenge.id +
-                    '/access?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
-                    this.wizard.total, {trigger: true});
+                router.navigate(
+                    `challenge/${challenge.id}/access?wizard&curr=${this.wizard.current + 1}&total=${this.wizard.total}`,
+                    {trigger: true});
             }, this).off('g:error').on('g:error', function (err) {
                 this.$('.g-validation-failed-message').text(err.responseJSON.message);
                 this.$('#c-challenge-' + err.responseJSON.field).focus();
@@ -29,7 +37,7 @@ covalic.views.NewChallengeView = covalic.View.extend({
             this.wizard.current = 0;
         }
 
-        this.dateTimeRangeWidget = new girder.views.DateTimeRangeWidget({
+        this.dateTimeRangeWidget = new DateTimeRangeWidget({
             parentView: this
         });
 
@@ -37,7 +45,7 @@ covalic.views.NewChallengeView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.newChallengePage({
+        this.$el.html(template({
             wizard: this.wizard
         }));
 
@@ -49,10 +57,4 @@ covalic.views.NewChallengeView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenge/new', 'newChallenge', function () {
-    girder.events.trigger('g:navigateTo', covalic.views.NewChallengeView, {
-        wizard: {
-            total: 4
-        }
-    });
-});
+export default NewChallengeView;

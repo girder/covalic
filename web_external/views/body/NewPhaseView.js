@@ -1,8 +1,16 @@
-covalic.views.NewPhaseView = covalic.View.extend({
+import _ from 'underscore';
+import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
+import router from '../../router';
+import View from '../view';
+import PhaseModel from '../../models/PhaseModel';
+import template from '../../templates/body/newPhasePage.pug';
+import '../../stylesheets/widgets/wizards.styl';
+import '../../stylesheets/body/newChallengePage.styl';
+
+var NewPhaseView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
-            var phase = new covalic.models.PhaseModel();
-            phase.set({
+            var phase = new PhaseModel({
                 challengeId: this.challenge.id,
                 name: this.$('#c-phase-name').val(),
                 description: this.$('#c-phase-description').val(),
@@ -15,7 +23,7 @@ covalic.views.NewPhaseView = covalic.View.extend({
             });
 
             phase.on('g:saved', function () {
-                covalic.router.navigate('phase/' + phase.id +
+                router.navigate('phase/' + phase.id +
                     '/access?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
                     this.wizard.total, {trigger: true});
             }, this).off('g:error').on('g:error', function (err) {
@@ -34,7 +42,7 @@ covalic.views.NewPhaseView = covalic.View.extend({
             this.wizard.current = 0;
         }
 
-        this.dateTimeRangeWidget = new girder.views.DateTimeRangeWidget({
+        this.dateTimeRangeWidget = new DateTimeRangeWidget({
             parentView: this
         });
 
@@ -42,7 +50,7 @@ covalic.views.NewPhaseView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.newPhasePage({
+        this.$el.html(template({
             wizard: this.wizard
         }));
 
@@ -54,14 +62,4 @@ covalic.views.NewPhaseView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenge/:id/phase/new', 'newPhase', function (id) {
-    var challenge = new covalic.models.ChallengeModel({
-        _id: id
-    });
-    girder.events.trigger('g:navigateTo', covalic.views.NewPhaseView, {
-        challenge: challenge,
-        wizard: {
-            total: 5
-        }
-    });
-});
+export default NewPhaseView;

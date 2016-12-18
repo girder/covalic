@@ -82,7 +82,7 @@ var ChallengeTimelineWidget = View.extend({
             var startLabel = moment(startDate).format(labelFormat);
             var endLabel = moment(endDate).format(labelFormat);
             if (now.isBefore(endDate) && now.isAfter(startDate)) {
-                endLabel += ' (' + moment(now).to(endDate, true) + ' remaining)';
+                endLabel += ' (' + moment(now).from(endDate, true) + ' remaining)';
             }
 
             new TimelineWidget({
