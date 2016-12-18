@@ -1,8 +1,15 @@
-covalic.views.EditThumbnailWidget = covalic.View.extend({
+import FolderModel from 'girder/models/FolderModel';
+import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
+import UploadWidget from 'girder/views/widgets/UploadWidget';
+import View from '../view';
+import template from '../../templates/widgets/editThumbnail.pug';
+import '../../stylesheets/widgets/editThumbnail.styl';
+
+var EditThumbnailWidget = View.extend({
     initialize: function () {
         this.render();
 
-        this.uploadWidget = new girder.views.UploadWidget({
+        this.uploadWidget = new UploadWidget({
             parentView: this,
             modal: false,
             title: false,
@@ -18,7 +25,7 @@ covalic.views.EditThumbnailWidget = covalic.View.extend({
                     'Please select only one file.');
             }
         }, this).on('g:uploadFinished', function () {
-            new girder.views.LoadingAnimation({
+            new LoadingAnimation({
                 parentView: this,
                 el: this.$('.c-current-thumbnail')
             }).render();
@@ -37,7 +44,7 @@ covalic.views.EditThumbnailWidget = covalic.View.extend({
         }, this);
 
         this.model.once('c:assetsFolderFetched', function (resp) {
-            this.assetsFolder = new girder.models.FolderModel(resp);
+            this.assetsFolder = new FolderModel(resp);
             this.uploadWidget.parent = this.assetsFolder;
             this.ready = true;
             this.render();
@@ -46,14 +53,14 @@ covalic.views.EditThumbnailWidget = covalic.View.extend({
 
     render: function () {
         if (!this.ready) {
-            new girder.views.LoadingAnimation({
+            new LoadingAnimation({
                 el: this.$el,
                 parentView: this
             }).render();
             return this;
         }
 
-        this.$el.html(covalic.templates.editThumbnail({
+        this.$el.html(template({
             challenge: this.model
         }));
         this._renderUploadWidget();
@@ -63,8 +70,9 @@ covalic.views.EditThumbnailWidget = covalic.View.extend({
 
     _renderUploadWidget: function () {
         this.uploadWidget.setElement(this.$('.c-thumbnail-upload-widget')).render();
-        this.uploadWidget.$(
-            '.g-start-upload,.g-overall-progress-message').hide();
+        this.uploadWidget.$('.g-start-upload,.g-overall-progress-message').hide();
         this.uploadWidget.$('.g-drop-zone').text('Browse or drop a file...');
     }
 });
+
+export default EditThumbnailWidget;

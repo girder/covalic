@@ -26,7 +26,7 @@ var ChallengeModel = AccessControlledModel.extend({
     createThumbnail: function (fileId, size) {
         size = size || this.DEFAULT_THUMB_SIZE;
 
-        girder.restRequest({
+        restRequest({
             path: `${this.resourceName}/${this.id}/thumbnail`,
             type: 'POST',
             data: {

@@ -1,7 +1,15 @@
-covalic.views.ChallengeThumbnailView = covalic.View.extend({
+import _ from 'underscore';
+import router from '../../router';
+import EditThumbnailWidget from '../widgets/EditThumbnailWidget';
+import View from '../view';
+import template from '../../templates/body/challengeThumbnailPage.pug';
+import '../../stylesheets/widgets/wizards.styl';
+import '../../stylesheets/body/challengeThumbnail.styl';
+
+var ChallengeThumbnailView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
-            covalic.router.navigate('challenge/' + this.model.id, {trigger: true});
+            router.navigate('challenge/' + this.model.id, {trigger: true});
         }
     },
 
@@ -11,7 +19,7 @@ covalic.views.ChallengeThumbnailView = covalic.View.extend({
             this.wizard.current = 0;
         }
 
-        this.editThumbnailWidget = new covalic.views.EditThumbnailWidget({
+        this.editThumbnailWidget = new EditThumbnailWidget({
             parentView: this,
             model: this.model
         });
@@ -20,7 +28,7 @@ covalic.views.ChallengeThumbnailView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.challengeThumbnailPage({
+        this.$el.html(template({
             challenge: this.model,
             wizard: this.wizard
         }));
@@ -31,25 +39,4 @@ covalic.views.ChallengeThumbnailView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenge/:id/thumbnail', 'challengeThumbnail', function (id, params) {
-    var challenge = new covalic.models.ChallengeModel({_id: id}),
-        wizard = false;
-
-    params = girder.parseQueryString(params);
-
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    challenge.on('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.ChallengeThumbnailView, {
-            model: challenge,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default ChallengeThumbnailView;

@@ -36,9 +36,7 @@ var ChallengeView = View.extend({
                 yesText: 'Delete',
                 escapedHtml: true,
                 confirmCallback: () => {
-                    this.model.destroy({
-                        progress: true
-                    }).on('g:deleted', function () {
+                    this.model.once('g:deleted', function () {
                         events.trigger('g:alert', {
                             icon: 'ok',
                             text: 'Challenge deleted.',
@@ -46,7 +44,9 @@ var ChallengeView = View.extend({
                             timeout: 4000
                         });
                         router.navigate('challenges', {trigger: true});
-                    });
+                    }).destroy({
+                        progress: true
+                    })
                 }
             });
         }
@@ -59,8 +59,9 @@ var ChallengeView = View.extend({
             this._initWidgets();
             this.render();
         } else if (settings.id) {
-            this.model = new ChallengeModel();
-            this.model.set('_id', settings.id);
+            this.model = new ChallengeModel({
+                _id: settings.id
+            });
 
             this.model.on('g:fetched', function () {
                 this._initWidgets();

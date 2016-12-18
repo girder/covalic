@@ -83,3 +83,27 @@ router.route('challenge/:id/phase/new', 'newPhase', function (id) {
         }
     });
 });
+
+import ChallengeThumbnailView from './views/body/ChallengeThumbnailView';
+router.route('challenge/:id/thumbnail', 'challengeThumbnail', function (id, params) {
+    var challenge = new ChallengeModel({_id: id}),
+        wizard = false;
+
+    params = parseQueryString(params);
+
+    if (_.has(params, 'wizard')) {
+        wizard = {
+            total: window.parseInt(params.total),
+            current: window.parseInt(params.curr)
+        };
+    }
+
+    challenge.on('g:fetched', function () {
+        events.trigger('g:navigateTo', ChallengeThumbnailView, {
+            model: challenge,
+            wizard: wizard
+        });
+    }, this).on('g:error', function () {
+        router.navigate('challenges', {trigger: true});
+    }, this).fetch();
+});
