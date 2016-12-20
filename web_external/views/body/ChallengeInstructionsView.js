@@ -1,4 +1,11 @@
-covalic.views.ChallengeInstructionsView = covalic.View.extend({
+import FolderModel from 'girder/models/FolderModel';
+import MarkdownWidget from 'girder/views/widgets/MarkdownWidget';
+import router from '../../router';
+import View from '../view';
+import template from '../../templates/body/challengeInstructions.pug';
+import '../../stylesheets/body/challengeInstructions.styl';
+
+var ChallengeInstructionsView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this._saveAndGoTo('challenge/' + this.model.id +
@@ -13,7 +20,7 @@ covalic.views.ChallengeInstructionsView = covalic.View.extend({
 
     _saveAndGoTo: function (route) {
         this.model.once('g:saved', function () {
-            covalic.router.navigate(route, {trigger: true});
+            router.navigate(route, {trigger: true});
         }, this).set({
             instructions: this.instructionsEditor.val()
         }).save();
@@ -23,9 +30,9 @@ covalic.views.ChallengeInstructionsView = covalic.View.extend({
         this.wizard = settings.wizard || false;
 
         this.model.once('c:assetsFolderFetched', function (resp) {
-            this.assetsFolder = new girder.models.FolderModel(resp);
+            this.assetsFolder = new FolderModel(resp);
 
-            this.instructionsEditor = new girder.views.MarkdownWidget({
+            this.instructionsEditor = new MarkdownWidget({
                 parentView: this,
                 prefix: 'challenge-instructions',
                 placeholder: 'Enter challenge overview',
@@ -40,7 +47,7 @@ covalic.views.ChallengeInstructionsView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.challengeInstructions({
+        this.$el.html(template({
             challenge: this.model,
             wizard: this.wizard,
             markdownLink: 'https://daringfireball.net/projects/markdown/syntax'
@@ -54,25 +61,4 @@ covalic.views.ChallengeInstructionsView = covalic.View.extend({
     }
 });
 
-covalic.router.route('challenge/:id/instructions', 'challengeAccess', function (id, params) {
-    var challenge = new covalic.models.ChallengeModel({_id: id}),
-        wizard = false;
-
-    params = girder.parseQueryString(params);
-
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    challenge.once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.ChallengeInstructionsView, {
-            model: challenge,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default ChallengeInstructionsView;

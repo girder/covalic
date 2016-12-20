@@ -107,3 +107,52 @@ router.route('challenge/:id/thumbnail', 'challengeThumbnail', function (id, para
         router.navigate('challenges', {trigger: true});
     }, this).fetch();
 });
+
+import ChallengeInstructionsView from './views/body/ChallengeInstructionsView';
+router.route('challenge/:id/instructions', 'challengeAccess', function (id, params) {
+    var challenge = new ChallengeModel({_id: id}),
+        wizard = false;
+
+    params = parseQueryString(params);
+
+    if (_.has(params, 'wizard')) {
+        wizard = {
+            total: window.parseInt(params.total),
+            current: window.parseInt(params.curr)
+        };
+    }
+
+    challenge.once('g:fetched', function () {
+        events.trigger('g:navigateTo', ChallengeInstructionsView, {
+            model: challenge,
+            wizard: wizard
+        });
+    }, this).on('g:error', function () {
+        router.navigate('challenges', {trigger: true});
+    }, this).fetch();
+});
+
+import ChallengeAccessView from './views/body/ChallengeAccessView';
+router.route('challenge/:id/access', 'challengeAccess', function (id, params) {
+    var challenge = new ChallengeModel({_id: id}),
+        wizard = false;
+
+    params = parseQueryString(params);
+
+    if (_.has(params, 'wizard')) {
+        wizard = {
+            total: window.parseInt(params.total),
+            current: window.parseInt(params.curr)
+        };
+    }
+
+    challenge.once('g:fetched', function () {
+        events.trigger('g:navigateTo', ChallengeAccessView, {
+            model: challenge,
+            wizard: wizard
+        });
+    }, this).on('g:error', function () {
+        router.navigate('challenges', {trigger: true});
+    }, this).fetch();
+});
+
