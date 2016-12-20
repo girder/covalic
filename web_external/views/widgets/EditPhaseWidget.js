@@ -1,7 +1,12 @@
-/**
- * This widget is used to create a new phase or edit an existing one.
- */
-covalic.views.EditPhaseWidget = covalic.View.extend({
+import _ from 'underscore';
+import { handleClose, handleOpen } from 'girder/dialog';
+import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
+import View from '../view';
+import PhaseModel from '../../models/PhaseModel';
+import template from '../../templates/widgets/editPhaseWidget.pug';
+import 'girder/utilities/jquery/girderModal';
+
+var EditPhaseWidget = View.extend({
     events: {
         'submit #c-phase-edit-form': function (e) {
             e.preventDefault();
@@ -21,7 +26,7 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
                 this.updatePhase(fields);
             } else {
                 this.createPhase(_.extend({
-                    challengeId: this.challenge.get('_id')
+                    challengeId: this.challenge.id
                 }, fields));
             }
 
@@ -34,22 +39,22 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
         this.model = settings.model || null;
         this.challenge = settings.challenge || null;
 
-        this.dateTimeRangeWidget = new girder.views.DateTimeRangeWidget({
+        this.dateTimeRangeWidget = new DateTimeRangeWidget({
             parentView: this
         });
     },
 
     render: function () {
         var view = this;
-        var modal = this.$el.html(covalic.templates.editPhaseWidget({
+        var modal = this.$el.html(template({
             phase: this.model
         })).girderModal(this).on('shown.bs.modal', function () {
             view.$('#c-phase-name').focus();
         }).on('hidden.bs.modal', function () {
             if (view.create) {
-                girder.dialogs.handleClose('create');
+                handleClose('create');
             } else {
-                girder.dialogs.handleClose('edit');
+                handleClose('edit');
             }
         }).on('ready.girder.modal', function () {
             if (view.model) {
@@ -93,21 +98,21 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
         this.$('#c-phase-name').focus();
 
         if (view.model) {
-            girder.dialogs.handleOpen('edit');
+            handleOpen('edit');
         } else {
-            girder.dialogs.handleOpen('create');
+            handleOpen('create');
         }
 
         return this;
     },
 
     createPhase: function (fields) {
-        var phase = new covalic.models.PhaseModel();
-        phase.set(fields);
+        var phase = new PhaseModel(fields);
+
         phase.on('g:saved', function () {
-            this.$el.on('hidden.bs.modal', _.bind(function () {
+            this.$el.on('hidden.bs.modal', () => {
                 this.trigger('g:saved', phase);
-            }, this)).modal('hide');
+            }).modal('hide');
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.c-save-phase').removeClass('disabled');
@@ -118,9 +123,9 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
     updatePhase: function (fields) {
         this.model.set(fields);
         this.model.on('g:saved', function () {
-            this.$el.on('hidden.bs.modal', _.bind(function () {
+            this.$el.on('hidden.bs.modal', () => {
                 this.trigger('g:saved', this.model);
-            }, this)).modal('hide');
+            }).modal('hide');
         }, this).off('g:error').on('g:error', function (err) {
             this.$('.g-validation-failed-message').text(err.responseJSON.message);
             this.$('button.c-save-phase').removeClass('disabled');
@@ -128,3 +133,5 @@ covalic.views.EditPhaseWidget = covalic.View.extend({
         }, this).save();
     }
 });
+
+export default EditPhaseWidget;

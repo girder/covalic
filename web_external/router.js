@@ -46,6 +46,22 @@ router.route('challenge/:id', 'challenge', function (id) {
     }, this).fetch();
 });
 
+import PhaseView from './views/body/PhaseView';
+import PhaseModel from './models/PhaseModel';
+router.route('phase/:id', 'phase', function (id) {
+    // Fetch the phase by id, then render the view.
+    var phase = new PhaseModel({
+        _id: id
+    }).once('g:fetched', function () {
+        events.trigger('g:navigateTo', PhaseView, {
+            phase: phase
+        });
+    }).once('g:error', function () {
+        router.navigate('challenges', {trigger: true});
+    });
+    phase.fetch();
+});
+
 router.route('challenge/n/:name', 'challengeByName', function (name) {
     var challenge = new ChallengeModel();
     challenge.findByName(name).once('c:found', function () {
@@ -84,75 +100,42 @@ router.route('challenge/:id/phase/new', 'newPhase', function (id) {
     });
 });
 
+var _wizardPage = function (route, routeName, modelType, viewType) {
+    router.route('challenge/:id/thumbnail', 'challengeThumbnail', function (id, params) {
+        var model = new modelType({_id: id}),
+            wizard = false;
+
+        params = parseQueryString(params);
+
+        if (_.has(params, 'wizard')) {
+            wizard = {
+                total: window.parseInt(params.total),
+                current: window.parseInt(params.curr)
+            };
+        }
+
+        model.once('g:fetched', () => {
+            events.trigger('g:navigateTo', viewType, {
+                model,
+                wizard
+            });
+        }).once('g:error', () => {
+            router.navigate('challenges', {trigger: true});
+        }).fetch();
+    });
+};
+
 import ChallengeThumbnailView from './views/body/ChallengeThumbnailView';
-router.route('challenge/:id/thumbnail', 'challengeThumbnail', function (id, params) {
-    var challenge = new ChallengeModel({_id: id}),
-        wizard = false;
-
-    params = parseQueryString(params);
-
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    challenge.on('g:fetched', function () {
-        events.trigger('g:navigateTo', ChallengeThumbnailView, {
-            model: challenge,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+_wizardPage('challenge/:id/thumbnail', 'challengeThumbnail', ChallengeModel, ChallengeThumbnailView);
 
 import ChallengeInstructionsView from './views/body/ChallengeInstructionsView';
-router.route('challenge/:id/instructions', 'challengeAccess', function (id, params) {
-    var challenge = new ChallengeModel({_id: id}),
-        wizard = false;
-
-    params = parseQueryString(params);
-
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    challenge.once('g:fetched', function () {
-        events.trigger('g:navigateTo', ChallengeInstructionsView, {
-            model: challenge,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+_wizardPage('challenge/:id/instructions', 'challengeAccess', ChallengeModel, ChallengeInstructionsView);
 
 import ChallengeAccessView from './views/body/ChallengeAccessView';
-router.route('challenge/:id/access', 'challengeAccess', function (id, params) {
-    var challenge = new ChallengeModel({_id: id}),
-        wizard = false;
+_wizardPage('challenge/:id/access', 'challengeAccess', ChallengeModel, ChallengeAccessView);
 
-    params = parseQueryString(params);
+import PhaseAccessView from './views/body/PhaseAccessView';
+_wizardPage('phase/:id/access', 'phaseAccess', PhaseModel, PhaseAccessView);
 
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    challenge.once('g:fetched', function () {
-        events.trigger('g:navigateTo', ChallengeAccessView, {
-            model: challenge,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
-
+import PhaseInputView from './views/body/PhaseInputView';
+_wizardPage('phase/:id/input', 'phaseInput', PhaseModel, PhaseInputView);

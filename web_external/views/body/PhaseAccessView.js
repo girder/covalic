@@ -1,8 +1,16 @@
-covalic.views.PhaseAccessView = covalic.View.extend({
+import _ from 'underscore';
+import events from 'girder/events';
+import AccessWidget from 'girder/views/widgets/AccessWidget';
+import router from '../../router';
+import View from '../view';
+import template from '../../templates/body/phaseAccessPage.pug';
+import '../../stylesheets/body/challengeAccess.styl';
+
+var PhaseAccessView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                covalic.router.navigate('phase/' + this.model.id +
+                router.navigate('phase/' + this.model.id +
                     '/instructions?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
                     this.wizard.total, {trigger: true});
             }, this).saveAccessList();
@@ -10,7 +18,7 @@ covalic.views.PhaseAccessView = covalic.View.extend({
 
         'click .c-save-access-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                girder.events.trigger('g:alert', {
+                events.trigger('g:alert', {
                     text: 'Settings saved.',
                     type: 'success',
                     icon: 'ok',
@@ -26,7 +34,7 @@ covalic.views.PhaseAccessView = covalic.View.extend({
             this.wizard.current = 0;
         }
 
-        this.accessWidget = new girder.views.AccessWidget({
+        this.accessWidget = new AccessWidget({
             parentView: this,
             modelType: 'phase',
             modal: false,
@@ -39,7 +47,7 @@ covalic.views.PhaseAccessView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.phaseAccessPage({
+        this.$el.html(template({
             wizard: this.wizard,
             phase: this.model
         }));
@@ -50,25 +58,4 @@ covalic.views.PhaseAccessView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/access', 'phaseAccess', function (id, params) {
-    var phase = new covalic.models.PhaseModel({_id: id}),
-        wizard = false;
-
-    params = girder.parseQueryString(params);
-
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    phase.once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.PhaseAccessView, {
-            model: phase,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default PhaseAccessView;

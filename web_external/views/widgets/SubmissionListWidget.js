@@ -1,17 +1,23 @@
-/**
- * This widget shows a sorted list of submissions. It is used to render the
- * leaderboard but can be sorted in other ways as well.
- */
-covalic.views.SubmissionListWidget = covalic.View.extend({
+import _ from 'underscore';
+import moment from 'moment';
+import { AccessType, SORT_DESC } from 'girder/constants';
+import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
+import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+import View from '../view';
+import SubmissionCollection from '../../collections/SubmissionCollection';
+import template from '../../templates/widgets/leaderboard.pug';
+import '../../stylesheets/widgets/leaderboard.styl';
+
+var SubmissionListWidget = View.extend({
     initialize: function (settings) {
         this.phase = settings.phase;
 
-        new girder.views.LoadingAnimation({
+        new LoadingAnimation({
             el: this.$el,
             parentView: this
         }).render();
 
-        this.collection = new covalic.collections.SubmissionCollection();
+        this.collection = new SubmissionCollection();
         this.collection.on('g:changed', function () {
             this.collection.each(function (submission) {
                 var score = submission.get('overallScore');
@@ -25,23 +31,25 @@ covalic.views.SubmissionListWidget = covalic.View.extend({
         }, this).fetch({
             phaseId: this.phase.get('_id'),
             sort: 'overallScore',
-            sortdir: girder.SORT_DESC
+            sortdir: SORT_DESC
         });
     },
 
     render: function () {
-        this.$el.html(covalic.templates.leaderboard({
+        this.$el.html(template({
             submissions: this.collection.models,
             start: this.collection.offset - this.collection.length,
             phase: this.phase,
-            girder: girder,
-            moment: moment
+            AccessType,
+            moment
         }));
 
-        new girder.views.PaginateWidget({
+        new PaginateWidget({
             el: this.$('.c-leaderboard-pagination'),
             collection: this.collection,
             parentView: this
         }).render();
     }
 });
+
+export default SubmissionListWidget;

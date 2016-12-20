@@ -1,7 +1,8 @@
-/**
- * This widget is used to customize scoring behavior for a phase.
- */
-covalic.views.EditScoringWidget = covalic.View.extend({
+import View from '../view';
+import template from '../../templates/widgets/editScoringWidget.pug';
+import 'girder/utilities/jquery/girderModal';
+
+var EditScoringWidget = View.extend({
     events: {
         'submit #c-phase-edit-score-form': function (e) {
             e.preventDefault();
@@ -22,9 +23,9 @@ covalic.views.EditScoringWidget = covalic.View.extend({
     },
 
     render: function () {
-        var modal = this.$el.html(covalic.templates.editScoringWidget({
+        var modal = this.$el.html(template({
             phase: this.model
-        })).girderModal(this).on('ready.girder.modal', _.bind(function () {
+        })).girderModal(this).on('ready.girder.modal', () => {
             var scoreTask = this.model.get('scoreTask');
             if (scoreTask) {
                 this.$('#c-scoring-docker-image').val(scoreTask.dockerImage);
@@ -32,9 +33,11 @@ covalic.views.EditScoringWidget = covalic.View.extend({
                     this.$('#c-scoring-docker-args').val(JSON.stringify(scoreTask.dockerArgs));
                 }
             }
-        }, this));
+        });
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
 
         return this;
     }
 });
+
+export default EditScoringWidget;

@@ -1,37 +1,37 @@
 .c-phase-header
     .c-phase-name.g-body-title
-        a.c-challenge-link(href="#challenge/#{challenge.id}")
+        a.c-challenge-link(href=`#challenge/${challenge.id}`)
             b= challenge.get('name')
         i.icon-angle-right
-        | #{phase.get('name')}
+        = phase.name()
         .c-phase-properties.pull-right
-            if phase.getAccessLevel() >= girder.AccessType.WRITE
+            if phase.getAccessLevel() >= AccessType.WRITE
                 .btn-group.pull-right
                     button.c-phase-actions-button.btn.btn-default.dropdown-toggle(
-                            data-toggle="dropdown" title="Actions")
+                            data-toggle="dropdown", title="Actions")
                         i.icon-cog
                         i.icon-down-dir
                     ul.c-phase-actions-menu.dropdown-menu.pull-right(role="menu")
                         li(role="presentation")
                           a.c-edit-phase(role="menuitem") #[i.icon-edit] Edit phase
                         li(role="presentation")
-                          a.c-ground-truth(href="#phase/#{phase.id}/groundtruth"
+                          a.c-ground-truth(href=`#phase/${phase.id}/groundtruth`,
                             role="menuitem") #[i.icon-target] Ground truth dataset...
                         li(role="presentation")
-                          a.c-test-data(href="#phase/#{phase.id}/input"
+                          a.c-test-data(href=`#phase/${phase.id}/input`,
                             role="menuitem") #[i.icon-beaker] Input dataset...
                         li(role="presentation")
-                            a.c-edit-metrics(role="menuitem" href="#phase/#{phase.id}/metrics")
+                            a.c-edit-metrics(role="menuitem", href=`#phase/${phase.id}/metrics`)
                                 i.icon-chart-bar
                                 |  Scoring metrics
-                        if phase.getAccessLevel() >= girder.AccessType.ADMIN
+                        if phase.getAccessLevel() >= AccessType.ADMIN
                             li.divider(role="presentation")
                             li(role="presentation")
                               a.c-edit-scoring(role="menuitem")
                                 i.icon-code
                                 |  Customize scoring behavior
                             li(role="presentation")
-                              a(href="#phase/#{phase.id}/access"
+                              a(href=`#phase/${phase.id}/access`,
                                 role="menuitem") #[i.icon-lock] Access control
                             li(role="presentation")
                               a.c-delete-phase(role="menuitem") #[i.icon-trash] Delete phase
@@ -42,9 +42,8 @@
 .c-overview-container
   .c-section-header
     | Overview
-    if phase.getAccessLevel() >= girder.AccessType.WRITE
-      a.c-edit-instructions(
-        href="#phase/#{phase.id}/instructions"): i.icon-pencil
+    if phase.getAccessLevel() >= AccessType.WRITE
+      a.c-edit-instructions(href=`#phase/${phase.id}/instructions`): i.icon-pencil
   .c-phase-instructions-container
 
 .c-phase-submit-container
@@ -59,10 +58,9 @@
           i.icon-target
           |  Download ground truth data
         if phase.get('active')
-            a#c-submit-phase-dataset.btn.btn-lg.btn-success(
-              href="#phase/#{phase.id}/submit")
-                i.icon-upload-cloud
-                |  Submit your results
+            a#c-submit-phase-dataset.btn.btn-lg.btn-success(href=`#phase/${phase.id}/submit`)
+              i.icon-upload-cloud
+              |  Submit your results
         else
             button#c-submit-phase-disabled.disabled.btn.btn-lg
                 i.icon-upload-cloud
@@ -76,6 +74,6 @@
   .c-section-header Leaderboard
   .c-leaderboard-widget-container
 
-  if phase.getAccessLevel() >= girder.AccessType.WRITE
-    a.btn.btn-default.btn-sm(href="#phase/#{phase.id}/submissions")
+  if phase.getAccessLevel() >= AccessType.WRITE
+    a.btn.btn-default.btn-sm(href=`#phase/${phase.id}/submissions`)
       | View all submissions

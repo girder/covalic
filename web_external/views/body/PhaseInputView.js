@@ -1,8 +1,18 @@
-covalic.views.PhaseInputView = covalic.View.extend({
+import { confirm } from 'girder/dialog';
+import events from 'girder/events';
+import AccessWidget from 'girder/views/widgets/AccessWidget';
+import UploadWidget from 'girder/views/widgets/UploadWidget';
+import FolderModel from 'girder/models/FolderModel';
+import router from '../../router';
+import View from '../view';
+import template from '../../templates/body/phaseInputData.pug';
+import '../../stylesheets/body/phaseGroundTruth.styl';
+
+var PhaseInputView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                covalic.router.navigate('phase/' + this.model.id +
+                router.navigate('phase/' + this.model.id +
                     '/groundtruth?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
                     this.wizard.total, {trigger: true});
             }, this).saveAccessList();
@@ -10,7 +20,7 @@ covalic.views.PhaseInputView = covalic.View.extend({
 
         'click .c-save-access': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                girder.events.trigger('g:alert', {
+                events.trigger('g:alert', {
                     text: 'Settings saved.',
                     type: 'success',
                     icon: 'ok',
@@ -20,27 +30,27 @@ covalic.views.PhaseInputView = covalic.View.extend({
         },
 
         'click .c-clear-contents': function () {
-            girder.confirm({
+            confirm({
                 text: 'Are you sure you want to delete any existing input ' +
                       'files for this phase? This cannot be undone.',
                 yesText: 'Delete',
-                confirmCallback: _.bind(function () {
+                confirmCallback: () => {
                     this.model.once('c:inputDataDeleted', function () {
-                        girder.events.trigger('g:alert', {
+                        events.trigger('g:alert', {
                             text: 'Data deleted.',
                             type: 'success',
                             icon: 'ok',
                             timeout: 3000
                         });
                     }, this).cleanInputData();
-                }, this)
+                }
             });
         }
     },
 
     _saveAndGoTo: function (route) {
         this.model.once('g:saved', function () {
-            covalic.router.navigate(route, {trigger: true});
+            router.navigate(route, {trigger: true});
         }, this).set({
 
         }).saveAccessList();
@@ -48,10 +58,10 @@ covalic.views.PhaseInputView = covalic.View.extend({
 
     initialize: function (settings) {
         this.wizard = settings.wizard || false;
-        this.inputFolder = new girder.models.FolderModel({
+        this.inputFolder = new FolderModel({
             _id: this.model.get('testDataFolderId')
         }).once('g:fetched', function () {
-            this.uploadWidget = new girder.views.UploadWidget({
+            this.uploadWidget = new UploadWidget({
                 parentView: this,
                 modal: false,
                 parentType: 'folder',
@@ -59,7 +69,7 @@ covalic.views.PhaseInputView = covalic.View.extend({
                 parent: this.inputFolder
             }).on('g:uploadFinished', this._uploadFinished, this);
 
-            this.accessWidget = new girder.views.AccessWidget({
+            this.accessWidget = new AccessWidget({
                 parentView: this,
                 modal: false,
                 hideRecurseOption: true,
@@ -73,7 +83,7 @@ covalic.views.PhaseInputView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.phaseInputData({
+        this.$el.html(template({
             wizard: this.wizard,
             phase: this.model
         }));
@@ -86,8 +96,8 @@ covalic.views.PhaseInputView = covalic.View.extend({
 
     _uploadFinished: function (info) {
         this.uploadWidget.render();
-        girder.events.trigger('g:alert', {
-            text: 'Added ' + info.files.length + ' input files.',
+        events.trigger('g:alert', {
+            text: `Added ${info.files.length} input files.`,
             type: 'success',
             icon: 'ok',
             timeout: 4000
@@ -95,25 +105,4 @@ covalic.views.PhaseInputView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/input', 'phaseInput', function (id, params) {
-    var phase = new covalic.models.PhaseModel({_id: id}),
-        wizard = false;
-
-    params = girder.parseQueryString(params);
-
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    phase.once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.PhaseInputView, {
-            model: phase,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default PhaseInputView;
