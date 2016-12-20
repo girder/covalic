@@ -101,7 +101,7 @@ router.route('challenge/:id/phase/new', 'newPhase', function (id) {
 });
 
 var _wizardPage = function (route, routeName, modelType, viewType) {
-    router.route('challenge/:id/thumbnail', 'challengeThumbnail', function (id, params) {
+    router.route(route, routeName, function (id, params) {
         var model = new modelType({_id: id}),
             wizard = false;
 
@@ -137,5 +137,12 @@ _wizardPage('challenge/:id/access', 'challengeAccess', ChallengeModel, Challenge
 import PhaseAccessView from './views/body/PhaseAccessView';
 _wizardPage('phase/:id/access', 'phaseAccess', PhaseModel, PhaseAccessView);
 
+import PhaseInstructionsView from './views/body/PhaseInstructionsView';
+_wizardPage('phase/:id/instructions', 'phaseInstructions', PhaseModel, PhaseInstructionsView);
+
 import PhaseInputView from './views/body/PhaseInputView';
 _wizardPage('phase/:id/input', 'phaseInput', PhaseModel, PhaseInputView);
+
+import PhaseGroundTruthView from './views/body/PhaseGroundTruthView';
+_wizardPage('phase/:id/groundtruth', 'phaseGroundTruth', PhaseModel, PhaseGroundTruthView);
+

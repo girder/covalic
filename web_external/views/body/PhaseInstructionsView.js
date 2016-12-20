@@ -1,4 +1,11 @@
-covalic.views.PhaseInstructionsView = covalic.View.extend({
+import FolderModel from 'girder/models/FolderModel';
+import MarkdownWidget from 'girder/views/widgets/MarkdownWidget';
+import router from '../../router';
+import View from '../view';
+import template from '../../templates/body/phaseInstructions.pug';
+import '../../stylesheets/body/challengeInstructions.styl';
+
+var PhaseInstructionsView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this._saveAndGoTo('phase/' + this.model.id +
@@ -13,7 +20,7 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
 
     _saveAndGoTo: function (route) {
         this.model.once('g:saved', function () {
-            covalic.router.navigate(route, {trigger: true});
+            router.navigate(route, {trigger: true});
         }, this).set({
             instructions: this.instructionsEditor.val()
         }).save();
@@ -22,11 +29,11 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
     initialize: function (settings) {
         this.wizard = settings.wizard || false;
 
-        this.phaseFolder = new girder.models.FolderModel({
+        this.phaseFolder = new FolderModel({
             _id: this.model.get('folderId')
         });
 
-        this.instructionsEditor = new girder.views.MarkdownWidget({
+        this.instructionsEditor = new MarkdownWidget({
             parentView: this,
             prefix: 'phase-instructions',
             placeholder: 'Enter phase overview',
@@ -40,7 +47,7 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.phaseInstructions({
+        this.$el.html(template({
             wizard: this.wizard,
             phase: this.model,
             markdownLink: 'https://daringfireball.net/projects/markdown/syntax'
@@ -54,25 +61,4 @@ covalic.views.PhaseInstructionsView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/instructions', 'phaseInstructions', function (id, params) {
-    var phase = new covalic.models.PhaseModel({_id: id}),
-        wizard = false;
-
-    params = girder.parseQueryString(params);
-
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    phase.once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.PhaseInstructionsView, {
-            model: phase,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default PhaseInstructionsView;

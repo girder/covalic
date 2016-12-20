@@ -79,7 +79,8 @@ var PhaseInputView = View.extend({
             });
 
             this.render();
-        }, this).fetch();
+        }, this);
+        this.inputFolder.fetch();
     },
 
     render: function () {

@@ -67,9 +67,7 @@ var PhaseView = View.extend({
                 yesText: 'Delete',
                 escapedHtml: true,
                 confirmCallback: () => {
-                    this.model.destroy({
-                        progress: true
-                    }).on('g:deleted', function () {
+                    this.model.once('g:deleted', function () {
                         events.trigger('g:alert', {
                             icon: 'ok',
                             text: 'Phase deleted.',
@@ -80,7 +78,9 @@ var PhaseView = View.extend({
                             'challenge/' + this.model.get('challengeId'), {
                                 trigger: true
                             });
-                    }, this);
+                    }, this).destroy({
+                        progress: true
+                    });
                 }
             });
         }

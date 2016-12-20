@@ -1,14 +1,24 @@
-covalic.views.PhaseGroundTruthView = covalic.View.extend({
+import { confirm } from 'girder/dialog';
+import events from 'girder/events';
+import AccessWidget from 'girder/views/widgets/AccessWidget';
+import UploadWidget from 'girder/views/widgets/UploadWidget';
+import FolderModel from 'girder/models/FolderModel';
+import router from '../../router';
+import View from '../view';
+import template from '../../templates/body/phaseGroundTruth.pug';
+import '../../stylesheets/body/phaseGroundTruth.styl';
+
+var PhaseGroundTruthView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                covalic.router.navigate('phase/' + this.model.id, {trigger: true});
+                router.navigate('phase/' + this.model.id, {trigger: true});
             }, this).saveAccessList();
         },
 
         'click .c-save-access': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                girder.events.trigger('g:alert', {
+                events.trigger('g:alert', {
                     text: 'Settings saved.',
                     type: 'success',
                     icon: 'ok',
@@ -18,20 +28,20 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
         },
 
         'click .c-clear-contents': function () {
-            girder.confirm({
+            confirm({
                 text: 'Are you sure you want to delete any existing ground ' +
                       'truth files for this phase? This cannot be undone.',
                 yesText: 'Delete',
-                confirmCallback: _.bind(function () {
+                confirmCallback: () => {
                     this.model.once('c:groundTruthDeleted', function () {
-                        girder.events.trigger('g:alert', {
+                        events.trigger('g:alert', {
                             text: 'Data deleted.',
                             type: 'success',
                             icon: 'ok',
                             timeout: 3000
                         });
                     }, this).cleanGroundTruthData();
-                }, this)
+                }
             });
         },
 
@@ -45,7 +55,7 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
 
     _saveAndGoTo: function (route) {
         this.model.once('g:saved', function () {
-            covalic.router.navigate(route, {trigger: true});
+            router.navigate(route, {trigger: true});
         }, this).set({
 
         }).saveAccessList();
@@ -53,10 +63,10 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
 
     initialize: function (settings) {
         this.wizard = settings.wizard || false;
-        this.groundTruthFolder = new girder.models.FolderModel({
+        this.groundTruthFolder = new FolderModel({
             _id: this.model.get('groundTruthFolderId')
         }).once('g:fetched', function () {
-            this.uploadWidget = new girder.views.UploadWidget({
+            this.uploadWidget = new UploadWidget({
                 parentView: this,
                 modal: false,
                 parentType: 'folder',
@@ -64,7 +74,7 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
                 parent: this.groundTruthFolder
             }).on('g:uploadFinished', this._uploadFinished, this);
 
-            this.accessWidget = new girder.views.AccessWidget({
+            this.accessWidget = new AccessWidget({
                 parentView: this,
                 modal: false,
                 hideRecurseOption: true,
@@ -74,11 +84,12 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
             });
 
             this.render();
-        }, this).fetch();
+        }, this);
+        this.groundTruthFolder.fetch();
     },
 
     render: function () {
-        this.$el.html(covalic.templates.phaseGroundTruth({
+        this.$el.html(template({
             wizard: this.wizard,
             phase: this.model
         }));
@@ -91,8 +102,8 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
 
     _uploadFinished: function (info) {
         this.uploadWidget.render();
-        girder.events.trigger('g:alert', {
-            text: 'Added ' + info.files.length + ' ground truth files.',
+        events.trigger('g:alert', {
+            text: `Added ${info.files.length} ground truth files.`,
             type: 'success',
             icon: 'ok',
             timeout: 4000
@@ -100,25 +111,4 @@ covalic.views.PhaseGroundTruthView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/groundtruth', 'phaseGroundTruth', function (id, params) {
-    var phase = new covalic.models.PhaseModel({_id: id}),
-        wizard = false;
-
-    params = girder.parseQueryString(params);
-
-    if (_.has(params, 'wizard')) {
-        wizard = {
-            total: window.parseInt(params.total),
-            current: window.parseInt(params.curr)
-        };
-    }
-
-    phase.once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.PhaseGroundTruthView, {
-            model: phase,
-            wizard: wizard
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default PhaseGroundTruthView;
