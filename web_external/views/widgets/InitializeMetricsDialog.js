@@ -1,4 +1,8 @@
-covalic.views.InitializeMetricsDialog = covalic.View.extend({
+import View from '../view';
+import template from '../../templates/widgets/initializeMetricsDialog.pug';
+import 'girder/utilities/jquery/girderModal';
+
+var InitializeMetricsDialog = View.extend({
     events: {
         'change .c-confirm-checkbox': function (e) {
             if ($(e.currentTarget).is(':checked')) {
@@ -16,6 +20,8 @@ covalic.views.InitializeMetricsDialog = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.initializeMetricsDialog()).girderModal(this);
+        this.$el.html(template()).girderModal(this);
     }
 });
+
+export default InitializeMetricsDialog;

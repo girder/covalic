@@ -1,9 +1,19 @@
-covalic.views.ScoringMetricsView = covalic.View.extend({
+import _ from 'underscore';
+import events from 'girder/events';
+import { cancelRestRequests } from 'girder/rest';
+import ChallengeModel from '../../models/ChallengeModel';
+import AddMetricWidget from '../widgets/AddMetricWidget';
+import SelectPhaseWidget from '../widgets/SelectPhaseWidget';
+import InitializeMetricsDialog from '../widgets/InitializeMetricsDialog';
+import View from '../view';
+import template from '../../templates/body/scoringMetrics.pug';
+import '../../stylesheets/body/scoringMetrics.styl';
 
+var ScoringMetricsView = View.extend({
     events: {
         'click .c-add-metric': function () {
             if (!this.addMetricWidget) {
-                this.addMetricWidget = new covalic.views.AddMetricWidget({
+                this.addMetricWidget = new AddMetricWidget({
                     el: $('#g-dialog-container'),
                     phase: this.model,
                     parentView: this
@@ -31,7 +41,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
 
         'click .c-copy-metrics': function () {
             if (!this.copyMetricsWidget) {
-                this.copyMetricsWidget = new covalic.views.SelectPhaseWidget({
+                this.copyMetricsWidget = new SelectPhaseWidget({
                     el: $('#g-dialog-container'),
                     phase: this.model,
                     title: 'Copy metric information from phase',
@@ -50,7 +60,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
 
             if (metrics) {
                 this.model.set('metrics', metrics).once('c:metricsSaved', function () {
-                    girder.events.trigger('g:alert', {
+                    events.trigger('g:alert', {
                         type: 'success',
                         icon: 'ok',
                         text: 'Metrics saved.',
@@ -74,7 +84,7 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
         },
 
         'click .c-initialize-metrics': function () {
-            new covalic.views.InitializeMetricsDialog({
+            new InitializeMetricsDialog({
                 parentView: this,
                 el: $('#g-dialog-container'),
                 model: this.model
@@ -118,8 +128,8 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
     },
 
     initialize: function (settings) {
-        girder.events.on('c:joinPhase', this.render, this);
-        girder.cancelRestRequests('fetch');
+        events.on('c:joinPhase', this.render, this);
+        cancelRestRequests('fetch');
 
         this.model = settings.phase;
         this.openMetric = settings.openMetric || null;
@@ -127,21 +137,21 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
         if (this.challenge) {
             this.render();
         } else {
-            this.challenge = new covalic.models.ChallengeModel();
-            this.challenge.set({
+            this.challenge = new ChallengeModel({
                 _id: this.model.get('challengeId')
             }).on('g:fetched', function () {
                 this.render();
-            }, this).fetch();
+            }, this);
+            this.challenge.fetch();
         }
     },
 
     render: function () {
-        this.$el.html(covalic.templates.scoringMetrics({
+        this.$el.html(template({
             phase: this.model,
             challenge: this.challenge,
             openMetric: this.openMetric,
-            _: _
+            _
         }));
 
         this.$('button[title],.c-metric-remove-button').tooltip({
@@ -151,22 +161,10 @@ covalic.views.ScoringMetricsView = covalic.View.extend({
         if (this.openMetric) {
             var el = this.$('.c-metric-id[value="' + this.openMetric + '"]');
             el.focus();
-            window.scrollTo(el.offset().top);
+            window.scrollTo(0, el.offset().top);
         }
         return this;
     }
 });
 
-covalic.router.route('phase/:id/metrics', 'phaseMetrics', function (id) {
-    // Fetch the phase by id, then render the view.
-    var phase = new covalic.models.PhaseModel();
-    phase.set({
-        _id: id
-    }).on('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.ScoringMetricsView, {
-            phase: phase
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default ScoringMetricsView;

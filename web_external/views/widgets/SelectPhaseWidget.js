@@ -1,7 +1,9 @@
-/**
- * Dialog for selecting a phase by ID.
- */
-covalic.views.SelectPhaseWidget = covalic.View.extend({
+import View from '../view';
+import PhaseModel from '../../models/PhaseModel';
+import template from '../../templates/widgets/selectPhase.pug';
+import 'girder/utilities/jquery/girderModal';
+
+var SelectPhaseWidget = View.extend({
     events: {
         'submit #c-phase-select-form': function (e) {
             e.preventDefault();
@@ -9,7 +11,7 @@ covalic.views.SelectPhaseWidget = covalic.View.extend({
             this.$('.g-validation-failed-message').empty();
 
             var id = this.$('#c-phase-id').val(),
-                phase = new covalic.models.PhaseModel({_id: id});
+                phase = new PhaseModel({_id: id});
 
             phase.on('g:fetched', function () {
                 this.$el.modal('hide');
@@ -26,11 +28,10 @@ covalic.views.SelectPhaseWidget = covalic.View.extend({
     },
 
     render: function () {
-        var view = this;
-        var modal = this.$el.html(covalic.templates.selectPhase({
+        var modal = this.$el.html(template({
             title: this.title
-        })).girderModal(this).on('shown.bs.modal', function () {
-            view.$('#c-phase-id').focus();
+        })).girderModal(this).on('shown.bs.modal', () => {
+            this.$('#c-phase-id').focus();
         });
 
         modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
@@ -39,3 +40,5 @@ covalic.views.SelectPhaseWidget = covalic.View.extend({
         return this;
     }
 });
+
+export default SelectPhaseWidget;

@@ -1,7 +1,9 @@
-/**
- * This widget is used to create a new metric.
- */
-covalic.views.AddMetricWidget = covalic.View.extend({
+import _ from 'underscore';
+import View from '../view';
+import template from '../../templates/widgets/addMetricWidget.pug';
+import 'girder/utilities/jquery/girderModal';
+
+var AddMetricWidget = View.extend({
     events: {
         'submit #c-metric-add-form': function (e) {
             e.preventDefault();
@@ -16,7 +18,7 @@ covalic.views.AddMetricWidget = covalic.View.extend({
                 this.$('.g-validation-failed-message').text('');
                 this.$el.modal('hide');
                 this.trigger('g:saved', {
-                    id: id
+                    id
                 });
             }
         }
@@ -28,7 +30,7 @@ covalic.views.AddMetricWidget = covalic.View.extend({
 
     render: function () {
         var view = this;
-        var modal = this.$el.html(covalic.templates.addMetricWidget())
+        var modal = this.$el.html(template())
             .girderModal(this).on('shown.bs.modal', function () {
                 view.$('#c-metric-id').focus();
             });
@@ -39,3 +41,5 @@ covalic.views.AddMetricWidget = covalic.View.extend({
         return this;
     }
 });
+
+export default AddMetricWidget;

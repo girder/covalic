@@ -1,8 +1,8 @@
 .c-metrics-header
   .g-body-title.c-breadcrumb-list
-    a.c-challenge-link(href="#challenge/#{challenge.get('_id')}")= challenge.get('name')
+    a.c-challenge-link(href=`#challenge/${challenge.id}`)= challenge.get('name')
     i.icon-angle-right
-    a.c-phase-link(href="#phase/#{phase.get('_id')}")= phase.get('name')
+    a.c-phase-link(href=`#phase/${phase.id}`)= phase.get('name')
     i.icon-angle-right
     span Scoring metrics
 
@@ -29,16 +29,16 @@ if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
       .c-metric-container.panel.panel-default
         .panel-heading(role="tab")
           h4.panel-title
-            a.c-metric-id-panel-title(data-toggle="collapse" data-parent=".c-metric-list"
-              href="#c-metric-#{i}")= id
+            a.c-metric-id-panel-title(data-toggle="collapse", data-parent=".c-metric-list",
+              href=`#c-metric-${i}`)= id
           .c-metric-remove-button(title="Remove metric"): i.icon-cancel
         .c-metric-panel.panel-collapse.collapse(
-            id="c-metric-#{i}" role="tabpanel" class="#{id === openMetric ? 'in' : ''}")
+            id=`c-metric-${i}`, role="tabpanel", class=(id === openMetric ? 'in' : ''))
           .panel-body
             .c-metric-info-label.c-first Short identifier
-            input.form-control.input-sm.c-metric-id(value="#{id}")
+            input.form-control.input-sm.c-metric-id(value=id)
             .c-metric-info-label Full metric name
-            input.form-control.input-sm.c-metric-title(value="#{metric.title}")
+            input.form-control.input-sm.c-metric-title(value=metric.title)
             .c-metric-info-label
               | Description (supports
               a(target="_blank", href="http://daringfireball.net/projects/markdown")  Markdown
@@ -46,7 +46,7 @@ if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
             textarea.form-control.input-sm.c-metric-description(rows="4")= metric.description
             .c-metric-info-label
               | Numeric weighting factor
-            input.form-control.input-sm.c-metric-weight(type="text", value="#{metric.weight}")
+            input.form-control.input-sm.c-metric-weight(type="text", value=metric.weight)
 
   .g-validation-failed-message
   button.c-save-metrics.btn.btn-primary(type="submit")

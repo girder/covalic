@@ -100,6 +100,21 @@ router.route('challenge/:id/phase/new', 'newPhase', function (id) {
     });
 });
 
+import ScoringMetricsView from './views/body/ScoringMetricsView';
+router.route('phase/:id/metrics', 'phaseMetrics', function (id) {
+    // Fetch the phase by id, then render the view.
+    var phase = new PhaseModel({
+        _id: id
+    }).on('g:fetched', function () {
+        events.trigger('g:navigateTo', ScoringMetricsView, {
+            phase: phase
+        });
+    }, this).on('g:error', function () {
+        router.navigate('challenges', {trigger: true});
+    }, this);
+    phase.fetch();
+});
+
 var _wizardPage = function (route, routeName, modelType, viewType) {
     router.route(route, routeName, function (id, params) {
         var model = new modelType({_id: id}),
