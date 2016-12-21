@@ -114,12 +114,6 @@
     - girder
     - deploy-update
 
-- name: run npm install
-  npm: path={{ girder_root }} production=yes
-  tags:
-    - girder
-    - deploy-update
-
 - name: install girder for development
   command: python setup.py develop chdir={{ girder_root }}
   sudo: yes
@@ -261,6 +255,12 @@
     state: present
   register: girder_admin_resp
   tags: girder
+
+- name: Build and install web client code
+  command: girder-install web
+  tags:
+    - girder
+    - deploy-update
 
 - name: Restart Girder as a service to make sure our plugins are running
   service: name=girder state=restarted enabled=yes
