@@ -115,6 +115,20 @@ router.route('phase/:id/metrics', 'phaseMetrics', function (id) {
     phase.fetch();
 });
 
+import SubmitView from './views/body/SubmitView';
+router.route('phase/:id/submit', 'phase_submit', function (id) {
+    var phase = new PhaseModel({
+        _id: id
+    });
+    phase.once('g:fetched', function () {
+        events.trigger('g:navigateTo', SubmitView, {
+            phase
+        });
+    }).once('g:error', function () {
+        router.navigate('challenges', {trigger: true});
+    }, this).fetch();
+});
+
 var _wizardPage = function (route, routeName, modelType, viewType) {
     router.route(route, routeName, function (id, params) {
         var model = new modelType({_id: id}),

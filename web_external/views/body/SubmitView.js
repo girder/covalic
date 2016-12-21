@@ -1,7 +1,16 @@
-/**
- * Page where users upload a submission.
- */
-covalic.views.SubmitView = covalic.View.extend({
+import _ from 'underscore';
+import events from 'girder/events';
+import { getCurrentUser } from 'girder/auth';
+import FolderModel from 'girder/models/FolderModel';
+import UploadWidget from 'girder/views/widgets/UploadWidget';
+import SubmissionModel from '../../models/SubmissionModel';
+import View from '../view';
+import router from '../../router';
+import template from '../../templates/body/submitPage.pug';
+import mismatchTemplate from '../../templates/widgets/mismatchedInputs.pug';
+import '../../stylesheets/body/submitPage.styl';
+
+var SubmitView = View.extend({
     events: {
         'input .c-submission-title-input': function () {
             this.title = this.$('.c-submission-title-input').val().trim();
@@ -18,12 +27,12 @@ covalic.views.SubmitView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.submitPage({
+        this.$el.html(template({
             phase: this.phase,
             maxTitleLength: 80
         }));
 
-        this.uploadWidget = new girder.views.UploadWidget({
+        this.uploadWidget = new UploadWidget({
             el: this.$('.c-submit-upload-widget'),
             modal: false,
             noParent: true,
@@ -76,8 +85,8 @@ covalic.views.SubmitView = covalic.View.extend({
 
         this.uploadWidget.setUploadEnabled(matchInfo.ok && titleOk);
 
-        this.$('.c-submission-mismatch-container').html(covalic.templates.mismatchedInputs({
-            matchInfo: matchInfo
+        this.$('.c-submission-mismatch-container').html(mismatchTemplate({
+            matchInfo
         }));
 
         this.filesCorrect = matchInfo.ok;
@@ -97,10 +106,10 @@ covalic.views.SubmitView = covalic.View.extend({
      * uploading into it.
      */
     uploadStarted: function () {
-        this.folder = new girder.models.FolderModel({
-            name: 'submission_' + this.phase.get('_id') + '_' + Date.now(),
+        this.folder = new FolderModel({
+            name: `submission_${this.phase.id}_${Date.now()}`,
             parentType: 'user',
-            parentId: girder.currentUser.get('_id'),
+            parentId: getCurrentUser().id,
             description: 'Challenge submission'
         });
 
@@ -109,7 +118,7 @@ covalic.views.SubmitView = covalic.View.extend({
             this.uploadWidget.parent = this.folder;
             this.uploadWidget.uploadNextFile();
         }, this).on('g:error', function () {
-            girder.events.trigger('g:alert', {
+            events.trigger('g:alert', {
                 icon: 'cancel',
                 text: 'Could not create submission folder.',
                 type: 'error',
@@ -119,26 +128,15 @@ covalic.views.SubmitView = covalic.View.extend({
     },
 
     uploadFinished: function () {
-        var submission = new covalic.models.SubmissionModel();
+        var submission = new SubmissionModel();
         submission.on('c:submissionPosted', function () {
-            covalic.router.navigate('submission/' + submission.get('_id'), {trigger: true});
+            router.navigate(`submission/${submission.id}`, {trigger: true});
         }, this).postSubmission({
-            phaseId: this.phase.get('_id'),
-            folderId: this.folder.get('_id'),
+            phaseId: this.phase.id,
+            folderId: this.folder.id,
             title: this.title
         });
     }
 });
 
-covalic.router.route('phase/:id/submit', 'phase_submit', function (id) {
-    var phase = new covalic.models.PhaseModel();
-    phase.set({
-        _id: id
-    }).on('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.SubmitView, {
-            phase: phase
-        });
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default SubmitView;
