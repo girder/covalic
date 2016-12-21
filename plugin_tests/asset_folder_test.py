@@ -52,6 +52,7 @@ class AssetFolderTestCase(base.TestCase):
         self.assertEqual(folder['access'], {
             'users': [{
                 'id': admin['_id'],
+                'flags': [],
                 'level': AccessType.ADMIN
             }],
             'groups': []
@@ -64,10 +65,12 @@ class AssetFolderTestCase(base.TestCase):
         self.assertEqual(folder['access'], {
             'users': [{
                 'id': admin['_id'],
+                'flags': [],
                 'level': AccessType.ADMIN
             }],
             'groups': [{
                 'id': group['_id'],
+                'flags': [],
                 'level': AccessType.WRITE
             }]
         })
