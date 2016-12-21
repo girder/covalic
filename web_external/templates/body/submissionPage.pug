@@ -1,6 +1,6 @@
 .c-submission-header-bar
   .c-submission-right-buttons.pull-right
-    a.c-leaderboard-button(href="#phase/#{submission.get('phaseId')}")
+    a.c-leaderboard-button(href=`#phase/${submission.get('phaseId')}`)
       if scoreHidden
         |  Return to phase&nbsp;
       else

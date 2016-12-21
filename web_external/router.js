@@ -2,6 +2,7 @@ import _ from 'underscore';
 import Backbone from 'backbone';
 import events from 'girder/events';
 import girderRouter from 'girder/router';
+import { AccessType } from 'girder/constants';
 import { parseQueryString } from 'girder/misc';
 
 girderRouter.enabled(false);
@@ -129,6 +130,52 @@ router.route('phase/:id/submit', 'phase_submit', function (id) {
     }, this).fetch();
 });
 
+import SubmissionView from './views/body/SubmissionView';
+import SubmissionModel from './models/SubmissionModel';
+router.route('submission/:id', 'phase_submission', function (id) {
+    var submission = new SubmissionModel({
+        _id: id
+    });
+    submission.once('g:fetched', function () {
+        events.trigger('g:navigateTo', SubmissionView, {
+            submission
+        });
+    }).once('g:error', function () {
+        router.navigate('challenges', {trigger: true});
+    }).fetch();
+});
+
+import PhaseSubmissionsView from './views/body/PhaseSubmissionsView';
+router.route('phase/:id/submissions', 'phaseSubmissions', function (id, params) {
+    var phase = new PhaseModel({
+        _id: id
+    }).once('g:fetched', function () {
+        if (phase.getAccessLevel() < AccessType.WRITE) {
+            router.navigate('challenges', {trigger: true});
+        } else {
+            params = parseQueryString(params);
+
+            var participantLimit = null;
+            var submissionLimit = null;
+            if (_.has(params, 'participantLimit')) {
+                participantLimit = params.participantLimit;
+            }
+            if (_.has(params, 'submissionLimit')) {
+                submissionLimit = params.submissionLimit;
+            }
+
+            events.trigger('g:navigateTo', PhaseSubmissionsView, {
+                phase,
+                participantLimit,
+                submissionLimit
+            });
+        }
+    }, this).on('g:error', function () {
+        router.navigate('challenges', {trigger: true});
+    }, this);
+    phase.fetch();
+});
+
 var _wizardPage = function (route, routeName, modelType, viewType) {
     router.route(route, routeName, function (id, params) {
         var model = new modelType({_id: id}),
@@ -174,4 +221,3 @@ _wizardPage('phase/:id/input', 'phaseInput', PhaseModel, PhaseInputView);
 
 import PhaseGroundTruthView from './views/body/PhaseGroundTruthView';
 _wizardPage('phase/:id/groundtruth', 'phaseGroundTruth', PhaseModel, PhaseGroundTruthView);
-

@@ -1,13 +1,32 @@
-/**
-* View for an individual submission.
-*/
-covalic.views.SubmissionView = covalic.View.extend({
+import _ from 'underscore';
+import { getCurrentUser } from 'girder/auth';
+import { AccessType, DATE_SECOND } from 'girder/constants';
+import { formatDate } from 'girder/misc';
+import ItemCollection from 'girder/collections/ItemCollection';
+import FolderModel from 'girder/models/FolderModel';
+import ItemModel from 'girder/models/ItemModel';
+import UserModel from 'girder/models/UserModel';
+import eventStream from 'girder/utilities/EventStream';
+import JobModel from 'girder_plugins/jobs/models/JobModel';
+import JobStatus from 'girder_plugins/jobs/JobStatus';
+import JobDetailsWidget from 'girder_plugins/jobs/views/JobDetailsWidget';
+import PhaseModel from '../../models/PhaseModel';
+import SubmissionModel from '../../models/SubmissionModel';
+import ScoreDetailWidget from '../widgets/ScoreDetailWidget';
+import router from '../../router';
+import View from '../view';
+import template from '../../templates/body/submissionPage.pug';
+import progressTemplate from '../../templates/widgets/scoringProgress.pug';
+import errorTemplate from '../../templates/widgets/submissionError.pug';
+import '../../stylesheets/body/submissionPage.styl';
+
+var SubmissionView = View.extend({
     events: {
         'click .c-restart-error-submission-button': function () {
             // create a new submission with the same properties
-            var submission = new covalic.models.SubmissionModel();
+            var submission = new SubmissionModel();
             submission.on('c:submissionPosted', function () {
-                covalic.router.navigate('submission/' + submission.get('_id'), {trigger: true});
+                router.navigate('submission/' + submission.id, {trigger: true});
             }, this).postSubmission({
                 phaseId: this.submission.get('phaseId'),
                 folderId: this.submission.get('folderId'),
@@ -15,9 +34,9 @@ covalic.views.SubmissionView = covalic.View.extend({
             });
         },
 
-        'click .c-download-submission-data': function (event) {
+        'click .c-download-submission-data': function () {
             // Get submission folder with details
-            var submissionFolder = new girder.models.FolderModel({
+            var submissionFolder = new FolderModel({
                 _id: this.submission.get('folderId')
             });
             submissionFolder.once('g:fetched', function () {
@@ -39,9 +58,9 @@ covalic.views.SubmissionView = covalic.View.extend({
         var numItems = folder.get('nItems');
         if (numFolders === 0 && numItems === 1) {
             // Download item
-            var items = new girder.collections.ItemCollection();
+            var items = new ItemCollection();
             items.once('g:changed', function () {
-                var item = new girder.models.ItemModel({
+                var item = new ItemModel({
                     _id: items.at(0).id
                 }).once('g:fetched', function () {
                     item.download();
@@ -60,24 +79,24 @@ covalic.views.SubmissionView = covalic.View.extend({
         // Must unbind previous fetch handlers to avoid infinite callbacks
         this.submission.off('g:fetched');
 
-        this.phase = new covalic.models.PhaseModel({
+        this.phase = new PhaseModel({
             _id: this.submission.get('phaseId')
         }).on('g:fetched', function () {
             this.render();
 
             if (!this.submission.get('score')) {
-                girder.eventStream.on('g:event.job_status', this._statusHandler, this);
-                girder.eventStream.on('g:event.progress', this._progressHandler, this);
+                eventStream.on('g:event.job_status', this._statusHandler, this);
+                eventStream.on('g:event.progress', this._progressHandler, this);
 
-                if (girder.currentUser && (
-                        girder.currentUser.get('_id') === this.submission.get('creatorId') ||
-                        girder.currentUser.get('admin'))) {
-                    this.job = new girder.models.JobModel({
+                var currentUser = getCurrentUser();
+                if (currentUser && (currentUser.id === this.submission.get('creatorId') ||
+                                    currentUser.get('admin'))) {
+                    this.job = new JobModel({
                         _id: this.submission.get('jobId')
                     }).on('g:fetched', function () {
-                        if (this.job.get('status') === girder.jobs_JobStatus.ERROR) {
+                        if (this.job.get('status') === JobStatus.ERROR) {
                             this._renderProcessingError();
-                        } else if (this.job.get('status') === girder.jobs_JobStatus.SUCCESS) {
+                        } else if (this.job.get('status') === JobStatus.SUCCESS) {
                             this.submission.once('g:fetched', this.render, this).fetch();
                         } else {
                             this.render();
@@ -85,7 +104,8 @@ covalic.views.SubmissionView = covalic.View.extend({
                     }, this).fetch();
                 }
             }
-        }, this).fetch();
+        }, this);
+        this.phase.fetch();
     },
 
     render: function () {
@@ -94,24 +114,25 @@ covalic.views.SubmissionView = covalic.View.extend({
             overallScore = Math.round(this.submission.get('overallScore') * 1000) / 1000;
         }
 
-        this.$el.html(covalic.templates.submissionPage({
+        this.$el.html(template({
             submission: this.submission,
-            overallScore: overallScore,
+            overallScore,
             scoreHidden: !!(this.phase.get('hideScores') &&
-                            this.phase.getAccessLevel() < girder.AccessType.WRITE),
-            JobStatus: girder.jobs_JobStatus,
+                            this.phase.getAccessLevel() < AccessType.WRITE),
+            JobStatus,
             job: this.job,
-            created: girder.formatDate(this.submission.get('created'), girder.DATE_SECOND),
-            download: this.phase.getAccessLevel() > girder.AccessType.READ
+            created: formatDate(this.submission.get('created'), DATE_SECOND),
+            download: this.phase.getAccessLevel() > AccessType.READ
         }));
 
-        var userModel = new girder.models.UserModel();
-        userModel.set('_id', this.submission.get('creatorId'));
-        this.$('.c-user-portrait').css('background-image', 'url(' +
-        userModel.getGravatarUrl(64) + ')');
+        var userModel = new UserModel({
+            _id: this.submission.get('creatorId')
+        });
+        this.$('.c-user-portrait').css(
+            'background-image', `url(${userModel.getGravatarUrl(64)})`);
 
         if (this.submission.get('score')) {
-            new covalic.views.ScoreDetailWidget({
+            new ScoreDetailWidget({
                 el: this.$('.c-submission-score-detail-container'),
                 submission: this.submission,
                 phase: this.phase,
@@ -122,11 +143,10 @@ covalic.views.SubmissionView = covalic.View.extend({
 
     _statusHandler: function (progress) {
         var status = window.parseInt(progress.data.status);
-        if (progress.data._id === this.job.get('_id') &&
-                status === girder.jobs_JobStatus.SUCCESS) {
+        if (progress.data._id === this.job.id && status === JobStatus.SUCCESS) {
             this.submission.off().on('g:fetched', function () {
-                girder.eventStream.off('g:event.job_status', null, this);
-                girder.eventStream.off('g:event.progress', null, this);
+                eventStream.off('g:event.job_status', null, this);
+                eventStream.off('g:event.progress', null, this);
                 this.render();
             }, this).fetch();
         } else {
@@ -156,12 +176,12 @@ covalic.views.SubmissionView = covalic.View.extend({
                         percentText = percent.toFixed(1) + '%';
                     }
 
-                    this.$('.c-score-progress-container').html(covalic.templates.scoringProgress({
-                        progress: progress,
-                        width: width,
+                    this.$('.c-score-progress-container').html(progressTemplate({
+                        progress,
+                        width,
                         barClass: barClass.join(' '),
                         progressClass: progressClass.join(' '),
-                        percentText: percentText
+                        percentText,
                     }));
                 }
             }
@@ -176,12 +196,12 @@ covalic.views.SubmissionView = covalic.View.extend({
 
     // If an error occurred during processing, we'll display error info.
     _renderProcessingError: function () {
-        this.$('.c-submission-display-body').html(covalic.templates.submissionError({
+        this.$('.c-submission-display-body').html(errorTemplate({
             job: this.job,
-            adminUser: (girder.currentUser && girder.currentUser.get('admin'))
+            adminUser: (getCurrentUser() && getCurrentUser().get('admin'))
         }));
 
-        new girder.views.jobs_JobDetailsWidget({ // eslint-disable-line new-cap
+        new JobDetailsWidget({
             el: this.$('.c-job-details-container'),
             parentView: this,
             job: this.job
@@ -189,15 +209,4 @@ covalic.views.SubmissionView = covalic.View.extend({
     }
 });
 
-covalic.router.route('submission/:id', 'phase_submission', function (id) {
-    var submission = new covalic.models.SubmissionModel();
-    submission.set({
-        _id: id
-    }).once('g:fetched', function () {
-        girder.events.trigger('g:navigateTo', covalic.views.SubmissionView, {
-            submission: submission
-        });
-    }).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }).fetch();
-});
+export default SubmissionView;

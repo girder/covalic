@@ -1,4 +1,10 @@
-covalic.views.ScoreDetailWidget = covalic.View.extend({
+import _ from 'underscore';
+import { renderMarkdown } from 'girder/misc';
+import View from '../view';
+import template from '../../templates/widgets/scoreDetails.pug';
+import metricInfoTemplate from '../../templates/widgets/metricInfo.pug';
+
+var ScoreDetailWidget = View.extend({
     initialize: function (settings) {
         this.submission = settings.submission;
         this.phase = settings.phase;
@@ -9,7 +15,7 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.scoreDetails({
+        this.$el.html(template({
             datasets: this.datasets,
             metrics: this.metrics,
             getScoreForCell: _.bind(this.getScoreForCell, this)
@@ -22,18 +28,17 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
                 metricInfo = metricsInfo[metricId] || {},
                 title = metricInfo.title || metricId,
                 description = metricInfo.description
-                    ? girder.renderMarkdown(metricInfo.description)
-                    : null,
+                    ? renderMarkdown(metricInfo.description) : null,
                 weight = metricInfo.weight || 0;
 
             el.popover({
-                title: title,
+                title,
                 container: this.$el,
                 trigger: 'focus',
                 placement: 'auto',
-                content: covalic.templates.metricInfo({
-                    description: description,
-                    weight: weight
+                content: metricInfoTemplate({
+                    description,
+                    weight
                 }),
                 html: true
             });
@@ -41,7 +46,8 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
     },
 
     getScoreForCell: function (dataset, metric) {
-        var score;
+        var score = null;
+
         _.every(this.score, function (d) {
             if (d.dataset === dataset) {
                 _.every(d.metrics, function (m) {
@@ -69,3 +75,5 @@ covalic.views.ScoreDetailWidget = covalic.View.extend({
         }
     }
 });
+
+export default ScoreDetailWidget;

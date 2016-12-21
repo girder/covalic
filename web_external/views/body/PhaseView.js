@@ -6,6 +6,7 @@ import events from 'girder/events';
 import { renderMarkdown } from 'girder/misc';
 import { cancelRestRequests, restRequest } from 'girder/rest';
 import FolderModel from 'girder/models/FolderModel';
+import ItemModel from 'girder/models/ItemModel';
 
 import router from '../../router';
 import View from '../view';

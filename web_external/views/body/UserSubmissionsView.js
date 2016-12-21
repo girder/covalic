@@ -1,7 +1,17 @@
-/**
-* View for a user's submissions to a phase.
-*/
-covalic.views.UserSubmissionsView = covalic.View.extend({
+import _ from 'underscore';
+import moment from 'moment';
+import { getCurrentUser } from 'girder/auth';
+import { SORT_DESC } from 'girder/constants';
+import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
+import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+import JobModel from 'girder_plugins/jobs/models/JobModel';
+import JobStatus from 'girder_plugins/jobs/JobStatus';
+import SubmissionCollection from '../../collections/SubmissionCollection';
+import View from '../view';
+import template from '../../templates/body/userSubmissionsPage.pug';
+import '../../stylesheets/body/userSubmissionsPage.styl';
+
+var UserSubmissionsView = View.extend({
     events: {
         'click a.c-submission-json-link': function (event) {
             var submissionId = $(event.currentTarget).attr('c-submission-id');
@@ -20,18 +30,18 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
             submissionLimit = Math.max(1, window.parseInt(settings.submissionLimit, 10));
         }
 
-        new girder.views.LoadingAnimation({
+        new LoadingAnimation({
             el: this.$el,
             parentView: this
         }).render();
 
         // XXX: add way to get total number of submissions without fetching all
-        this.submissions = new covalic.collections.SubmissionCollection();
+        this.submissions = new SubmissionCollection();
         this.submissions.sortField = 'created';
-        this.submissions.sortDir = girder.SORT_DESC;
+        this.submissions.sortDir = SORT_DESC;
         this.submissions.pageLimit = submissionLimit;
         this.submissions.on('g:changed', function () {
-            if (girder.currentUser.get('admin')) {
+            if (getCurrentUser().get('admin')) {
                 // Assume submissions that have overallScore were successful.
                 // Fetch jobs for all other submissions.
                 var unscoredSubmissions =
@@ -43,7 +53,7 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
                     var promises = [];
                     _.each(unscoredSubmissions, function (submission) {
                         var deferred = $.Deferred();
-                        var job = new girder.models.JobModel({
+                        var job = new JobModel({
                             _id: submission.get('jobId')
                         }).on('g:fetched', function () {
                             deferred.resolve();
@@ -68,20 +78,20 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
             userId: this.user.id
         });
 
-        this.paginateWidget = new girder.views.PaginateWidget({
+        this.paginateWidget = new PaginateWidget({
             collection: this.submissions,
             parentView: this
         });
     },
 
     render: function (params) {
-        this.$el.html(covalic.templates.userSubmissionsPage({
+        this.$el.html(template({
             user: this.user,
             submissions: this.submissions,
             getShortLog: this._getShortLog,
-            girder: girder,
-            moment: moment,
-            siteAdmin: girder.currentUser.get('admin'),
+            JobStatus,
+            moment,
+            siteAdmin: getCurrentUser().get('admin'),
             jobs: params && params.jobs
         }));
 
@@ -116,3 +126,5 @@ covalic.views.UserSubmissionsView = covalic.View.extend({
         return shortLog.join('\n');
     }
 });
+
+export default UserSubmissionsView;

@@ -1,9 +1,15 @@
-/**
-* View for submissions to a phase.
-*/
-covalic.views.PhaseSubmissionsView = covalic.View.extend({
+import _ from 'underscore';
+import { cancelRestRequests } from 'girder/rest';
+import UserCollection from 'girder/collections/UserCollection';
+import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+import View from '../view';
+import UserSubmissionsView from './UserSubmissionsView';
+import template from '../../templates/body/phaseSubmissionsPage.pug';
+import '../../stylesheets/body/phaseSubmissionsPage.styl';
+
+var PhaseSubmissionsView = View.extend({
     initialize: function (settings) {
-        girder.cancelRestRequests('fetch');
+        cancelRestRequests('fetch');
 
         var participantLimit = 5;
         if (!_.isNull(settings.participantLimit)) {
@@ -15,24 +21,23 @@ covalic.views.PhaseSubmissionsView = covalic.View.extend({
         if (settings.phase) {
             this.phase = settings.phase;
 
-            this.participants = new girder.collections.UserCollection();
-            this.participants.altUrl =
-                'group/' + this.phase.get('participantGroupId') + '/member';
+            this.participants = new UserCollection();
+            this.participants.altUrl = `group/${this.phase.get('participantGroupId')}/member`;
             this.participants.pageLimit = participantLimit;
             this.participants.on('g:changed', function () {
                 this.views = [];
-                this.participants.each(_.bind(function (user) {
-                    this.views.push(new covalic.views.UserSubmissionsView({
+                this.participants.each((user) => {
+                    this.views.push(new UserSubmissionsView({
                         phase: this.phase,
-                        user: user,
+                        user,
                         submissionLimit: settings.submissionLimit,
                         parentView: this
                     }));
-                }, this));
+                });
                 this.render();
             }, this).fetch();
 
-            this.paginateWidget = new girder.views.PaginateWidget({
+            this.paginateWidget = new PaginateWidget({
                 collection: this.participants,
                 parentView: this
             });
@@ -40,7 +45,7 @@ covalic.views.PhaseSubmissionsView = covalic.View.extend({
     },
 
     render: function () {
-        this.$el.html(covalic.templates.phaseSubmissionsPage({
+        this.$el.html(template({
             phase: this.phase
         }));
 
@@ -56,31 +61,4 @@ covalic.views.PhaseSubmissionsView = covalic.View.extend({
     }
 });
 
-covalic.router.route('phase/:id/submissions', 'phaseSubmissions', function (id, params) {
-    var phase = new covalic.models.PhaseModel({
-        _id: id
-    }).once('g:fetched', function () {
-        if (phase.getAccessLevel() < girder.AccessType.WRITE) {
-            covalic.router.navigate('challenges', {trigger: true});
-        } else {
-            params = girder.parseQueryString(params);
-
-            var participantLimit = null;
-            var submissionLimit = null;
-            if (_.has(params, 'participantLimit')) {
-                participantLimit = params.participantLimit;
-            }
-            if (_.has(params, 'submissionLimit')) {
-                submissionLimit = params.submissionLimit;
-            }
-
-            girder.events.trigger('g:navigateTo', covalic.views.PhaseSubmissionsView, {
-                phase: phase,
-                participantLimit: participantLimit,
-                submissionLimit: submissionLimit
-            });
-        }
-    }, this).on('g:error', function () {
-        covalic.router.navigate('challenges', {trigger: true});
-    }, this).fetch();
-});
+export default PhaseSubmissionsView;
