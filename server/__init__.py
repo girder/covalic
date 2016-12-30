@@ -29,6 +29,7 @@ from girder.models.model_base import ValidationException
 from girder.plugins.jobs.constants import JobStatus
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
+from girder.utility.plugin_utilities import registerPluginWebroot
 from .rest import challenge, phase, submission
 from .constants import PluginSettings, JOB_LOG_PREFIX
 from .utility import getAssetsFolder
@@ -222,10 +223,7 @@ def load(info):
     info['apiRoot'].challenge_phase = phase.Phase()
     info['apiRoot'].covalic_submission = submission.Submission()
 
-    # Move girder app to /girder, serve covalic app from /
-    info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
-                                                     info['serverRoot'])
-    info['serverRoot'].api = info['serverRoot'].girder.api
+    registerPluginWebroot(CustomAppRoot(), info['name'])
 
     events.bind('jobs.job.update', 'covalic', onJobUpdate)
     events.bind('model.setting.validate', 'covalic', validateSettings)

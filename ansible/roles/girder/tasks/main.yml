@@ -114,33 +114,14 @@
     - girder
     - deploy-update
 
-- name: install girder for development
-  command: python setup.py develop chdir={{ girder_root }}
-  sudo: yes
-  tags:
-    - girder
-    - deploy-update
-
-# TODO this will probably have to be reworked or at least tested for multiple mongo ips
-- name: set the mongodb server ip in girder local config
-  lineinfile:
+- name: Install local girder config
+  template:
+    src: girder.local.cfg.j2
     dest: /opt/covalic/girder/girder/conf/girder.local.cfg
-    state: present
-    regexp: 'mongodb://(.*):27017'
-    line: "uri: \"mongodb://{{mongo_private_ip}}:27017/girder\""
+    mode: 0644
   tags:
     - girder
     - rewire
-
-- name: Let cherrypy know about nginx proxying
-  lineinfile:
-    dest: /opt/covalic/girder/girder/conf/girder.local.cfg
-    state: present
-    insertafter: 'global'
-    regexp: 'tools.proxy.on: True'
-    line: 'tools.proxy.on: True'
-  tags: girder
-  when: pod == 'prod'
 
 - name: install Girder as a service
   template: src=girder.conf.j2 dest=/etc/init/girder.conf mode=644 owner=root
@@ -280,6 +261,17 @@
     - rewire
 
 # Configure plugin settings
+
+- name: Set webroot route config
+  girder:
+    port: "{{ girder_socket_port }}"
+    username: "{{ girder_admin_user }}"
+    password: "{{ girder_admin_password }}"
+    put:
+      path: system/setting
+      parameters:
+        key: core.route_table
+        value: "{{ girder_route_config | to_json }}"
 
 - name: Set worker broker setting
   girder:
