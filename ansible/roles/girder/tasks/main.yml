@@ -267,22 +267,23 @@
     port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    put:
-      path: system/setting
-      parameters:
-        key: core.route_table
-        value: "{{ girder_route_config | to_json }}"
+    setting:
+      key: core.route_table
+      value: "{{ girder_route_config }}"
+    state: present
+  tags:
+  - girder
+  - rewire
 
 - name: Set worker broker setting
   girder:
     port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    put:
-      path: system/setting
-      parameters:
-        key: worker.broker
-        value: "amqp://guest@{{ mq_private_ip }}//"
+    setting:
+      key: worker.broker
+      value: "amqp://guest@{{ mq_private_ip }}//"
+    state: present
   tags:
     - girder
     - rewire
@@ -292,11 +293,10 @@
     port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    put:
-      path: system/setting
-      parameters:
-        key: worker.backend
-        value: "amqp://guest@{{ mq_private_ip }}//"
+    setting:
+      key: worker.backend
+      value: "amqp://guest@{{ mq_private_ip }}//"
+    state: present
   tags:
     - girder
     - rewire
@@ -306,11 +306,10 @@
     port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    put:
-      path: system/setting
-      parameters:
-        key: covalic.scoring_user_id
-        value: "{{ covalic_scoring_user['gc_return']['_id'] }}"
+    setting:
+      key: covalic.scoring_user_id
+      value: "{{ covalic_scoring_user['gc_return']['_id'] }}"
+    state: present
   tags:
     - girder
     - rewire
