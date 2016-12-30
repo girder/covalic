@@ -398,3 +398,20 @@
     - girder
     - deploy-update
     - rewire
+
+- name: Restart Girder as a service (to catch changes to route table)
+  service: name=girder state=restarted enabled=yes
+  sudo: yes
+  tags:
+    - girder
+    - deploy-update
+    - rewire
+
+- name: Wait for Girder startup
+  wait_for:
+    port: "{{girder_socket_port}}"
+    delay: 1
+  tags:
+    - girder
+    - deploy-update
+    - rewire
