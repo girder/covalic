@@ -13,5 +13,5 @@ add_eslint_test(
   ESLINT_IGNORE_FILE "${PROJECT_SOURCE_DIR}/plugins/covalic/web_external/.eslintignore"
 )
 
-add_puglint_test(${PLUGIN}
-    "${PROJECT_SOURCE_DIR}/plugins/${PLUGIN}/web_external/templates")
+add_puglint_test(
+    covalic "${PROJECT_SOURCE_DIR}/plugins/${PLUGIN}/web_external/templates")
