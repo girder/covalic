@@ -4,9 +4,9 @@ import events from './events';
 
 $(function () {
     events.trigger('g:appload.before');
-    new App({
+    var app = new App({
         el: 'body',
         parentView: null
     });
-    events.trigger('g:appload.after');
+    events.trigger('g:appload.after', app);
 });

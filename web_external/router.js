@@ -178,7 +178,7 @@ router.route('phase/:id/submissions', 'phaseSubmissions', function (id, params) 
 
 var _wizardPage = function (route, routeName, modelType, viewType) {
     router.route(route, routeName, function (id, params) {
-        var model = new modelType({_id: id}),
+        var model = new modelType({_id: id}),  // eslint-disable-line new-cap
             wizard = false;
 
         params = parseQueryString(params);

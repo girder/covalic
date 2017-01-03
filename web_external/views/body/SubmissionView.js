@@ -183,7 +183,7 @@ var SubmissionView = View.extend({
                         width,
                         barClass: barClass.join(' '),
                         progressClass: progressClass.join(' '),
-                        percentText,
+                        percentText
                     }));
                 }
             }

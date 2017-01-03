@@ -10,7 +10,6 @@ import template from './templates/layout.pug';
 import './stylesheets/layout.styl';
 import './stylesheets/global.styl';
 
-
 const CovalicApp = App.extend({
     render: function () {
         this.$el.html(template());
