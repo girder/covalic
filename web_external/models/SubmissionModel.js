@@ -1,5 +1,5 @@
 import Model from 'girder/models/Model';
-import { restRequest } from 'girder/rest';
+import { apiRoot, restRequest } from 'girder/rest';
 
 var SubmissionModel = Model.extend({
     resourceName: 'covalic_submission',
@@ -22,7 +22,7 @@ var SubmissionModel = Model.extend({
     },
 
     downloadUrl: function () {
-        return `${girder.apiRoot}/folder/${this.get('folderId')}/download`;
+        return `${apiRoot}/folder/${this.get('folderId')}/download`;
     }
 });
 

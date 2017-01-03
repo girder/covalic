@@ -101,7 +101,8 @@ var SubmissionView = View.extend({
                         } else {
                             this.render();
                         }
-                    }, this).fetch();
+                    }, this);
+                    this.job.fetch();
                 }
             }
         }, this);
