@@ -59,7 +59,8 @@ var UserSubmissionsView = View.extend({
                             deferred.resolve();
                         }, this).on('g:error', function () {
                             deferred.reject();
-                        }, this).fetch();
+                        }, this);
+                        job.fetch();
                         jobs.push(job);
                         promises.push(deferred.promise());
                     });

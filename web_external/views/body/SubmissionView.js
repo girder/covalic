@@ -64,7 +64,8 @@ var SubmissionView = View.extend({
                     _id: items.at(0).id
                 }).once('g:fetched', function () {
                     item.download();
-                }, this).fetch();
+                }, this);
+                item.fetch();
             }, this).fetch({
                 folderId: folder.id
             });
