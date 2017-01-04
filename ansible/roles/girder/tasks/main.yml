@@ -79,22 +79,8 @@
     - girder
     - deploy-update
 
-- name: install girder core python requirements
-  pip: extra_args="-e" name="{{ girder_root }}"
-  sudo: yes
-  tags:
-    - girder
-    - deploy-update
-
-- name: install plugin python requirements
+- name: install girder using pip editable install
   pip: extra_args="-e" name="{{ girder_root }}[plugins]"
-  sudo: yes
-  tags:
-    - girder
-    - deploy-update
-
-- name: install celery pip package
-  pip: name=celery version=3.1.11
   sudo: yes
   tags:
     - girder
@@ -119,6 +105,7 @@
     src: girder.local.cfg.j2
     dest: /opt/covalic/girder/girder/conf/girder.local.cfg
     mode: 0644
+  when: vagrant is not defined
   tags:
     - girder
     - rewire
