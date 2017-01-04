@@ -45,7 +45,7 @@ var ChallengeView = View.extend({
                         router.navigate('challenges', {trigger: true});
                     }).destroy({
                         progress: true
-                    })
+                    });
                 }
             });
         }

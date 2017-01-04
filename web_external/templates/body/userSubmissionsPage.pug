@@ -55,13 +55,11 @@
                     href=`#submission/${submission.id}`)= (Math.round(submission.get('overallScore') * 1000) / 1000).toFixed(3)
             td.c-submission-download
               a.c-tooltip(
-                title="Download submission data",
-                href=submission.downloadUrl())
+                title="Download submission data", href=submission.downloadUrl())
                   | download
             td.c-submission-json
               a.c-submission-json-link.c-tooltip(
-                title="Dump submission JSON to console"
-                c-submission-id=submission.id)
+                title="Dump submission JSON to console", c-submission-id=submission.id)
                   | dump json
 
   if !hasSubmissions || !hasSuccessfulSubmission || (hasSubmissions && endOfSubmissions)

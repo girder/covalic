@@ -27,16 +27,16 @@
   else
     .c-score-pending-container
       if job
-        if job.get('status') == JobStatus.INACTIVE
+        if job.get('status') === JobStatus.INACTIVE
           i.icon-spin1.g-inactive
           .c-text Your submission has not yet been queued for scoring.
-        else if job.get('status') == JobStatus.QUEUED
+        else if job.get('status') === JobStatus.QUEUED
           i.icon-spin1.g-queued
           .c-text Your submission has been queued for scoring.
-        else if job.get('status') == JobStatus.RUNNING
+        else if job.get('status') === JobStatus.RUNNING
           i.icon-spin1.animate-spin.g-running
           .c-text Your submission is being scored, please wait...
-        else if job.get('status') == JobStatus.SUCCESS && scoreHidden
+        else if job.get('status') === JobStatus.SUCCESS && scoreHidden
           .c-text
             i.icon-ok
             | Your submission has been scored successfully. Scores are currently hidden from participants.

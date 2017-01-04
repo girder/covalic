@@ -5,17 +5,17 @@
       h4.modal-title Auto-initialize metrics for this phase
     .modal-body
       p.
-        Clicking <b>Begin</b> below will create a simulated submission based on the
+        Clicking #[b Begin] below will create a simulated submission based on the
         ground truth dataset for this phase. The simulation task will perturb
         each ground truth image, submit the results, and run scoring on it. This
         scoring will be used to initialize the metrics and their weights for this
         phase of the challenge.
       p.
-        <b>WARNING:</b> This action will overwrite any already existing metrics and
+        #[b WARNING:] This action will overwrite any already existing metrics and
         weights for this phase.
       .checkbox
         label
-          input(type="checkbox" class="c-confirm-checkbox")
+          input.c-confirm-checkbox(type="checkbox")
           | I understand and wish to proceed
     .modal-footer
       a.btn.btn-small.btn-default(data-dismiss="modal") Close

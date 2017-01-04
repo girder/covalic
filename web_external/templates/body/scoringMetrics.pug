@@ -30,7 +30,7 @@ if phase.get('metrics') && !_.isEmpty(phase.get('metrics'))
         .panel-heading(role="tab")
           h4.panel-title
             a.c-metric-id-panel-title(data-toggle="collapse", data-parent=".c-metric-list",
-              href=`#c-metric-${i}`)= id
+                href=`#c-metric-${i}`)= id
           .c-metric-remove-button(title="Remove metric"): i.icon-cancel
         .c-metric-panel.panel-collapse.collapse(
             id=`c-metric-${i}`, role="tabpanel", class=(id === openMetric ? 'in' : ''))

@@ -15,15 +15,17 @@
                         li(role="presentation")
                           a.c-edit-phase(role="menuitem") #[i.icon-edit] Edit phase
                         li(role="presentation")
-                          a.c-ground-truth(href=`#phase/${phase.id}/groundtruth`,
-                            role="menuitem") #[i.icon-target] Ground truth dataset...
+                          a.c-ground-truth(href=`#phase/${phase.id}/groundtruth`, role="menuitem")
+                            i.icon-target
+                            | Ground truth dataset...
                         li(role="presentation")
-                          a.c-test-data(href=`#phase/${phase.id}/input`,
-                            role="menuitem") #[i.icon-beaker] Input dataset...
+                          a.c-test-data(href=`#phase/${phase.id}/input`, role="menuitem")
+                            i.icon-beaker
+                            | Input dataset...
                         li(role="presentation")
                             a.c-edit-metrics(role="menuitem", href=`#phase/${phase.id}/metrics`)
-                                i.icon-chart-bar
-                                |  Scoring metrics
+                              i.icon-chart-bar
+                              |  Scoring metrics
                         if phase.getAccessLevel() >= AccessType.ADMIN
                             li.divider(role="presentation")
                             li(role="presentation")
@@ -31,8 +33,9 @@
                                 i.icon-code
                                 |  Customize scoring behavior
                             li(role="presentation")
-                              a(href=`#phase/${phase.id}/access`,
-                                role="menuitem") #[i.icon-lock] Access control
+                              a(href=`#phase/${phase.id}/access`, role="menuitem")
+                                i.icon-lock
+                                | Access control
                             li(role="presentation")
                               a.c-delete-phase(role="menuitem") #[i.icon-trash] Delete phase
 
