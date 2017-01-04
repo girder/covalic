@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import { getCurrentUser } from 'girder/auth';
-import { AccessType, DATE_SECOND } from 'girder/constants';
-import { formatDate } from 'girder/misc';
+import { AccessType } from 'girder/constants';
+import { formatDate, DATE_SECOND } from 'girder/misc';
 import ItemCollection from 'girder/collections/ItemCollection';
 import FolderModel from 'girder/models/FolderModel';
 import ItemModel from 'girder/models/ItemModel';
