@@ -20,6 +20,34 @@ import progressTemplate from '../../templates/widgets/scoringProgress.pug';
 import errorTemplate from '../../templates/widgets/submissionError.pug';
 import '../../stylesheets/body/submissionPage.styl';
 
+// We must reapply the global JobStatus changes for this bundle's
+// copy of the JobStatus object, otherwise our copy of the job widgets
+// will not have those modifications and rendering will fail.
+// This can only go away once girder plugins are dynamically linked against
+// one another.
+JobStatus.registerStatus({
+    WORKER_FETCHING_INPUT: {
+        value: 820,
+        text: 'Fetching input',
+        icon: 'icon-download'
+    },
+    WORKER_CONVERTING_INPUT: {
+        value: 821,
+        text: 'Converting input',
+        icon: 'icon-shuffle'
+    },
+    WORKER_CONVERTING_OUTPUT: {
+        value: 822,
+        text: 'Converting output',
+        icon: 'icon-shuffle'
+    },
+    WORKER_PUSHING_OUTPUT: {
+        value: 823,
+        text: 'Pushing output',
+        icon: 'icon-upload'
+    }
+});
+
 var SubmissionView = View.extend({
     events: {
         'click .c-restart-error-submission-button': function () {
