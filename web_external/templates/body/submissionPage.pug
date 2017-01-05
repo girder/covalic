@@ -1,0 +1,45 @@
+.c-submission-header-bar
+  .c-submission-right-buttons.pull-right
+    a.c-leaderboard-button(href=`#phase/${submission.get('phaseId')}`)
+      if scoreHidden
+        |  Return to phase&nbsp;
+      else
+        |  View leaderboard&nbsp;
+        i.icon-right-big
+
+  .c-header-info-wrapper
+    .c-user-portrait
+    .c-details-area
+      if submission.get('title')
+        .c-submission-title-text= submission.get('title')
+      .c-submission-subtitle Submitted #[b= created] by #[b= submission.get('creatorName')]
+
+.c-submission-display-body
+  if download
+    .c-submission-download-container
+      a.c-download-submission-data.btn.btn-lg.btn-primary
+        i.icon-download
+        |  Download submission
+  if submission.has('overallScore')
+    .c-submission-overall-score-container
+      .c-pre-text Overall score:
+      .c-overall-score= overallScore
+  else
+    .c-score-pending-container
+      if job
+        if job.get('status') === JobStatus.INACTIVE
+          i.icon-spin1.g-inactive
+          .c-text Your submission has not yet been queued for scoring.
+        else if job.get('status') === JobStatus.QUEUED
+          i.icon-spin1.g-queued
+          .c-text Your submission has been queued for scoring.
+        else if job.get('status') === JobStatus.RUNNING
+          i.icon-spin1.animate-spin.g-running
+          .c-text Your submission is being scored, please wait...
+        else if job.get('status') === JobStatus.SUCCESS && scoreHidden
+          .c-text
+            i.icon-ok
+            | Your submission has been scored successfully. Scores are currently hidden from participants.
+    .c-score-progress-container
+
+  .c-submission-score-detail-container

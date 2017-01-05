@@ -56,15 +56,17 @@
     - celery
     - deploy-update
 
-- name: Install worker pip dependencies
-  pip: requirements=/opt/girder_worker/requirements.txt
+- name: Install girder_worker using pip editable install
+  pip: extra_args="-e" name="/opt/girder_worker[girder_io]"
   sudo: yes
   tags:
     - celery
     - deploy-update
 
-- name: Install girder_io plugin pip dependencies
-  pip: requirements=/opt/girder_worker/girder_worker/plugins/girder_io/requirements.txt
+# Trying to use multiple extras install syntax fails on windows, so we
+# do two different steps for the two extras
+- name: Install girder_worker docker plugin deps
+  pip: extra_args="-e" name="/opt/girder_worker[docker]"
   sudo: yes
   tags:
     - celery

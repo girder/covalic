@@ -4,3 +4,7 @@ girder_assetstore_type: s3
 girder_assetstore_name: s3_default
 girder_exec_user: www-data
 girder_exec_group: developers
+girder_route_config:
+  core_girder: /girder
+  core_static_root: /static
+  covalic: /

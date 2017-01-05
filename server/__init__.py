@@ -29,6 +29,7 @@ from girder.models.model_base import ValidationException
 from girder.plugins.jobs.constants import JobStatus
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
+from girder.utility.plugin_utilities import registerPluginWebroot
 from .rest import challenge, phase, submission
 from .constants import PluginSettings, JOB_LOG_PREFIX
 from .utility import getAssetsFolder
@@ -61,8 +62,7 @@ class CustomAppRoot(ModelImporter):
               href="${staticRoot}/built/fontello/css/fontello.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/fontello/css/animation.css">
-        <link rel="stylesheet" href="${staticRoot}/built/girder.ext.min.css">
-        <link rel="stylesheet" href="${staticRoot}/built/girder.app.min.css">
+        <link rel="stylesheet" href="${staticRoot}/built/girder_lib.min.css">
         <link rel="stylesheet"
               href="${staticRoot}/built/plugins/covalic/covalic.min.css">
         % for plugin in pluginCss:
@@ -77,15 +77,11 @@ class CustomAppRoot(ModelImporter):
       <body>
         <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
         <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
-        <script src="${staticRoot}/built/girder.ext.min.js"></script>
-        <script src="${staticRoot}/built/girder.app.min.js"></script>
+        <script src="${staticRoot}/built/girder_lib.min.js"></script>
         % for plugin in pluginJs:
-          <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js">
-          </script>
+          <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
         % endfor
-        <script src="${staticRoot}/built/plugins/covalic/covalic.min.js">
-        </script>
-        <script src="${staticRoot}/built/plugins/covalic/main.min.js"></script>
+        <script src="${staticRoot}/built/plugins/covalic/covalic.min.js"></script>
       </body>
     </html>
     """
@@ -150,9 +146,13 @@ def onJobUpdate(event):
     the user and challenge/phase administrators accordingly. Here, an
     administrator is defined to be a user with WRITE access or above.
     """
-    if (event.info['job']['type'] == 'covalic_score' and
-            'status' in event.info['params'] and
-            int(event.info['params']['status']) == JobStatus.ERROR):
+    isErrorStatus = False
+    try:
+        isErrorStatus = int(event.info['params'].get('status')) == JobStatus.ERROR
+    except (ValueError, TypeError):
+        pass
+
+    if (event.info['job']['type'] == 'covalic_score' and isErrorStatus):
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
 
         # Create minimal log that contains only Covalic errors.
@@ -227,10 +227,7 @@ def load(info):
     info['apiRoot'].challenge_phase = phase.Phase()
     info['apiRoot'].covalic_submission = submission.Submission()
 
-    # Move girder app to /girder, serve covalic app from /
-    info['serverRoot'], info['serverRoot'].girder = (CustomAppRoot(),
-                                                     info['serverRoot'])
-    info['serverRoot'].api = info['serverRoot'].girder.api
+    registerPluginWebroot(CustomAppRoot(), info['name'])
 
     events.bind('jobs.job.update', 'covalic', onJobUpdate)
     events.bind('model.setting.validate', 'covalic', validateSettings)

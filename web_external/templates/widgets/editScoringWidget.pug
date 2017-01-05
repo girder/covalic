@@ -1,0 +1,36 @@
+.modal-dialog
+  .modal-content
+    form#c-phase-edit-score-form.modal-form(role="form")
+      .modal-header
+        button.close(data-dismiss="modal", aria-hidden="true", type="button") &times;
+        h4.modal-title Customize scoring
+        .g-dialog-subtitle= phase.name()
+      .modal-body
+        p.
+          Submissions to challenge phases are scored using a
+          #[a(href="https://www.docker.com/", target="_blank") Docker container].
+          By default, the submission will be scored using the
+          #[b girder/covalic-metrics:latest] docker image. If you want to use a
+          different image, make sure the image is available on
+          #[a(href="https://hub.docker.com/", target="_blank") Docker Hub], then
+          specify the image name here.
+        .form-group
+          label.control-label(for="c-scoring-docker-image") Image identifier (tag is optional)
+          input.input-sm#c-scoring-docker-image.form-control(
+            type="text", placeholder="girder/covalic-metrics:latest")
+        p.
+          If your container needs to be run with arguments besides the default
+          #[b --groundtruth] and #[b --submission] arguments, specify all custom
+          arguments to the container's entrypoint as a JSON list. Use the special
+          placeholder values #[b $input{groundtruth}] and #[b $input{submission}] for
+          the ground truth folder and submission folder, respectively.
+        .form-group
+          label.control-label(for="c-scoring-docker-args") Container arguments
+          textarea.input-sm#c-scoring-docker-args.form-control(
+            placeholder="[\"--groundtruth=$input{groundtruth}\", \"--submission=$input{submission}\"]")
+        .g-validation-failed-message
+      .modal-footer
+        a.btn.btn-small.btn-default(data-dismiss="modal") Cancel
+        button.c-save-scoring-info.btn.btn-small.btn-primary(type="submit")
+          i.icon-edit
+          | Save

@@ -79,22 +79,8 @@
     - girder
     - deploy-update
 
-- name: install girder core python requirements
-  pip: extra_args="-e" name="{{ girder_root }}"
-  sudo: yes
-  tags:
-    - girder
-    - deploy-update
-
-- name: install plugin python requirements
+- name: install girder using pip editable install
   pip: extra_args="-e" name="{{ girder_root }}[plugins]"
-  sudo: yes
-  tags:
-    - girder
-    - deploy-update
-
-- name: install celery pip package
-  pip: name=celery version=3.1.11
   sudo: yes
   tags:
     - girder
@@ -114,39 +100,15 @@
     - girder
     - deploy-update
 
-- name: run npm install
-  npm: path={{ girder_root }} production=yes
-  tags:
-    - girder
-    - deploy-update
-
-- name: install girder for development
-  command: python setup.py develop chdir={{ girder_root }}
-  sudo: yes
-  tags:
-    - girder
-    - deploy-update
-
-# TODO this will probably have to be reworked or at least tested for multiple mongo ips
-- name: set the mongodb server ip in girder local config
-  lineinfile:
+- name: Install local girder config
+  template:
+    src: girder.local.cfg.j2
     dest: /opt/covalic/girder/girder/conf/girder.local.cfg
-    state: present
-    regexp: 'mongodb://(.*):27017'
-    line: "uri: \"mongodb://{{mongo_private_ip}}:27017/girder\""
+    mode: 0644
+  when: vagrant is not defined
   tags:
     - girder
     - rewire
-
-- name: Let cherrypy know about nginx proxying
-  lineinfile:
-    dest: /opt/covalic/girder/girder/conf/girder.local.cfg
-    state: present
-    insertafter: 'global'
-    regexp: 'tools.proxy.on: True'
-    line: 'tools.proxy.on: True'
-  tags: girder
-  when: pod == 'prod'
 
 - name: install Girder as a service
   template: src=girder.conf.j2 dest=/etc/init/girder.conf mode=644 owner=root
@@ -262,6 +224,12 @@
   register: girder_admin_resp
   tags: girder
 
+- name: Build and install web client code
+  command: girder-install web
+  tags:
+    - girder
+    - deploy-update
+
 - name: Restart Girder as a service to make sure our plugins are running
   service: name=girder state=restarted enabled=yes
   sudo: yes
@@ -281,16 +249,28 @@
 
 # Configure plugin settings
 
+- name: Set webroot route config
+  girder:
+    port: "{{ girder_socket_port }}"
+    username: "{{ girder_admin_user }}"
+    password: "{{ girder_admin_password }}"
+    setting:
+      key: core.route_table
+      value: "{{ girder_route_config }}"
+    state: present
+  tags:
+  - girder
+  - rewire
+
 - name: Set worker broker setting
   girder:
     port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    put:
-      path: system/setting
-      parameters:
-        key: worker.broker
-        value: "amqp://guest@{{ mq_private_ip }}//"
+    setting:
+      key: worker.broker
+      value: "amqp://guest@{{ mq_private_ip }}//"
+    state: present
   tags:
     - girder
     - rewire
@@ -300,11 +280,10 @@
     port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    put:
-      path: system/setting
-      parameters:
-        key: worker.backend
-        value: "amqp://guest@{{ mq_private_ip }}//"
+    setting:
+      key: worker.backend
+      value: "amqp://guest@{{ mq_private_ip }}//"
+    state: present
   tags:
     - girder
     - rewire
@@ -314,11 +293,10 @@
     port: "{{ girder_socket_port }}"
     username: "{{ girder_admin_user }}"
     password: "{{ girder_admin_password }}"
-    put:
-      path: system/setting
-      parameters:
-        key: covalic.scoring_user_id
-        value: "{{ covalic_scoring_user['gc_return']['_id'] }}"
+    setting:
+      key: covalic.scoring_user_id
+      value: "{{ covalic_scoring_user['gc_return']['_id'] }}"
+    state: present
   tags:
     - girder
     - rewire
@@ -403,6 +381,23 @@
 - name: Restart nginx service
   service: name=nginx state=restarted enabled=yes
   sudo: yes
+  tags:
+    - girder
+    - deploy-update
+    - rewire
+
+- name: Restart Girder as a service (to catch changes to route table)
+  service: name=girder state=restarted enabled=yes
+  sudo: yes
+  tags:
+    - girder
+    - deploy-update
+    - rewire
+
+- name: Wait for Girder startup
+  wait_for:
+    port: "{{girder_socket_port}}"
+    delay: 1
   tags:
     - girder
     - deploy-update

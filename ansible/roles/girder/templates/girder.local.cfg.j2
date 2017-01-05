@@ -1,0 +1,6 @@
+[global]
+tools.proxy.on: True
+
+[database]
+# TODO this will probably have to be reworked or at least tested for multiple mongo ips
+uri: "mongodb://{{ mongo_private_ip }}:27017/girder"
