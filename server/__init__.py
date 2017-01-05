@@ -146,9 +146,13 @@ def onJobUpdate(event):
     the user and challenge/phase administrators accordingly. Here, an
     administrator is defined to be a user with WRITE access or above.
     """
-    if (event.info['job']['type'] == 'covalic_score' and
-            'status' in event.info['params'] and
-            int(event.info['params']['status']) == JobStatus.ERROR):
+    isErrorStatus = False
+    try:
+        isErrorStatus = int(event.info['params'].get('status')) == JobStatus.ERROR
+    except (ValueError, TypeError):
+        pass
+
+    if (event.info['job']['type'] == 'covalic_score' and isErrorStatus):
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
 
         # Create minimal log that contains only Covalic errors.
