@@ -64,10 +64,10 @@ var UserSubmissionsView = View.extend({
                         jobs.push(job);
                         promises.push(deferred.promise());
                     });
-                    $.when.apply($, promises).done(_.bind(function () {
+                    $.when.apply($, promises).done(() => {
                         var jobMap = _.indexBy(jobs, 'id');
                         this.render({jobs: jobMap});
-                    }, this));
+                    });
                 } else {
                     this.render();
                 }
@@ -119,12 +119,17 @@ var UserSubmissionsView = View.extend({
      * The string ends in an ellipsis if any lines were omitted.
      */
     _getShortLog: function (job, numLines) {
-        var logLines = job.get('log').split('\n');
-        var shortLog = logLines.slice(0, numLines);
-        if (logLines.length > numLines && numLines > 0) {
-            shortLog.push('...');
+        var log = job.get('log');
+        if (log && log.length && numLines) {
+            var logLines = log.join('').split('\n');
+            var shortLog = logLines.slice(0, numLines);
+            if (logLines.length > numLines) {
+                shortLog.push('...');
+            }
+            return shortLog.join('\n');
+        } else {
+            return '';
         }
-        return shortLog.join('\n');
     }
 });
 
