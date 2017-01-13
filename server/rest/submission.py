@@ -65,9 +65,10 @@ class Submission(Resource):
             # coerce any nans or infs to strings
             for dataset in (submission.get('score') or ()):
                 for metric in dataset['metrics']:
-                    v = float(metric['value'])
-                    if math.isnan(v) or math.isinf(v):
-                        metric['value'] = str(v)
+                    if metric['value'] is not None:
+                        v = float(metric['value'])
+                        if math.isnan(v) or math.isinf(v):
+                            metric['value'] = str(v)
             v = submission.get('overallScore') or 0
             if math.isnan(v) or math.isinf(v):
                 submission['overallScore'] = str(v)
