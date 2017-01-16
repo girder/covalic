@@ -157,9 +157,14 @@ def onJobUpdate(event):
 
         # Create minimal log that contains only Covalic errors.
         # Use full log if no Covalic-specific errors are found.
-        log = event.info['job'].get('log')
+        # Fetch log from model, because log in event may not be up-to-date.
+        job = ModelImporter.model('job', 'jobs').load(
+            event.info['job']['_id'], includeLog=True, force=True)
+        log = job.get('log')
+
         minimalLog = None
         if log:
+            log = ''.join(log)
             minimalLog = '\n'.join([line[len(JOB_LOG_PREFIX):].strip()
                                     for line in log.splitlines()
                                     if line.startswith(JOB_LOG_PREFIX)])
