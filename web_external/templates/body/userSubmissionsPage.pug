@@ -2,6 +2,9 @@
 - var hasSuccessfulSubmission = false
 - var endOfSubmissions = !submissions.hasNextPage()
 - var successText = JobStatus.text(JobStatus.SUCCESS)
+- var enableOrganization = phase.get('enableOrganization')
+- var enableOrganizationUrl = phase.get('enableOrganizationUrl')
+- var enableDocumentationUrl = phase.get('enableDocumentationUrl')
 
 .c-user-submissions-panel.panel.panel-default
   .c-user-submissions-user-info.panel-heading.clearfix
@@ -18,6 +21,10 @@
       thead
         tr
           th Title
+          if enableOrganization
+            th Organization
+          if enableDocumentationUrl
+            th Documentation
           th Latest
           th Status
           th Date
@@ -32,6 +39,19 @@
           tr
             td.c-submission-title
               a(href=`#submission/${submission.id}`)= submission.get('title') || '--'
+            if enableOrganization
+              td.c-submission-organization
+                if enableOrganizationUrl && submission.get('organizationUrl')
+                  a(href=submission.get('organizationUrl'))= submission.get('organization') || '--'
+                else
+                  = submission.get('organization') || '--'
+            if enableDocumentationUrl
+              td.c-submission-documentation
+                if submission.get('documentationUrl')
+                  a(href=submission.get('documentationUrl'))
+                    i.icon-doc-text
+                else
+                  | --
             td.c-submission-latest
               if submission.get('latest')
                 i.icon-ok
