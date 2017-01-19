@@ -187,7 +187,10 @@ class PhaseTestCase(base.TestCase):
             endDate='2015-12-01T14:00:00.000Z',
             type='type',
             hideScores=True,
-            matchSubmissions=False)
+            matchSubmissions=False,
+            enableOrganization=True,
+            enableOrganizationUrl=True,
+            enableDocumentationUrl=True)
 
         resp = self.request(path='/challenge_phase/%s' % phase['_id'],
                             user=self.user)
@@ -209,6 +212,9 @@ class PhaseTestCase(base.TestCase):
         self.assertEqual(resp.json['type'], 'type')
         self.assertTrue(resp.json['hideScores'])
         self.assertFalse(resp.json['matchSubmissions'])
+        self.assertTrue(resp.json['enableOrganization'])
+        self.assertTrue(resp.json['enableOrganizationUrl'])
+        self.assertTrue(resp.json['enableDocumentationUrl'])
 
     def testGetPhaseInvalid(self):
         resp = self.request(path='/challenge_phase/1', user=self.user)
@@ -227,7 +233,10 @@ class PhaseTestCase(base.TestCase):
             endDate='2015-12-01T14:00:00.000Z',
             type='type',
             hideScores=True,
-            matchSubmissions=False)
+            matchSubmissions=False,
+            enableOrganization=True,
+            enableOrganizationUrl=True,
+            enableDocumentationUrl=True)
 
         params = {
             'name': 'phase 1 updated',
@@ -239,7 +248,10 @@ class PhaseTestCase(base.TestCase):
             'endDate': '2015-04-01T14:00:00.000Z',
             'type': 'type updated',
             'hideScores': False,
-            'matchSubmissions': True
+            'matchSubmissions': True,
+            'enableOrganization': False,
+            'enableOrganizationUrl': False,
+            'enableDocumentationUrl': False
         }
         resp = self.request(path='/challenge_phase/%s' % phase['_id'],
                             method='PUT', user=self.user, params=params)
@@ -260,6 +272,9 @@ class PhaseTestCase(base.TestCase):
         self.assertEqual(resp.json['type'], 'type updated')
         self.assertFalse(resp.json['hideScores'])
         self.assertTrue(resp.json['matchSubmissions'])
+        self.assertFalse(resp.json['enableOrganization'])
+        self.assertFalse(resp.json['enableOrganizationUrl'])
+        self.assertFalse(resp.json['enableDocumentationUrl'])
 
     def testPhaseClearDates(self):
         phase = self.model('phase', 'covalic').createPhase(

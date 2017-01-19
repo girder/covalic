@@ -39,7 +39,8 @@ class Phase(AccessControlledModel):
             'active', 'challengeId', 'folderId', 'participantGroupId',
             'groundTruthFolderId', 'testDataFolderId', 'instructions',
             'ordinal', 'startDate', 'endDate', 'type', 'hideScores',
-            'matchSubmissions', 'metrics'})
+            'matchSubmissions', 'enableOrganization', 'enableOrganizationUrl',
+            'enableDocumentationUrl', 'metrics'})
         self.exposeFields(level=AccessType.ADMIN, fields={'scoreTask'})
 
     def list(self, challenge, user=None, limit=50, offset=0, sort=None):
@@ -114,7 +115,9 @@ class Phase(AccessControlledModel):
                     instructions='', active=False, public=True,
                     participantGroup=None, groundTruthFolder=None,
                     testDataFolder=None, startDate=None, endDate=None,
-                    type='', hideScores=False, matchSubmissions=True):
+                    type='', hideScores=False, matchSubmissions=True,
+                    enableOrganization=False, enableOrganizationUrl=False,
+                    enableDocumentationUrl=False):
         """
         Create a new phase for a challenge. Will create a top-level folder under
         the challenge's collection. Will also create a new group for the
@@ -164,6 +167,12 @@ class Phase(AccessControlledModel):
         :param matchSubmissions: Whether to require that submission filenames
             match ground truth filenames.
         :type matchSubmissions: bool
+        :param enableOrganization: Enable submission Organization field.
+        :type enableOrganization: bool
+        :param enableOrganizationUrl: Enable submission Organization URL field.
+        :type enableOrganizationUrl: bool
+        :param enableDocumentationUrl: Enable submission Documentation URL field.
+        :type enableDocumentationUrl: bool
         """
         collection = self.model('collection').load(challenge['collectionId'],
                                                    force=True)
@@ -182,7 +191,10 @@ class Phase(AccessControlledModel):
             'endDate': endDate,
             'type': type,
             'hideScores': hideScores,
-            'matchSubmissions': matchSubmissions
+            'matchSubmissions': matchSubmissions,
+            'enableOrganization': enableOrganization,
+            'enableOrganizationUrl': enableOrganizationUrl,
+            'enableDocumentationUrl': enableDocumentationUrl
         }
         self.validate(phase)
 

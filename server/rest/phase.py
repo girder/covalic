@@ -100,6 +100,12 @@ class Phase(Resource):
         .param('matchSubmissions', 'Whether to require that submission '
                'filenames match ground truth filenames', dataType='boolean',
                default=True, required=False)
+        .param('enableOrganization', 'Enable submission Organization field.', dataType='boolean',
+               default=False, required=False)
+        .param('enableOrganizationUrl', 'Enable submission Organization URL field.',
+               dataType='boolean', default=False, required=False)
+        .param('enableDocumentationUrl', 'Enable submission Documentation URL field.',
+               dataType='boolean', default=False, required=False)
     )
     def createPhase(self, challenge, params):
         self.requireParams('name', params)
@@ -110,6 +116,9 @@ class Phase(Resource):
         hideScores = self.boolParam('hideScores', params, default=False)
         matchSubmissions = self.boolParam('matchSubmissions', params,
                                           default=True)
+        enableOrganization = self.boolParam('enableOrganization', params, default=False)
+        enableOrganizationUrl = self.boolParam('enableOrganizationUrl', params, default=False)
+        enableDocumentationUrl = self.boolParam('enableDocumentationUrl', params, default=False)
         description = params.get('description', '').strip()
         instructions = params.get('instructions', '').strip()
 
@@ -134,7 +143,10 @@ class Phase(Resource):
             instructions=instructions, active=active, public=public,
             creator=user, challenge=challenge, participantGroup=group,
             ordinal=ordinal, startDate=startDate, endDate=endDate,
-            type=type, hideScores=hideScores, matchSubmissions=matchSubmissions)
+            type=type, hideScores=hideScores, matchSubmissions=matchSubmissions,
+            enableOrganization=enableOrganization, enableOrganizationUrl=enableOrganizationUrl,
+            enableDocumentationUrl=enableDocumentationUrl
+        )
 
         return phase
 
@@ -210,6 +222,12 @@ class Phase(Resource):
         .param('matchSubmissions', 'Whether to require that submission '
                'filenames match ground truth filenames', dataType='boolean',
                default=True, required=False)
+        .param('enableOrganization', 'Enable submission Organization field.', dataType='boolean',
+               default=False, required=False)
+        .param('enableOrganizationUrl', 'Enable submission Organization URL field.',
+               dataType='boolean', default=False, required=False)
+        .param('enableDocumentationUrl', 'Enable submission Documentation URL field.',
+               dataType='boolean', default=False, required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the phase.', 403)
     )
@@ -221,6 +239,12 @@ class Phase(Resource):
                                              phase.get('hideScores', False))
         phase['matchSubmissions'] = self.boolParam(
             'matchSubmissions', params, phase.get('matchSubmissions', True))
+        phase['enableOrganization'] = self.boolParam(
+            'enableOrganization', params, phase.get('enableOrganization', False))
+        phase['enableOrganizationUrl'] = self.boolParam(
+            'enableOrganizationUrl', params, phase.get('enableOrganizationUrl', False))
+        phase['enableDocumentationUrl'] = self.boolParam(
+            'enableDocumentationUrl', params, phase.get('enableDocumentationUrl', False))
         phase['name'] = params.get('name', phase['name']).strip()
         phase['description'] = params.get('description',
                                           phase.get('description', '')).strip()
