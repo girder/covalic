@@ -25,7 +25,10 @@ var PhaseConfigureSubmissionsView = View.extend({
 
     _save: function (onSuccess) {
         var fields = {
-            matchSubmissions: this.$('#c-phase-match-submissions').is(':checked')
+            matchSubmissions: this.$('#c-phase-match-submissions').is(':checked'),
+            enableOrganization: this.$('#c-phase-enable-organization').is(':checked'),
+            enableOrganizationUrl: this.$('#c-phase-enable-organization-url').is(':checked'),
+            enableDocumentationUrl: this.$('#c-phase-enable-documentation-url').is(':checked')
         };
 
         this.model.set(fields);
