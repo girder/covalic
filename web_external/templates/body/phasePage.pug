@@ -26,6 +26,10 @@
                             a.c-edit-metrics(role="menuitem", href=`#phase/${phase.id}/metrics`)
                               i.icon-chart-bar
                               |  Scoring metrics
+                        li(role="presentation")
+                          a.c-configure-submissions(href=`#phase/${phase.id}/configure_submissions`, role="menuitem")
+                            i.icon-upload
+                            |  Configure submissions
                         if phase.getAccessLevel() >= AccessType.ADMIN
                             li.divider(role="presentation")
                             li(role="presentation")

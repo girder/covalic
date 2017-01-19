@@ -1,0 +1,23 @@
+include ../mixins/backMixins
+include ../mixins/wizardMixins
+
+.c-wizard-page-container
+  .c-page-title Configure submissions
+
+  p.
+    Configure options for submissions to this phase.
+
+  .c-form-container
+    form.c-phase-configure-submissions-form
+      .checkbox
+        label
+          input#c-phase-match-submissions(type="checkbox", checked=(phase.get('matchSubmissions') ? 'checked' : undefined))
+          |  Require submission filenames to match ground truth filenames
+    .g-validation-failed-message
+
+  if wizard
+    .c-wizard-nav-container
+      +wizardNav(wizard.current, wizard.total)
+  else
+    button.btn.btn-primary.c-save-options #[i.icon-ok] Save
+    +backToModel(phase, '#phase/' + phase.id)

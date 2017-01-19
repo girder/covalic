@@ -12,7 +12,9 @@ var PhaseGroundTruthView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this.accessWidget.once('g:accessListSaved', function () {
-                router.navigate('phase/' + this.model.id, {trigger: true});
+                this._saveAndGoTo('phase/' + this.model.id +
+                  '/configure_submissions?wizard&curr=' + (this.wizard.current + 1) +
+                  '&total=' + this.wizard.total);
             }, this).saveAccessList();
         },
 
@@ -58,7 +60,7 @@ var PhaseGroundTruthView = View.extend({
             router.navigate(route, {trigger: true});
         }, this).set({
 
-        }).saveAccessList();
+        }).save();
     },
 
     initialize: function (settings) {

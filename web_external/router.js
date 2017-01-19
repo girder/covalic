@@ -96,7 +96,7 @@ router.route('challenge/:id/phase/new', 'newPhase', function (id) {
     events.trigger('g:navigateTo', NewPhaseView, {
         challenge: challenge,
         wizard: {
-            total: 5
+            total: 6
         }
     });
 });
@@ -221,3 +221,6 @@ _wizardPage('phase/:id/input', 'phaseInput', PhaseModel, PhaseInputView);
 
 import PhaseGroundTruthView from './views/body/PhaseGroundTruthView';
 _wizardPage('phase/:id/groundtruth', 'phaseGroundTruth', PhaseModel, PhaseGroundTruthView);
+
+import PhaseConfigureSubmissionsView from './views/body/PhaseConfigureSubmissionsView';
+_wizardPage('phase/:id/configure_submissions', 'phaseConfigureSubmission', PhaseModel, PhaseConfigureSubmissionsView);
