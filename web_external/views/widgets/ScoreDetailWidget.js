@@ -45,6 +45,7 @@ var ScoreDetailWidget = View.extend({
             el.popover({
                 title,
                 container: this.$el,
+                viewport: '.c-submission-score-table',
                 trigger: 'focus',
                 placement: 'auto',
                 content: metricInfoTemplate({
