@@ -10,7 +10,18 @@ var ScoreDetailWidget = View.extend({
         this.phase = settings.phase;
         this.score = this.submission.get('score');
 
-        this.metrics = _.pluck(this.score[0].metrics, 'name');
+        var metricsInfo = this.phase.get('metrics') || {};
+        this.metrics = _.map(this.score[0].metrics, function (metric) {
+            var metricInfo = metricsInfo[metric.name] || {};
+            var title = metricInfo.title;
+            var result = {
+                name: metric.name
+            };
+            if (title) {
+                result['title'] = title;
+            }
+            return result;
+        });
         this.datasets = _.pluck(this.score, 'dataset');
     },
 
