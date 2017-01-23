@@ -1,4 +1,7 @@
 - var phaseAdmin = phase.getAccessLevel() >= AccessType.ADMIN
+- var enableOrganization = phase.get('enableOrganization')
+- var enableOrganizationUrl = phase.get('enableOrganizationUrl')
+- var enableDocumentationUrl = phase.get('enableDocumentationUrl')
 
 table.table.table-striped.table-condensed.c-leaderboard-table
   thead
@@ -6,6 +9,10 @@ table.table.table-striped.table-condensed.c-leaderboard-table
       th.c-rank Rank
       th User
       th Title
+      if enableOrganization
+        th Organization
+      if phaseAdmin && enableDocumentationUrl
+        th Documentation
       th Date
       th Score
   tbody
@@ -20,6 +27,20 @@ table.table.table-striped.table-condensed.c-leaderboard-table
           else
             = submission.get('creatorName')
         td= submission.get('title') || '--'
+        if enableOrganization
+          td
+            if phaseAdmin && enableOrganizationUrl && submission.get('organizationUrl')
+              a.c-organization-link(
+                href=submission.get('organizationUrl'))= submission.get('organization') || '--'
+            else
+              = submission.get('organization') || '--'
+        if phaseAdmin && enableDocumentationUrl
+          td
+            if submission.get('documentationUrl')
+              a.c-documentation-link(href=submission.get('documentationUrl'))
+                i.icon-doc-text
+            else
+              | --
         - var date = moment(submission.get('created'))
         - var dateStr = date.format('ddd, D MMM YYYY, h:mm:ss a')
         - var dateFromNow = date.fromNow()

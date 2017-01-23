@@ -88,6 +88,7 @@ var UserSubmissionsView = View.extend({
     render: function (params) {
         this.$el.html(template({
             user: this.user,
+            phase: this.phase,
             submissions: this.submissions,
             getShortLog: this._getShortLog,
             JobStatus,

@@ -11,7 +11,10 @@ var SubmissionModel = Model.extend({
             data: {
                 folderId: opts.folderId,
                 phaseId: opts.phaseId,
-                title: opts.title
+                title: opts.title,
+                organization: opts.organization,
+                organizationUrl: opts.organizationUrl,
+                documentationUrl: opts.documentationUrl
             }
         }).done((resp) => {
             this.set(resp);

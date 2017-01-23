@@ -58,7 +58,10 @@ var SubmissionView = View.extend({
             }, this).postSubmission({
                 phaseId: this.submission.get('phaseId'),
                 folderId: this.submission.get('folderId'),
-                title: this.submission.get('title')
+                title: this.submission.get('title'),
+                organization: this.submission.get('organization'),
+                organizationUrl: this.submission.get('organizationUrl'),
+                documentationUrl: this.submission.get('documentationUrl')
             });
         },
 

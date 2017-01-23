@@ -135,6 +135,11 @@ class Submission(Resource):
         .param('date', 'The date of the submission.', required=False)
         .param('userId', 'The ID of the user to submit on behalf of.',
                required=False)
+        .param('organization', 'Organization associated with the submission.', required=False)
+        .param('organizationUrl', 'URL for organization associated with the submission.',
+               required=False)
+        .param('documentationUrl', 'URL of documentation associated with the submission.',
+               required=False)
         .errorResponse('You are not a member of the participant group.', 403)
         .errorResponse('The ID was invalid.')
     )
@@ -151,6 +156,20 @@ class Submission(Resource):
         if phase['participantGroupId'] not in user['groups']:
             self.model('phase', 'covalic').requireAccess(
                 phase, user, level=AccessType.WRITE)
+
+        # Require optional fields that are enabled in phase
+        organization = None
+        organizationUrl = None
+        documentationUrl = None
+        if phase.get('enableOrganization', False):
+            self.requireParams('organization', params)
+            organization = params['organization'].strip()
+        if phase.get('enableOrganizationUrl', False):
+            self.requireParams('organizationUrl', params)
+            organizationUrl = params['organizationUrl'].strip()
+        if phase.get('enableDocumentationUrl', False):
+            self.requireParams('documentationUrl', params)
+            documentationUrl = params['documentationUrl'].strip()
 
         # Site admins may override the submission creation date
         created = None
@@ -192,7 +211,8 @@ class Submission(Resource):
 
         title = params['title'].strip()
         submission = self.model('submission', 'covalic').createSubmission(
-            user, phase, folder, job, title, created)
+            user, phase, folder, job, title, created, organization, organizationUrl,
+            documentationUrl)
 
         if not self.model('phase', 'covalic').hasAccess(
                 phase, user=scoreUser, level=AccessType.ADMIN):

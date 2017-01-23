@@ -13,10 +13,10 @@
     p.
       To submit to this phase of the challenge, upload your output files here.
   p.
-    Before you upload your submission, please add a short title that identifies
-    either your organization or your algorithm. This title doesn't have to be
+    Before uploading your submission, please fill out the information below,
+    including a short title that describes your submission. This title doesn't have to be
     unique, but it will appear in the leaderboard with your submission. The title
-    should be no more than #{maxTitleLength} characters.
+    should be no more than #{maxTextLength} characters.
   p.
     Use the button below to select all of the files, or drag and drop them onto
     the button. If the selection is valid, you can upload them. Once done, your
@@ -25,7 +25,20 @@
 
 .c-submit-uploader-container
   .c-submission-mismatch-container
-  label Enter submission title
-  input.c-submission-title-input.form-control(type="text", maxlength=maxTitleLength)
-  .c-submission-title-error
+  .form-group
+    label Submission title
+    input.c-submission-title-input.form-control(type="text", maxlength=maxTextLength)
+  if phase.get('enableOrganization')
+    .form-group
+      label Organization or team name
+      input.c-submission-organization-input.form-control(type="text", maxlength=maxTextLength)
+  if phase.get('enableOrganizationUrl')
+    .form-group
+      label URL for organization or team
+      input.c-submission-organization-url-input.form-control(type="text", maxlength=maxUrlLength)
+  if phase.get('enableDocumentationUrl')
+    .form-group
+      label URL for documentation about your submission
+      input.c-submission-documentation-url-input.form-control(type="text", maxlength=maxUrlLength)
+  .c-submission-validation-error
   .c-submit-upload-widget

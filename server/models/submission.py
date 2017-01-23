@@ -42,7 +42,8 @@ class Submission(Model):
                             'overallScore'))
         self.exposeFields(level=AccessType.READ, fields=(
             '_id', 'creatorId', 'creatorName', 'phaseId', 'folderId', 'created',
-            'score', 'title', 'latest', 'overallScore', 'jobId'
+            'score', 'title', 'latest', 'overallScore', 'jobId', 'organization', 'organizationUrl',
+            'documentationUrl'
         ))
 
     def validate(self, doc):
@@ -116,7 +117,8 @@ class Submission(Model):
             yield result
 
     def createSubmission(self, creator, phase, folder, job=None, title=None,
-                         created=None):
+                         created=None, organization=None, organizationUrl=None,
+                         documentationUrl=None):
         submission = {
             'creatorId': creator['_id'],
             'creatorName': self.getUserName(creator),
@@ -126,6 +128,13 @@ class Submission(Model):
             'score': None,
             'title': title
         }
+
+        if organization is not None:
+            submission['organization'] = organization
+        if organizationUrl is not None:
+            submission['organizationUrl'] = organizationUrl
+        if documentationUrl is not None:
+            submission['documentationUrl'] = documentationUrl
 
         if job is not None:
             submission['jobId'] = job['_id']
