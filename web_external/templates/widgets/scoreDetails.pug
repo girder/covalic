@@ -1,15 +1,18 @@
+.alert.alert-warning(role="alert")
+  | Note: Click on column headers to see scoring metric details.
+
 table.table.table-striped.table-condensed.c-submission-score-table
   thead
     tr
       th
       each metric in metrics
         th
-          a.c-metric-heading(metric=metric, tabindex="0")= metric
+          a.c-metric-heading(metric=metric.name, tabindex="0")= metric.title || metric.name
   tbody
     - var i = 0
     each dataset in datasets
       tr
         th= dataset
         each metric in metrics
-          td= getScoreForCell(dataset, metric)
+          td= getScoreForCell(dataset, metric.name)
       - i ++
