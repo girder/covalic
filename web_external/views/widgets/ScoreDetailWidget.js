@@ -32,6 +32,8 @@ var ScoreDetailWidget = View.extend({
             getScoreForCell: _.bind(this.getScoreForCell, this)
         }));
 
+	var scoreTable = this.$('.c-submission-score-table');
+
         var metricsInfo = this.phase.get('metrics') || {};
         _.each(this.$('.c-metric-heading'), function (heading) {
             var el = $(heading),
@@ -45,7 +47,7 @@ var ScoreDetailWidget = View.extend({
             el.popover({
                 title,
                 container: this.$el,
-                viewport: '.c-submission-score-table',
+                viewport: scoreTable,
                 trigger: 'focus',
                 placement: 'auto',
                 content: metricInfoTemplate({
