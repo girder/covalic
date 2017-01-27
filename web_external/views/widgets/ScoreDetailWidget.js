@@ -18,7 +18,7 @@ var ScoreDetailWidget = View.extend({
                 name: metric.name
             };
             if (title) {
-                result['title'] = title;
+                result.title = title;
             }
             return result;
         });
