@@ -32,7 +32,7 @@ var ScoreDetailWidget = View.extend({
             getScoreForCell: _.bind(this.getScoreForCell, this)
         }));
 
-	var scoreTable = this.$('.c-submission-score-table');
+        var scoreTable = this.$('.c-submission-score-table');
 
         var metricsInfo = this.phase.get('metrics') || {};
         _.each(this.$('.c-metric-heading'), function (heading) {
