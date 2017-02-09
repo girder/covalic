@@ -1,5 +1,4 @@
-@import '~nib/index.styl'
-@import 'challengeList'
+@require '~nib/index.styl'
 
 .c-challenge-header
   border-bottom 1px solid #ddd
@@ -85,6 +84,21 @@
         color #666
 
 .c-phase-create
-  @extend .c-challenge-create-button
+  color white
+  background-color #44ce82
+  font-size 18px
+  padding 0 10px
+  line-height 30px
+  height 30px
+  box-shadow 0 2px 4px rgba(0,0,0,0.15)
   margin-left 15px
   vertical-align top
+
+  &:hover
+    color white
+    background-color #44d788
+    box-shadow 0 2px 3px rgba(0,0,0,0.22)
+
+  &:focus
+    color white
+    outline none
