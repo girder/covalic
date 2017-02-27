@@ -190,7 +190,10 @@ class PhaseTestCase(base.TestCase):
             matchSubmissions=False,
             enableOrganization=True,
             enableOrganizationUrl=True,
-            enableDocumentationUrl=True)
+            enableDocumentationUrl=True,
+            requireOrganization=False,
+            requireOrganizationUrl=False,
+            requireDocumentationUrl=False)
 
         resp = self.request(path='/challenge_phase/%s' % phase['_id'],
                             user=self.user)
@@ -215,6 +218,9 @@ class PhaseTestCase(base.TestCase):
         self.assertTrue(resp.json['enableOrganization'])
         self.assertTrue(resp.json['enableOrganizationUrl'])
         self.assertTrue(resp.json['enableDocumentationUrl'])
+        self.assertFalse(resp.json['requireOrganization'])
+        self.assertFalse(resp.json['requireOrganizationUrl'])
+        self.assertFalse(resp.json['requireDocumentationUrl'])
 
     def testGetPhaseInvalid(self):
         resp = self.request(path='/challenge_phase/1', user=self.user)
@@ -236,7 +242,10 @@ class PhaseTestCase(base.TestCase):
             matchSubmissions=False,
             enableOrganization=True,
             enableOrganizationUrl=True,
-            enableDocumentationUrl=True)
+            enableDocumentationUrl=True,
+            requireOrganization=False,
+            requireOrganizationUrl=False,
+            requireDocumentationUrl=False)
 
         params = {
             'name': 'phase 1 updated',
@@ -251,7 +260,10 @@ class PhaseTestCase(base.TestCase):
             'matchSubmissions': True,
             'enableOrganization': False,
             'enableOrganizationUrl': False,
-            'enableDocumentationUrl': False
+            'enableDocumentationUrl': False,
+            'requireOrganization': True,
+            'requireOrganizationUrl': True,
+            'requireDocumentationUrl': True
         }
         resp = self.request(path='/challenge_phase/%s' % phase['_id'],
                             method='PUT', user=self.user, params=params)
@@ -275,6 +287,9 @@ class PhaseTestCase(base.TestCase):
         self.assertFalse(resp.json['enableOrganization'])
         self.assertFalse(resp.json['enableOrganizationUrl'])
         self.assertFalse(resp.json['enableDocumentationUrl'])
+        self.assertTrue(resp.json['requireOrganization'])
+        self.assertTrue(resp.json['requireOrganizationUrl'])
+        self.assertTrue(resp.json['requireDocumentationUrl'])
 
     def testPhaseClearDates(self):
         phase = self.model('phase', 'covalic').createPhase(

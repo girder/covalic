@@ -2,9 +2,9 @@
 - var hasSuccessfulSubmission = false
 - var endOfSubmissions = !submissions.hasNextPage()
 - var successText = JobStatus.text(JobStatus.SUCCESS)
-- var enableOrganization = phase.get('enableOrganization')
-- var enableOrganizationUrl = phase.get('enableOrganizationUrl')
-- var enableDocumentationUrl = phase.get('enableDocumentationUrl')
+- var enableOrganization = phase.enableOrganization()
+- var enableOrganizationUrl = phase.enableOrganizationUrl()
+- var enableDocumentationUrl = phase.enableDocumentationUrl()
 
 .c-user-submissions-panel.panel.panel-default
   .c-user-submissions-user-info.panel-heading.clearfix

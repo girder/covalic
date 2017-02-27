@@ -75,6 +75,31 @@ class Submission(Resource):
 
         return submission
 
+    def _checkRequireParam(self, phase, params, paramName, requireOptionName):
+        """
+        Require a parameter conditionally, based on a phase property.
+
+        :param phase: The phase.
+        :param params: Parameters.
+        :param paramName: Parameter name.
+        :param requireOptionName: Phase property that indicates whether the parameter is required.
+        """
+        if phase.get(requireOptionName, False):
+            self.requireParams(paramName, params)
+
+    def _getStrippedParam(self, params, name):
+        """
+        Return the stripped parameter, or None if the parameter doesn't exist.
+
+        :param params: Parameters.
+        :param name: Parameter name.
+        :return: The stripped parameter, or None.
+        """
+        param = params.get(name)
+        if param is not None:
+            param = param.strip()
+        return param
+
     @access.public
     @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='covalic',
                level=AccessType.READ)
@@ -162,14 +187,14 @@ class Submission(Resource):
         organizationUrl = None
         documentationUrl = None
         if phase.get('enableOrganization', False):
-            self.requireParams('organization', params)
-            organization = params['organization'].strip()
+            self._checkRequireParam(phase, params, 'organization', 'requireOrganization')
+            organization = self._getStrippedParam(params, 'organization')
         if phase.get('enableOrganizationUrl', False):
-            self.requireParams('organizationUrl', params)
-            organizationUrl = params['organizationUrl'].strip()
+            self._checkRequireParam(phase, params, 'organizationUrl', 'requireOrganizationUrl')
+            organizationUrl = self._getStrippedParam(params, 'organizationUrl')
         if phase.get('enableDocumentationUrl', False):
-            self.requireParams('documentationUrl', params)
-            documentationUrl = params['documentationUrl'].strip()
+            self._checkRequireParam(phase, params, 'documentationUrl', 'requireDocumentationUrl')
+            documentationUrl = self._getStrippedParam(params, 'documentationUrl')
 
         # Site admins may override the submission creation date
         created = None
