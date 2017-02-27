@@ -40,7 +40,8 @@ class Phase(AccessControlledModel):
             'groundTruthFolderId', 'testDataFolderId', 'instructions',
             'ordinal', 'startDate', 'endDate', 'type', 'hideScores',
             'matchSubmissions', 'enableOrganization', 'enableOrganizationUrl',
-            'enableDocumentationUrl', 'metrics'})
+            'enableDocumentationUrl', 'requireOrganization',
+            'requireOrganizationUrl', 'requireDocumentationUrl', 'metrics'})
         self.exposeFields(level=AccessType.ADMIN, fields={'scoreTask'})
 
     def list(self, challenge, user=None, limit=50, offset=0, sort=None):
@@ -117,7 +118,8 @@ class Phase(AccessControlledModel):
                     testDataFolder=None, startDate=None, endDate=None,
                     type='', hideScores=False, matchSubmissions=True,
                     enableOrganization=False, enableOrganizationUrl=False,
-                    enableDocumentationUrl=False):
+                    enableDocumentationUrl=False, requireOrganization=False,
+                    requireOrganizationUrl=False, requireDocumentationUrl=False):
         """
         Create a new phase for a challenge. Will create a top-level folder under
         the challenge's collection. Will also create a new group for the
@@ -173,6 +175,12 @@ class Phase(AccessControlledModel):
         :type enableOrganizationUrl: bool
         :param enableDocumentationUrl: Enable submission Documentation URL field.
         :type enableDocumentationUrl: bool
+        :param requireOrganization: Require submission Organization field.
+        :type requireOrganization: bool
+        :param requireOrganizationUrl: Require submission Organization URL field.
+        :type requireOrganizationUrl: bool
+        :param requireDocumentationUrl: Require submission Documentation URL field.
+        :type requireDocumentationUrl: bool
         """
         collection = self.model('collection').load(challenge['collectionId'],
                                                    force=True)
@@ -194,7 +202,10 @@ class Phase(AccessControlledModel):
             'matchSubmissions': matchSubmissions,
             'enableOrganization': enableOrganization,
             'enableOrganizationUrl': enableOrganizationUrl,
-            'enableDocumentationUrl': enableDocumentationUrl
+            'enableDocumentationUrl': enableDocumentationUrl,
+            'requireOrganization': requireOrganization,
+            'requireOrganizationUrl': requireOrganizationUrl,
+            'requireDocumentationUrl': requireDocumentationUrl
         }
         self.validate(phase)
 

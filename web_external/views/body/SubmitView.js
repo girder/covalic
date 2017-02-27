@@ -87,15 +87,15 @@ var SubmitView = View.extend({
             this.$('input.c-submission-title').focus();
             errorText = 'Please enter a title for your submission.';
             valid = false;
-        } else if (this.phase.get('enableOrganization') && _.isEmpty(this.organization)) {
+        } else if (this.phase.enableOrganization() && this.phase.requireOrganization() && _.isEmpty(this.organization)) {
             this.$('input.c-submission-organization').focus();
             errorText = 'Please enter an organization or team name.';
             valid = false;
-        } else if (this.phase.get('enableOrganizationUrl') && _.isEmpty(this.organizationUrl)) {
+        } else if (this.phase.enableOrganizationUrl() && this.phase.requireOrganizationUrl() && _.isEmpty(this.organizationUrl)) {
             this.$('input.c-submission-organization-url').focus();
             errorText = 'Please enter a URL for the organization or team.';
             valid = false;
-        } else if (this.phase.get('enableDocumentationUrl') && _.isEmpty(this.documentationUrl)) {
+        } else if (this.phase.enableDocumentationUrl() && this.phase.requireDocumentationUrl() && _.isEmpty(this.documentationUrl)) {
             this.$('input.c-submission-documentation-url').focus();
             errorText = 'Please enter a URL for documentation about your submission.';
             valid = false;

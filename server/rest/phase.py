@@ -106,6 +106,12 @@ class Phase(Resource):
                dataType='boolean', default=False, required=False)
         .param('enableDocumentationUrl', 'Enable submission Documentation URL field.',
                dataType='boolean', default=False, required=False)
+        .param('requireOrganization', 'Require submission Organization field.', dataType='boolean',
+               default=True, required=False)
+        .param('requireOrganizationUrl', 'Require submission Organization URL field.',
+               dataType='boolean', default=True, required=False)
+        .param('requireDocumentationUrl', 'Require submission Documentation URL field.',
+               dataType='boolean', default=True, required=False)
     )
     def createPhase(self, challenge, params):
         self.requireParams('name', params)
@@ -119,6 +125,9 @@ class Phase(Resource):
         enableOrganization = self.boolParam('enableOrganization', params, default=False)
         enableOrganizationUrl = self.boolParam('enableOrganizationUrl', params, default=False)
         enableDocumentationUrl = self.boolParam('enableDocumentationUrl', params, default=False)
+        requireOrganization = self.boolParam('requireOrganization', params, default=True)
+        requireOrganizationUrl = self.boolParam('requireOrganizationUrl', params, default=True)
+        requireDocumentationUrl = self.boolParam('requireDocumentationUrl', params, default=True)
         description = params.get('description', '').strip()
         instructions = params.get('instructions', '').strip()
 
@@ -145,7 +154,10 @@ class Phase(Resource):
             ordinal=ordinal, startDate=startDate, endDate=endDate,
             type=type, hideScores=hideScores, matchSubmissions=matchSubmissions,
             enableOrganization=enableOrganization, enableOrganizationUrl=enableOrganizationUrl,
-            enableDocumentationUrl=enableDocumentationUrl
+            enableDocumentationUrl=enableDocumentationUrl,
+            requireOrganization=requireOrganization,
+            requireOrganizationUrl=requireOrganizationUrl,
+            requireDocumentationUrl=requireDocumentationUrl
         )
 
         return phase
@@ -228,6 +240,12 @@ class Phase(Resource):
                dataType='boolean', default=False, required=False)
         .param('enableDocumentationUrl', 'Enable submission Documentation URL field.',
                dataType='boolean', default=False, required=False)
+        .param('requireOrganization', 'Require submission Organization field.', dataType='boolean',
+               default=True, required=False)
+        .param('requireOrganizationUrl', 'Require submission Organization URL field.',
+               dataType='boolean', default=True, required=False)
+        .param('requireDocumentationUrl', 'Require submission Documentation URL field.',
+               dataType='boolean', default=True, required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the phase.', 403)
     )
@@ -245,6 +263,12 @@ class Phase(Resource):
             'enableOrganizationUrl', params, phase.get('enableOrganizationUrl', False))
         phase['enableDocumentationUrl'] = self.boolParam(
             'enableDocumentationUrl', params, phase.get('enableDocumentationUrl', False))
+        phase['requireOrganization'] = self.boolParam(
+            'requireOrganization', params, phase.get('requireOrganization', True))
+        phase['requireOrganizationUrl'] = self.boolParam(
+            'requireOrganizationUrl', params, phase.get('requireOrganizationUrl', True))
+        phase['requireDocumentationUrl'] = self.boolParam(
+            'requireDocumentationUrl', params, phase.get('requireDocumentationUrl', True))
         phase['name'] = params.get('name', phase['name']).strip()
         phase['description'] = params.get('description',
                                           phase.get('description', '')).strip()

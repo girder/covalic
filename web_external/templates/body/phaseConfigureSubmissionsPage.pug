@@ -8,6 +8,7 @@ include ../mixins/wizardMixins
     Configure options for submissions to this phase.
 
   .c-form-container
+    //- TODO improve layout, connect 'require' checkbox sensitivities to 'enable' checkboxes
     form.c-phase-configure-submissions-form
       .checkbox
         label
@@ -15,16 +16,28 @@ include ../mixins/wizardMixins
           |  Require submission filenames to match ground truth filenames
       .checkbox
         label
-          input#c-phase-enable-organization(type="checkbox", checked=(phase.get('enableOrganization') ? 'checked' : undefined))
+          input#c-phase-enable-organization(type="checkbox", checked=(phase.enableOrganization() ? 'checked' : undefined))
           |  Enable Organization field
       .checkbox
         label
-          input#c-phase-enable-organization-url(type="checkbox", checked=(phase.get('enableOrganizationUrl') ? 'checked' : undefined))
+          input#c-phase-enable-organization-url(type="checkbox", checked=(phase.enableOrganizationUrl() ? 'checked' : undefined))
           |  Enable Organization URL field
       .checkbox
         label
-          input#c-phase-enable-documentation-url(type="checkbox", checked=(phase.get('enableDocumentationUrl') ? 'checked' : undefined))
+          input#c-phase-enable-documentation-url(type="checkbox", checked=(phase.enableDocumentationUrl() ? 'checked' : undefined))
           |  Enable Documentation URL field
+      .checkbox
+        label
+          input#c-phase-require-organization(type="checkbox", checked=(phase.requireOrganization() ? 'checked' : undefined))
+          |  Require Organization field
+      .checkbox
+        label
+          input#c-phase-require-organization-url(type="checkbox", checked=(phase.requireOrganizationUrl() ? 'checked' : undefined))
+          |  Require Organization URL field
+      .checkbox
+        label
+          input#c-phase-require-documentation-url(type="checkbox", checked=(phase.requireDocumentationUrl() ? 'checked' : undefined))
+          |  Require Documentation URL field
     .g-validation-failed-message
 
   if wizard

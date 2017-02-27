@@ -88,6 +88,30 @@ var PhaseModel = AccessControlledModel.extend({
         }).error((err) => {
             this.trigger('c:error', err);
         });
+    },
+
+    enableOrganization: function () {
+        return this.get('enableOrganization');
+    },
+
+    requireOrganization: function () {
+        return !this.has('requireOrganization') || this.get('requireOrganization');
+    },
+
+    enableOrganizationUrl: function () {
+        return this.get('enableOrganizationUrl');
+    },
+
+    requireOrganizationUrl: function () {
+        return !this.has('requireOrganizationUrl') || this.get('requireOrganizationUrl');
+    },
+
+    enableDocumentationUrl: function () {
+        return this.get('enableDocumentationUrl');
+    },
+
+    requireDocumentationUrl: function () {
+        return !this.has('requireDocumentationUrl') || this.get('requireDocumentationUrl');
     }
 });
 

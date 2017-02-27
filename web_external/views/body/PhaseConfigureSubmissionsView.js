@@ -28,7 +28,10 @@ var PhaseConfigureSubmissionsView = View.extend({
             matchSubmissions: this.$('#c-phase-match-submissions').is(':checked'),
             enableOrganization: this.$('#c-phase-enable-organization').is(':checked'),
             enableOrganizationUrl: this.$('#c-phase-enable-organization-url').is(':checked'),
-            enableDocumentationUrl: this.$('#c-phase-enable-documentation-url').is(':checked')
+            enableDocumentationUrl: this.$('#c-phase-enable-documentation-url').is(':checked'),
+            requireOrganization: this.$('#c-phase-require-organization').is(':checked'),
+            requireOrganizationUrl: this.$('#c-phase-require-organization-url').is(':checked'),
+            requireDocumentationUrl: this.$('#c-phase-require-documentation-url').is(':checked')
         };
 
         this.model.set(fields);

@@ -28,17 +28,26 @@
   .form-group
     label Submission title
     input.c-submission-title-input.form-control(type="text", maxlength=maxTextLength)
-  if phase.get('enableOrganization')
+  if phase.enableOrganization()
     .form-group
-      label Organization or team name
+      label
+        | Organization or team name
+        if !phase.requireOrganization()
+          |  (optional)
       input.c-submission-organization-input.form-control(type="text", maxlength=maxTextLength)
-  if phase.get('enableOrganizationUrl')
+  if phase.enableOrganizationUrl()
     .form-group
-      label URL for organization or team
+      label
+        | URL for organization or team
+        if !phase.requireOrganizationUrl()
+          |  (optional)
       input.c-submission-organization-url-input.form-control(type="text", maxlength=maxUrlLength)
-  if phase.get('enableDocumentationUrl')
+  if phase.enableDocumentationUrl()
     .form-group
-      label URL for documentation about your submission
+      label
+        | URL for documentation about your submission
+        if !phase.requireDocumentationUrl()
+          |  (optional)
       input.c-submission-documentation-url-input.form-control(type="text", maxlength=maxUrlLength)
   .c-submission-validation-error
   .c-submit-upload-widget
