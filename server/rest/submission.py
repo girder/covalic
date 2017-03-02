@@ -44,6 +44,7 @@ class Submission(Resource):
         self.route('GET', (':id',), self.getSubmission)
         self.route('GET', ('unscored',), self.getUnscoredSubmissions)
         self.route('POST', (), self.postSubmission)
+        self.route('PUT', (':id',), self.updateSubmission)
         self.route('POST', (':id', 'score'), self.postScore)
         self.route('DELETE', (':id',), self.deleteSubmission)
 
@@ -308,6 +309,49 @@ class Submission(Resource):
         job = jobModel.save(job)
         jobModel.scheduleJob(job)
 
+        return self._filterScore(phase, submission, user)
+
+    @access.admin
+    @loadmodel(model='submission', plugin='covalic')
+    @filtermodel(model='submission', plugin='covalic')
+    @describeRoute(
+        Description('Overwrite metadata for a submission.')
+        .param('id', 'The ID of the submission.', paramType='path')
+        .param('title', 'Title for the submission', required=False)
+        .param('date', 'The date of the submission.', required=False)
+        .param('organization', 'Organization associated with the submission.',
+               required=False)
+        .param('organizationUrl', 'URL for organization associated with the submission.',
+               required=False)
+        .param('documentationUrl', 'URL of documentation associated with the submission.',
+               required=False)
+        .errorResponse('ID was invalid.')
+        .errorResponse('Site admin access is required.', 403)
+    )
+    def updateSubmission(self, submission, params):
+        title = self._getStrippedParam(params, 'title')
+        if title is not None:
+            submission['title'] = title
+        created = self._getStrippedParam(params, 'date')
+        if created is not None:
+            submission['created'] = created
+        # Since only admins may use this endpoint, skip the normal checks for
+        # 'enableOrganization', etc.
+        organization = self._getStrippedParam(params, 'organization')
+        if organization is not None:
+            submission['organization'] = organization
+        organizationUrl = self._getStrippedParam(params, 'organizationUrl')
+        if organizationUrl is not None:
+            submission['organizationUrl'] = organizationUrl
+        documentationUrl = self._getStrippedParam(params, 'documentationUrl')
+        if documentationUrl is not None:
+            submission['documentationUrl'] = documentationUrl
+
+        submission = self.model('submission', 'covalic').save(submission)
+
+        user = self.getCurrentUser()
+        phase = self.model('phase', 'covalic').load(
+            submission['phaseId'], user=user, exc=True, level=AccessType.READ)
         return self._filterScore(phase, submission, user)
 
     @access.user
