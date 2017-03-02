@@ -329,6 +329,12 @@ class Submission(Resource):
         .errorResponse('Site admin access is required.', 403)
     )
     def updateSubmission(self, submission, params):
+        # Ensure write access on the containing challenge phase, in case this
+        # endpoint is ever opened to non-site-admins
+        user = self.getCurrentUser()
+        phase = self.model('phase', 'covalic').load(
+            submission['phaseId'], user=user, exc=True, level=AccessType.WRITE)
+
         title = self._getStrippedParam(params, 'title')
         if title is not None:
             submission['title'] = title
@@ -349,9 +355,6 @@ class Submission(Resource):
 
         submission = self.model('submission', 'covalic').save(submission)
 
-        user = self.getCurrentUser()
-        phase = self.model('phase', 'covalic').load(
-            submission['phaseId'], user=user, exc=True, level=AccessType.READ)
         return self._filterScore(phase, submission, user)
 
     @access.user
