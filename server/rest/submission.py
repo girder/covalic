@@ -325,6 +325,8 @@ class Submission(Resource):
                required=False)
         .param('documentationUrl', 'URL of documentation associated with the submission.',
                required=False)
+        .param('disqualified', 'Whether the submission is disqualified. Disqualified '
+               'submissions do not appear in the leaderboard.', dataType='boolean', required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Site admin access is required.', 403)
     )
@@ -352,6 +354,13 @@ class Submission(Resource):
         documentationUrl = self._getStrippedParam(params, 'documentationUrl')
         if documentationUrl is not None:
             submission['documentationUrl'] = documentationUrl
+
+        # Note that this does not enforce the requirement that only a single submission
+        # per user per phase is marked as the 'latest' submission. If access to this endpoint
+        # is expanded beyond admin users, then that requirement should be enforced.
+        disqualified = self.boolParam('disqualified', params)
+        if disqualified is not None:
+            submission['latest'] = not disqualified
 
         submission = self.model('submission', 'covalic').save(submission)
 
