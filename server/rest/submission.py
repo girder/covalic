@@ -325,6 +325,8 @@ class Submission(Resource):
                required=False)
         .param('documentationUrl', 'URL of documentation associated with the submission.',
                required=False)
+        .param('disqualify', 'Whether to disqualify the submission so that it does not '
+               'appear in the leaderboard.', dataType='boolean', required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Site admin access is required.', 403)
     )
@@ -352,6 +354,10 @@ class Submission(Resource):
         documentationUrl = self._getStrippedParam(params, 'documentationUrl')
         if documentationUrl is not None:
             submission['documentationUrl'] = documentationUrl
+
+        disqualify = self.boolParam('disqualify', params, default=False)
+        if disqualify:
+            submission['latest'] = False
 
         submission = self.model('submission', 'covalic').save(submission)
 
