@@ -11,7 +11,7 @@ table.table.table-striped.table-condensed.c-leaderboard-table
       th Title
       if enableOrganization
         th Organization
-      if phaseAdmin && enableDocumentationUrl
+      if enableDocumentationUrl
         th Documentation
       th Date
       th Score
@@ -29,12 +29,12 @@ table.table.table-striped.table-condensed.c-leaderboard-table
         td= submission.get('title') || '--'
         if enableOrganization
           td
-            if phaseAdmin && enableOrganizationUrl && submission.get('organizationUrl')
+            if enableOrganizationUrl && submission.get('organizationUrl')
               a.c-organization-link(
                 href=submission.get('organizationUrl'))= submission.get('organization') || '--'
             else
               = submission.get('organization') || '--'
-        if phaseAdmin && enableDocumentationUrl
+        if enableDocumentationUrl
           td
             if submission.get('documentationUrl')
               a.c-documentation-link(href=submission.get('documentationUrl'))
