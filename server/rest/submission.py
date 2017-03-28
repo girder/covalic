@@ -18,7 +18,6 @@
 ###############################################################################
 
 import cherrypy
-import json
 import math
 import os
 import posixpath
@@ -26,7 +25,7 @@ import posixpath
 from ..constants import PluginSettings
 from ..utility.user_emails import getPhaseUserEmails
 from girder.api import access
-from girder.api.describe import Description, describeRoute
+from girder.api.describe import Description, autoDescribeRoute, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
 from girder.models.model_base import AccessException, ValidationException
@@ -367,24 +366,51 @@ class Submission(Resource):
         return self._filterScore(phase, submission, user)
 
     @access.user
-    @loadmodel(model='submission', plugin='covalic')
-    @describeRoute(
+    @autoDescribeRoute(
         Description('Post a score for a given submission.')
+        .modelParam('id', model='submission', plugin='covalic')
+        .jsonParam(
+            'score', 'The JSON object containing the scores for this submission.',
+            paramType='body',
+            schema={
+                "$schema": "http://json-schema.org/schema#",
+                'type': 'array',
+                'items': {'$ref': '#/definitions/score'},
+                'definitions': {
+                    'score': {
+                        'type': 'object',
+                        'properties': {
+                            'dataset': {'type': 'string'},
+                            'metrics': {
+                                'type': 'array',
+                                'items': {'$ref': '#/definitions/metric'}
+                            }
+                        },
+                        'required': ['dataset', 'metrics']
+                    },
+                    'metric': {
+                        'type': 'object',
+                        'properties': {
+                            'name': {'type': 'string'},
+                            'value': {'type': ['null', 'number', 'string']}
+                        },
+                        'required': ['name', 'value']
+                    }
+                }
+            })
         .notes('This should only be called by the scoring service, not by '
                'end users.')
-        .param('id', 'The ID of the submission being scored.', paramType='path')
-        .param('body', 'The JSON object containing the scores for this '
-               'submission.', paramType='body')
-        .errorResponse('ID was invalid.')
+        .errorResponse(('ID was invalid.',
+                        'Invalid JSON passed in request body.'))
         .errorResponse('Admin access was denied for the challenge phase.', 403)
     )
-    def postScore(self, submission, params):
+    def postScore(self, submission, score, params):
         # Ensure admin access on the containing challenge phase
         phase = self.model('phase', 'covalic').load(
             submission['phaseId'], user=self.getCurrentUser(), exc=True,
             level=AccessType.ADMIN)
 
-        submission['score'] = json.loads(cherrypy.request.body.read())
+        submission['score'] = score
         submission = self.model('submission', 'covalic').save(submission)
 
         # Delete the scoring user's job token since the job is now complete.
