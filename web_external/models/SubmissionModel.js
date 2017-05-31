@@ -1,8 +1,10 @@
+import _ from 'underscore';
 import Model from 'girder/models/Model';
 import { apiRoot, restRequest } from 'girder/rest';
 
 var SubmissionModel = Model.extend({
     resourceName: 'covalic_submission',
+    sanitizedUrlFields: ['organizationUrl', 'documentationUrl'],
 
     postSubmission: function (opts) {
         restRequest({
@@ -26,6 +28,20 @@ var SubmissionModel = Model.extend({
 
     downloadUrl: function () {
         return `${apiRoot}/folder/${this.get('folderId')}/download`;
+    },
+
+    /**
+     * Overrides the normal get() to sanitize user-provided URLs.
+     */
+    get: function (attribute) {
+        const val = Model.prototype.get.call(this, attribute);
+
+        if (val && _.contains(this.sanitizedUrlFields, attribute) &&
+                !val.startsWith('http://') && !val.startsWith('https://')) {
+            return 'http://' + val;
+        } else {
+            return val;
+        }
     }
 });
 
