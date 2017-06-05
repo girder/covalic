@@ -1,7 +1,10 @@
 import _ from 'underscore';
+import 'bootstrap/js/dropdown';
 import moment from 'moment';
 import { getCurrentUser } from 'girder/auth';
 import { SORT_DESC } from 'girder/constants';
+import { confirm } from 'girder/dialog';
+import events from 'girder/events';
 import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
 import PaginateWidget from 'girder/views/widgets/PaginateWidget';
 import JobModel from 'girder_plugins/jobs/models/JobModel';
@@ -13,6 +16,25 @@ import '../../stylesheets/body/userSubmissionsPage.styl';
 
 var UserSubmissionsView = View.extend({
     events: {
+        'click a.c-submission-delete-link': function (event) {
+            var submissionId = $(event.currentTarget).attr('c-submission-id');
+            var submission = this.submissions.get(submissionId);
+            confirm({
+                text: `Permanently delete submission <b>${submission.escape('title')}</b> from user <b>${this.user.escape('login')}</b>?`,
+                yesText: 'Delete',
+                escapedHtml: true,
+                confirmCallback: () => {
+                    submission.once('g:deleted', function () {
+                        events.trigger('g:alert', {
+                            icon: 'ok',
+                            text: 'Submission deleted.',
+                            type: 'success',
+                            timeout: 4000
+                        });
+                    }, this).destroy();
+                }
+            });
+        },
         'click a.c-submission-json-link': function (event) {
             var submissionId = $(event.currentTarget).attr('c-submission-id');
             var submission = this.submissions.get(submissionId);
@@ -40,44 +62,18 @@ var UserSubmissionsView = View.extend({
         this.submissions.sortField = 'created';
         this.submissions.sortDir = SORT_DESC;
         this.submissions.pageLimit = submissionLimit;
-        this.submissions.on('g:changed', function () {
-            if (getCurrentUser().get('admin')) {
-                // Assume submissions that have overallScore were successful.
-                // Fetch jobs for all other submissions.
-                var unscoredSubmissions =
-                    _.filter(this.submissions.models, function (submission) {
-                        return _.isUndefined(submission.get('overallScore'));
-                    });
-                if (unscoredSubmissions.length > 0) {
-                    var jobs = [];
-                    var promises = [];
-                    _.each(unscoredSubmissions, function (submission) {
-                        var deferred = $.Deferred();
-                        var job = new JobModel({
-                            _id: submission.get('jobId')
-                        }).on('g:fetched', function () {
-                            deferred.resolve();
-                        }, this).on('g:error', function () {
-                            deferred.reject();
-                        }, this);
-                        job.fetch();
-                        jobs.push(job);
-                        promises.push(deferred.promise());
-                    });
-                    $.when.apply($, promises).done(() => {
-                        var jobMap = _.indexBy(jobs, 'id');
-                        this.render({jobs: jobMap});
-                    });
-                } else {
-                    this.render();
-                }
-            } else {
-                this.render();
-            }
-        }, this).fetch({
+        this.submissions.on('g:changed', this._renderSubmissions, this);
+
+        var params = {
             phaseId: this.phase.id,
             userId: this.user.id
+        };
+        this.submissions.on('remove', () => {
+            // Re-fetch collection when a submission is deleted to ensure table
+            // and pagination widget are up-to-date and consistent.
+            this.submissions.fetch(params, true);
         });
+        this.submissions.fetch(params);
 
         this.paginateWidget = new PaginateWidget({
             collection: this.submissions,
@@ -113,6 +109,42 @@ var UserSubmissionsView = View.extend({
         }));
 
         return this;
+    },
+
+    _renderSubmissions: function () {
+        if (getCurrentUser().get('admin')) {
+            // Assume submissions that have overallScore were successful.
+            // Fetch jobs for all other submissions.
+            var unscoredSubmissions =
+                _.filter(this.submissions.models, function (submission) {
+                    return _.isUndefined(submission.get('overallScore'));
+                });
+            if (unscoredSubmissions.length > 0) {
+                var jobs = [];
+                var promises = [];
+                _.each(unscoredSubmissions, function (submission) {
+                    var deferred = $.Deferred();
+                    var job = new JobModel({
+                        _id: submission.get('jobId')
+                    }).on('g:fetched', function () {
+                        deferred.resolve();
+                    }, this).on('g:error', function () {
+                        deferred.reject();
+                    }, this);
+                    job.fetch();
+                    jobs.push(job);
+                    promises.push(deferred.promise());
+                });
+                $.when.apply($, promises).done(() => {
+                    var jobMap = _.indexBy(jobs, 'id');
+                    this.render({jobs: jobMap});
+                });
+            } else {
+                this.render();
+            }
+        } else {
+            this.render();
+        }
     },
 
     /**

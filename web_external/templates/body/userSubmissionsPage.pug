@@ -86,6 +86,11 @@
                   a.c-submission-json-link.c-tooltip(c-submission-id=submission.id)
                     i.icon-list-alt
                     | Dump to console as JSON
+                li.divider
+                li.c-submission-delete
+                  a.c-submission-delete-link.c-tooltip(c-submission-id=submission.id)
+                    i.icon-trash
+                    | Delete submission
   if !hasSubmissions || !hasSuccessfulSubmission || (hasSubmissions && endOfSubmissions)
     .c-user-submissions-footer.panel-footer
       if !hasSubmissions
