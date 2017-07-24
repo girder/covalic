@@ -16,26 +16,32 @@
 # Mongo needs to be running before Girder or else Girder fails to start
 - name: Mongo
   user: ubuntu
-  hosts: tag_type_mongodb:&tag_pod_{{pod}}
+  hosts: tag_mongodb_true:&tag_pod_{{pod}}
   gather_facts: false
   roles:
-    - users
     - common
     - mongodb
 
 # Message queue should be running before Girder and the worker
 - name: Message queue
   user: ubuntu
-  hosts: tag_type_mq:&tag_pod_{{pod}}
+  hosts: tag_mq_true:&tag_pod_{{pod}}
   gather_facts: false
   roles:
-    - users
     - common
     - mq
 
+- name: Celery
+  user: ubuntu
+  hosts: tag_worker_true:&tag_pod_{{pod}}
+  gather_facts: false
+  roles:
+    - common
+    - celery
+
 - name: Girder
   user: ubuntu
-  hosts: tag_type_girder:&tag_pod_{{pod}}
+  hosts: tag_girder_true:&tag_pod_{{pod}}
   gather_facts: false
   vars:
     girder_admin_user: covalic
@@ -53,15 +59,5 @@
     - pod_static_vars/prod_cert.yml
     - pod_static_vars/prod_key.yml
   roles:
-    - users
     - common
     - girder
-
-- name: Celery
-  user: ubuntu
-  hosts: tag_type_celery:&tag_pod_{{pod}}
-  gather_facts: false
-  roles:
-    - users
-    - common
-    - celery

@@ -20,7 +20,7 @@
   tags: girder
 
 - name: add nodejs ppa
-  shell: curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
+  shell: curl -sL https://deb.nodesource.com/setup_6.x | sudo bash -
   sudo: yes
   tags: girder
 
@@ -52,6 +52,16 @@
     - girder
     - deploy-update
 
+- name: setup log directory
+  file:
+    path: "{{ root_dir }}/girder_logs"
+    state: directory
+    recurse: yes
+    mode: 0777
+  sudo: yes
+  tags:
+    - girder
+
 - name: clone girder
   git:
     repo: git://github.com/girder/girder.git
@@ -80,14 +90,14 @@
     - deploy-update
 
 - name: install girder using pip editable install
-  pip: extra_args="-e" name="{{ girder_root }}[plugins]"
+  command: pip install -e "{{ girder_root }}[thumbnails,worker]"
   sudo: yes
   tags:
     - girder
     - deploy-update
 
 - name: install girder-client pip package
-  pip: name=girder-client version=1.1.1
+  pip: name=girder-client
   sudo: yes
   tags:
     - girder
@@ -111,12 +121,12 @@
     - rewire
 
 - name: install Girder as a service
-  template: src=girder.conf.j2 dest=/etc/init/girder.conf mode=644 owner=root
+  template: src=girder.service.j2 dest=/lib/systemd/system/girder.service mode=644 owner=root
   sudo: yes
   tags: girder
 
 - name: Start Girder as a service
-  service: name=girder state=restarted enabled=yes
+  systemd: name=girder state=restarted enabled=yes daemon_reload=yes
   sudo: yes
   tags:
     - girder

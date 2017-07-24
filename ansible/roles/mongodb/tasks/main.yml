@@ -1,21 +1,20 @@
 ---
 - name: MongoDB | Fetch GPG key
   sudo: yes
-  command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+  command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
   tags: mongodb
 
 - name: MongoDB | Add 10 gen repository
   sudo: yes
   shell:
-    echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/10gen.list creates=/etc/apt/sources.list.d/10gen.list
+    echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
   tags: mongodb
 
 - name: MongoDB | Install latest mongodb
   sudo: yes
   apt: pkg={{ item }} update-cache=yes
   with_items:
-    - mongodb-org-server
-    - mongodb-org-tools
+    - mongodb-org
     - python-pip
   tags: mongodb
 
@@ -40,21 +39,11 @@
   lineinfile:
     dest: /etc/mongod.conf
     state: present
-    regexp: 'bind_ip = (.*)'
-    line: "bind_ip = {{mongo_private_ip}}"
+    regexp: '  bindIp:(.*)'
+    line: "  bindIp: {{ mongo_private_ip }}"
   tags:
     - mongodb
     - rewire
-
-- name: Make mongo use the larger EBS volume for the database
-  sudo: yes
-  lineinfile:
-    dest: /etc/mongod.conf
-    state: present
-    regexp: 'dbpath=(.*)'
-    line: "dbpath={{ mongo_dbpath }}"
-  tags:
-    - mongodb
 
 - name: Ensure db directory exists
   sudo: yes
@@ -69,7 +58,7 @@
 
 - name: Run mongo daemon
   sudo: yes
-  service: name=mongod state=restarted
+  systemd: name=mongod state=restarted
   tags:
     - mongodb
     - rewire
