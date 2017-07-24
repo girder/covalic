@@ -1,4 +1,5 @@
 import Collection from 'girder/collections/Collection';
+
 import PhaseModel from '../models/PhaseModel';
 
 var ChallengePhaseCollection = Collection.extend({

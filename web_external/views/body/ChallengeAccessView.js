@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import events from 'girder/events';
 import AccessWidget from 'girder/views/widgets/AccessWidget';
+
 import router from '../../router';
 import View from '../view';
 import template from '../../templates/body/challengeAccessPage.pug';

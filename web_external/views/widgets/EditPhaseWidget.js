@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import { handleClose, handleOpen } from 'girder/dialog';
 import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
+
 import View from '../view';
 import PhaseModel from '../../models/PhaseModel';
 import template from '../../templates/widgets/editPhaseWidget.pug';

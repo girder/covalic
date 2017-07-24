@@ -3,6 +3,7 @@ import events from 'girder/events';
 import AccessWidget from 'girder/views/widgets/AccessWidget';
 import UploadWidget from 'girder/views/widgets/UploadWidget';
 import FolderModel from 'girder/models/FolderModel';
+
 import router from '../../router';
 import View from '../view';
 import template from '../../templates/body/phaseGroundTruth.pug';
@@ -55,14 +56,6 @@ var PhaseGroundTruthView = View.extend({
         }
     },
 
-    _saveAndGoTo: function (route) {
-        this.model.once('g:saved', function () {
-            router.navigate(route, {trigger: true});
-        }, this).set({
-
-        }).save();
-    },
-
     initialize: function (settings) {
         this.wizard = settings.wizard || false;
         this.groundTruthFolder = new FolderModel({
@@ -100,6 +93,14 @@ var PhaseGroundTruthView = View.extend({
         this.accessWidget.setElement(this.$('.c-access-container')).render();
 
         return this;
+    },
+
+    _saveAndGoTo: function (route) {
+        this.model.once('g:saved', function () {
+            router.navigate(route, {trigger: true});
+        }, this).set({
+
+        }).save();
     },
 
     _uploadFinished: function (info) {

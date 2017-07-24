@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import { renderMarkdown } from 'girder/misc';
+
 import View from '../view';
 import template from '../../templates/widgets/scoreDetails.pug';
 import metricInfoTemplate from '../../templates/widgets/metricInfo.pug';

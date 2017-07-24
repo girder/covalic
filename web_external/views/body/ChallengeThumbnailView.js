@@ -1,4 +1,5 @@
 import _ from 'underscore';
+
 import router from '../../router';
 import EditThumbnailWidget from '../widgets/EditThumbnailWidget';
 import View from '../view';

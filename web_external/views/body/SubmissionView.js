@@ -10,6 +10,7 @@ import eventStream from 'girder/utilities/EventStream';
 import JobModel from 'girder_plugins/jobs/models/JobModel';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
 import JobDetailsWidget from 'girder_plugins/jobs/views/JobDetailsWidget';
+
 import PhaseModel from '../../models/PhaseModel';
 import SubmissionModel from '../../models/SubmissionModel';
 import ScoreDetailWidget from '../widgets/ScoreDetailWidget';
@@ -80,32 +81,6 @@ var SubmissionView = View.extend({
         }
     },
 
-    /**
-     * Download submission data from folder. If folder contains only one item,
-     * download the item directly.
-     */
-    _downloadSubmissionData: function (folder) {
-        var numFolders = folder.get('nFolders');
-        var numItems = folder.get('nItems');
-        if (numFolders === 0 && numItems === 1) {
-            // Download item
-            var items = new ItemCollection();
-            items.once('g:changed', function () {
-                var item = new ItemModel({
-                    _id: items.at(0).id
-                }).once('g:fetched', function () {
-                    item.download();
-                }, this);
-                item.fetch();
-            }, this).fetch({
-                folderId: folder.id
-            });
-        } else {
-            // Download folder
-            folder.download();
-        }
-    },
-
     initialize: function (settings) {
         this.submission = settings.submission;
         // Must unbind previous fetch handlers to avoid infinite callbacks
@@ -171,6 +146,32 @@ var SubmissionView = View.extend({
                 phase: this.phase,
                 parentView: this
             }).render();
+        }
+    },
+
+    /**
+     * Download submission data from folder. If folder contains only one item,
+     * download the item directly.
+     */
+    _downloadSubmissionData: function (folder) {
+        var numFolders = folder.get('nFolders');
+        var numItems = folder.get('nItems');
+        if (numFolders === 0 && numItems === 1) {
+            // Download item
+            var items = new ItemCollection();
+            items.once('g:changed', function () {
+                var item = new ItemModel({
+                    _id: items.at(0).id
+                }).once('g:fetched', function () {
+                    item.download();
+                }, this);
+                item.fetch();
+            }, this).fetch({
+                folderId: folder.id
+            });
+        } else {
+            // Download folder
+            folder.download();
         }
     },
 

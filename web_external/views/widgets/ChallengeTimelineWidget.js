@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import moment from 'moment';
 import TimelineWidget from 'girder/views/widgets/TimelineWidget';
+
 import View from '../view';
 import ChallengePhaseCollection from '../../collections/ChallengePhaseCollection';
 import '../../stylesheets/widgets/challengeTimeline.styl';
@@ -49,7 +50,7 @@ var ChallengeTimelineWidget = View.extend({
 
             // Add points at phase start and end dates
             var tooltip;
-            _.each(this.collection.models, function (phase) {
+            _.each(this.collection.toArray(), function (phase) {
                 var phaseStartDateStr = phase.get('startDate');
                 var phaseEndDateStr = phase.get('endDate');
                 var phaseStartDate = !_.isEmpty(phaseStartDateStr)

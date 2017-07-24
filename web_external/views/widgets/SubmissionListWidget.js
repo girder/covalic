@@ -3,6 +3,7 @@ import moment from 'moment';
 import { AccessType, SORT_DESC } from 'girder/constants';
 import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
 import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+
 import View from '../view';
 import SubmissionCollection from '../../collections/SubmissionCollection';
 import template from '../../templates/widgets/leaderboard.pug';
@@ -37,7 +38,7 @@ var SubmissionListWidget = View.extend({
 
     render: function () {
         this.$el.html(template({
-            submissions: this.collection.models,
+            submissions: this.collection.toArray(),
             start: this.collection.offset - this.collection.length,
             phase: this.phase,
             AccessType,

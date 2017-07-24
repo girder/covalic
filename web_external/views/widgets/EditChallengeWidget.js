@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { handleClose, handleOpen } from 'girder/dialog';
 import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
 import 'girder/utilities/jquery/girderModal';
+
 import View from '../view';
 import ChallengeModel from '../../models/ChallengeModel';
 import template from '../../templates/widgets/editChallenge.pug';

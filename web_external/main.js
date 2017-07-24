@@ -1,4 +1,5 @@
 import $ from 'jquery';
+
 import App from './app.js';
 import events from './events';
 
