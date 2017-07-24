@@ -26,7 +26,7 @@ install:
     - cd "${HOME}/girder"
     - pip install -e .[thumbnails,worker]
     - pip install -U -r requirements-dev.txt -r plugins/covalic/requirements.txt
-    - girder-install web --dev
+    - girder-install web --dev --plugins=covalic
 script:
     - mkdir _build
     - cd _build
