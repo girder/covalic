@@ -2,6 +2,7 @@ import _ from 'underscore';
 import { cancelRestRequests } from 'girder/rest';
 import UserCollection from 'girder/collections/UserCollection';
 import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+
 import View from '../view';
 import UserSubmissionsView from './UserSubmissionsView';
 import template from '../../templates/body/phaseSubmissionsPage.pug';

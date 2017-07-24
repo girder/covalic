@@ -2,4 +2,3 @@
 worker_exec_user: www-data
 worker_concurrency: 2
 worker_exec_group: www-data
-docker_package_name: docker.io

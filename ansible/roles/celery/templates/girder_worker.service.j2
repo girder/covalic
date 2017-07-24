@@ -1,0 +1,10 @@
+[Unit]
+Description=Girder worker
+After=network.target
+
+[Service]
+User={{  worker_exec_user }}
+ExecStart=/usr/local/bin/girder-worker --concurrency={{ worker_concurrency }} --pidfile=/opt/girder_worker/.worker_pids
+ExecStop=/usr/local/bin/celery multi stopwait worker --pidfile=/opt/girder_worker/.worker_pids
+StandardOutput=null
+StandardError=null

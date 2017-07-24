@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { AccessType } from 'girder/constants';
+
 import View from '../view';
 import ChallengePhaseCollection from '../../collections/ChallengePhaseCollection';
 import template from '../../templates/widgets/challengePhases.pug';
@@ -32,7 +33,7 @@ var ChallengePhasesWidget = View.extend({
 
     render: function () {
         this.$el.html(template({
-            phases: this.collection.models,
+            phases: this.collection.toArray(),
             challenge: this.challenge,
             canCreate: this.challenge.getAccessLevel() >= AccessType.WRITE
         }));

@@ -1,20 +1,24 @@
 ---
-- name: Update apt cache
-  apt: update_cache=yes
+- name: Update apt cache and install docker prerequisites
+  apt: update_cache=yes name={{ item }} state=present
   sudo: yes
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - software-properties-common
   tags: celery
 
-- name: Fetch GPG key for docker package
+- name: Add GPG key for docker
   sudo: yes
-  command: apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   tags:
     - celery
     - deploy-update
 
 - name: Add docker PPA
   sudo: yes
-  shell:
-    echo 'deb https://apt.dockerproject.org/repo ubuntu-trusty main' | sudo tee /etc/apt/sources.list.d/docker.list creates=/etc/apt/sources.list.d/docker.list
+  shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   tags:
     - celery
     - deploy-update
@@ -32,7 +36,7 @@
     - libfreetype6-dev
     - zlib1g-dev
     - libpng-dev
-    - docker-engine
+    - docker-ce
   tags:
     - celery
     - deploy-update
@@ -57,16 +61,7 @@
     - deploy-update
 
 - name: Install girder_worker using pip editable install
-  pip: extra_args="-e" name="/opt/girder_worker[girder_io]"
-  sudo: yes
-  tags:
-    - celery
-    - deploy-update
-
-# Trying to use multiple extras install syntax fails on windows, so we
-# do two different steps for the two extras
-- name: Install girder_worker docker plugin deps
-  pip: extra_args="-e" name="/opt/girder_worker[docker]"
+  command: pip install -e "/opt/girder_worker[girder_io,docker]"
   sudo: yes
   tags:
     - celery
@@ -115,17 +110,17 @@
     - celery
     - deploy-update
 
-- name: Install celery worker as a service
+- name: Install girder worker as a service
   template:
-      src: celery_worker.conf
-      dest: /etc/init/celery_worker.conf
+      src: girder_worker.service.j2
+      dest: /lib/systemd/system/girder_worker.service
       mode: 644
       owner: root
   sudo: yes
   tags: celery
 
 - name: Restart celery worker as a service
-  service: name=celery_worker state=restarted enabled=yes
+  systemd: name=girder_worker state=restarted enabled=yes daemon_reload=yes
   sudo: yes
   tags:
     - celery

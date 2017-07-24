@@ -9,6 +9,7 @@ import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
 import PaginateWidget from 'girder/views/widgets/PaginateWidget';
 import JobModel from 'girder_plugins/jobs/models/JobModel';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
+
 import SubmissionCollection from '../../collections/SubmissionCollection';
 import View from '../view';
 import template from '../../templates/body/userSubmissionsPage.pug';

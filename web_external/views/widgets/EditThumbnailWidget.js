@@ -1,6 +1,7 @@
 import FolderModel from 'girder/models/FolderModel';
 import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
 import UploadWidget from 'girder/views/widgets/UploadWidget';
+
 import View from '../view';
 import template from '../../templates/widgets/editThumbnail.pug';
 import '../../stylesheets/widgets/editThumbnail.styl';

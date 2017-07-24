@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import events from 'girder/events';
 import { cancelRestRequests } from 'girder/rest';
+
 import ChallengeModel from '../../models/ChallengeModel';
 import AddMetricWidget from '../widgets/AddMetricWidget';
 import SelectPhaseWidget from '../widgets/SelectPhaseWidget';
@@ -92,41 +93,6 @@ var ScoringMetricsView = View.extend({
         }
     },
 
-    _getMetricsState: function () {
-        var metrics = {};
-        var ok = _.every(this.$('.c-metric-container'), function (el) {
-            el = $(el);
-            var idInput = el.find('.c-metric-id');
-            var metricId = idInput.val().trim();
-            if (!metricId) {
-                this.$('.g-validation-failed-message').text(
-                    'Metric identifier field must not be empty.');
-                idInput.focus();
-                return false;
-            }
-            if (_.has(metrics, metricId)) {
-                this.$('.g-validation-failed-message').text(
-                    'Duplicate metric identifier: ' + metricId + '.');
-                idInput.focus();
-                return false;
-            }
-
-            metrics[metricId] = {
-                title: el.find('.c-metric-title').val().trim(),
-                description: el.find('.c-metric-description').val().trim(),
-                weight: window.Number(el.find('.c-metric-weight').val() || 0)
-            };
-
-            return true;
-        }, this);
-
-        if (ok) {
-            return metrics;
-        } else {
-            return false;
-        }
-    },
-
     initialize: function (settings) {
         events.on('c:joinPhase', this.render, this);
         cancelRestRequests('fetch');
@@ -164,6 +130,41 @@ var ScoringMetricsView = View.extend({
             window.scrollTo(0, el.offset().top);
         }
         return this;
+    },
+
+    _getMetricsState: function () {
+        var metrics = {};
+        var ok = _.every(this.$('.c-metric-container'), function (el) {
+            el = $(el);
+            var idInput = el.find('.c-metric-id');
+            var metricId = idInput.val().trim();
+            if (!metricId) {
+                this.$('.g-validation-failed-message').text(
+                    'Metric identifier field must not be empty.');
+                idInput.focus();
+                return false;
+            }
+            if (_.has(metrics, metricId)) {
+                this.$('.g-validation-failed-message').text(
+                    'Duplicate metric identifier: ' + metricId + '.');
+                idInput.focus();
+                return false;
+            }
+
+            metrics[metricId] = {
+                title: el.find('.c-metric-title').val().trim(),
+                description: el.find('.c-metric-description').val().trim(),
+                weight: window.Number(el.find('.c-metric-weight').val() || 0)
+            };
+
+            return true;
+        }, this);
+
+        if (ok) {
+            return metrics;
+        } else {
+            return false;
+        }
     }
 });
 

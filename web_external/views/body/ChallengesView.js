@@ -50,7 +50,7 @@ var ChallengesView = View.extend({
     render: function () {
         var currentUser = getCurrentUser();
         this.$el.html(template({
-            challenges: this.collection.models,
+            challenges: this.collection.toArray(),
             admin: !!(currentUser && currentUser.get('admin')),
             currentUser,
             AccessType,

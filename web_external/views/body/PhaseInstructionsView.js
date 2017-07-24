@@ -1,5 +1,6 @@
 import FolderModel from 'girder/models/FolderModel';
 import MarkdownWidget from 'girder/views/widgets/MarkdownWidget';
+
 import router from '../../router';
 import View from '../view';
 import template from '../../templates/body/phaseInstructions.pug';
@@ -16,14 +17,6 @@ var PhaseInstructionsView = View.extend({
         'click .c-save-instructions': function () {
             this._saveAndGoTo('phase/' + this.model.id);
         }
-    },
-
-    _saveAndGoTo: function (route) {
-        this.model.once('g:saved', function () {
-            router.navigate(route, {trigger: true});
-        }, this).set({
-            instructions: this.instructionsEditor.val()
-        }).save();
     },
 
     initialize: function (settings) {
@@ -58,6 +51,14 @@ var PhaseInstructionsView = View.extend({
             .val(this.model.get('instructions') || '');
 
         return this;
+    },
+
+    _saveAndGoTo: function (route) {
+        this.model.once('g:saved', function () {
+            router.navigate(route, {trigger: true});
+        }, this).set({
+            instructions: this.instructionsEditor.val()
+        }).save();
     }
 });
 

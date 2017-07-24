@@ -34,8 +34,4 @@ server {
     location /static {
         try_files $uri $uri/ /index.html;
     }
-
-    location /midas {
-        rewrite ^(.*)/midas(.*)$ http://challenge-legacy.kitware.com/midas$2 permanent;
-    }
 }

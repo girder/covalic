@@ -9,7 +9,7 @@ compiler:
     - gcc
 before_install:
     - cd "${HOME}"
-    - nvm install v5
+    - nvm install v6
     - npm install -g npm
     - git clone git://github.com/girder/girder
     - curl "https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.0.2.tgz" | gunzip -c | tar x
@@ -26,7 +26,7 @@ install:
     - cd "${HOME}/girder"
     - pip install -e .[thumbnails,worker]
     - pip install -U -r requirements-dev.txt -r plugins/covalic/requirements.txt
-    - girder-install web --dev
+    - girder-install web --dev --plugins=covalic
 script:
     - mkdir _build
     - cd _build

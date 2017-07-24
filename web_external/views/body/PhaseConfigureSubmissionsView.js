@@ -1,4 +1,5 @@
 import events from 'girder/events';
+
 import router from '../../router';
 import View from '../view';
 import template from '../../templates/body/phaseConfigureSubmissionsPage.pug';
@@ -23,6 +24,21 @@ var PhaseConfigureSubmissionsView = View.extend({
         }
     },
 
+    initialize: function (settings) {
+        this.wizard = settings.wizard || false;
+
+        this.render();
+    },
+
+    render: function () {
+        this.$el.html(template({
+            wizard: this.wizard,
+            phase: this.model
+        }));
+
+        return this;
+    },
+
     _save: function (onSuccess) {
         var fields = {
             matchSubmissions: this.$('#c-phase-match-submissions').is(':checked'),
@@ -42,21 +58,6 @@ var PhaseConfigureSubmissionsView = View.extend({
         }).save();
 
         this.$('.g-validation-failed-message').text('');
-    },
-
-    initialize: function (settings) {
-        this.wizard = settings.wizard || false;
-
-        this.render();
-    },
-
-    render: function () {
-        this.$el.html(template({
-            wizard: this.wizard,
-            phase: this.model
-        }));
-
-        return this;
     }
 });
 

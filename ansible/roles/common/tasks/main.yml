@@ -1,3 +1,10 @@
+- name: Install aptitude
+  apt:
+    name: aptitude
+    state: installed
+  sudo: yes
+  tags: common
+
 - name: upgrade all safe packages
   apt: upgrade=safe
   sudo: yes

@@ -4,8 +4,13 @@ covalic_version: master
 covalic_metrics_version: latest
 girder_worker_version: master
 pod_hosts: "{{ groups.get('tag_pod_' + pod, ['localhost']) }}"
-mongo_hosts: "{{ groups.get('tag_type_mongodb', ['localhost']) | intersect(pod_hosts) }}"
-mq_hosts: "{{ groups.get('tag_type_mq', ['localhost']) | intersect(pod_hosts) }}"
-mq_private_ip: "{{ hostvars[mq_hosts[0]].get('ec2_private_ip_address', 'localhost') }}"
-mongo_private_ip: "{{ hostvars[mongo_hosts[0]].get('ec2_private_ip_address', 'localhost') }}"
+mongo_hosts: "{{ groups.get('tag_mongodb_true', ['localhost']) | intersect(pod_hosts) }}"
+mq_hosts: "{{ groups.get('tag_mq_true', ['localhost']) | intersect(pod_hosts) }}"
+# Uncomment if we change deployment; for now use localhost. Guest:guest only works for rabbitmq
+# if you are binding to localhost.
+#mq_private_ip: "{{ hostvars[mq_hosts[0]].get('ec2_private_ip_address', 'localhost') }}"
+# Uncomment if we change deployment; for now use localhost
+#mongo_private_ip: "{{ hostvars[mongo_hosts[0]].get('ec2_private_ip_address', 'localhost') }}"
+mq_private_ip: localhost
+mongo_private_ip: localhost
 mongo_dbpath: /mongodata

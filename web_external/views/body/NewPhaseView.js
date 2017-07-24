@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
+
 import router from '../../router';
 import View from '../view';
 import PhaseModel from '../../models/PhaseModel';

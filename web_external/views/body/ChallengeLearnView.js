@@ -1,4 +1,5 @@
 import { cancelRestRequests, staticRoot } from 'girder/rest';
+
 import View from '../view';
 import template from '../../templates/body/challengeLearn.pug';
 import '../../stylesheets/body/challengeLearn.styl';

@@ -3,6 +3,7 @@ import events from 'girder/events';
 import { getCurrentUser } from 'girder/auth';
 import FolderModel from 'girder/models/FolderModel';
 import UploadWidget from 'girder/views/widgets/UploadWidget';
+
 import SubmissionModel from '../../models/SubmissionModel';
 import View from '../view';
 import router from '../../router';

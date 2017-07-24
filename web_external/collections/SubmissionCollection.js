@@ -1,5 +1,6 @@
 import { SORT_DESC } from 'girder/constants';
 import Collection from 'girder/collections/Collection';
+
 import SubmissionModel from '../models/SubmissionModel';
 
 var SubmissionCollection = Collection.extend({
