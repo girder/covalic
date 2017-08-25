@@ -101,27 +101,18 @@ class Submission(Resource):
         return param
 
     @access.public
-    @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='covalic',
-               level=AccessType.READ)
     @filtermodel(model='submission', plugin='covalic')
-    @describeRoute(
+    @autoDescribeRoute(
         Description('List submissions to a challenge phase.')
-        .param('phaseId', 'The ID of the phase.')
-        .param('userId', 'Show only results for the given user.',
-               required=False)
-        .param('limit', "Result set size limit (default=50).", required=False,
-               dataType='int')
-        .param('offset', "Offset into result set (default=0).", required=False,
-               dataType='int')
-        .param('sort', 'Field to sort the result list by ('
-               'default=overallScore)', required=False)
-        .param('sortdir', "1 for ascending, -1 for descending (default=-1)",
-               required=False, dataType='int')
+        .modelParam('phaseId', 'The ID of the phase.', model='phase', plugin='covalic',
+                    paramType='query', level=AccessType.READ)
+        .modelParam('userId', 'Show only results for the given user.', model='user',
+                    paramType='query', level=AccessType.READ, required=False, destName='userFilter')
+        .param('latest', 'Only include the latest scored submission for each user.',
+               required=False, dataType='boolean', default=True)
+        .pagingParams(defaultSort='overallScore', defaultSortDir=SortDir.DESCENDING)
     )
-    def listSubmissions(self, phase, params):
-        limit, offset, sort = self.getPagingParameters(
-            params, 'overallScore', defaultSortDir=SortDir.DESCENDING)
-        userFilter = None
+    def listSubmissions(self, phase, userFilter, latest, limit, offset, sort):
         user = self.getCurrentUser()
 
         # If scores are hidden, do not allow sorting by score fields
@@ -134,16 +125,12 @@ class Submission(Resource):
                         'Scores are hidden from participants in this phase, '
                         'you may not sort by score fields.')
 
-        if 'userId' in params:
-            userFilter = self.model('user').load(
-                params['userId'], user=user, level=AccessType.READ)
-
         # Exclude score field
         fields = {'score': False}
 
         submissions = self.model('submission', 'covalic').list(
             phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter,
-            fields=fields)
+            fields=fields, latest=latest)
         return [self._filterScore(phase, s, user) for s in submissions]
 
     @access.user
