@@ -169,7 +169,7 @@ var PhaseView = View.extend({
         }));
 
         renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
-                       this.$('.c-phase-instructions-container'));
+            this.$('.c-phase-instructions-container'));
 
         if (!this.model.get('hideScores') ||
                 this.model.getAccessLevel() >= AccessType.WRITE) {

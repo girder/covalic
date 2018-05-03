@@ -1,8 +1,10 @@
+import _ from 'underscore';
 import View from 'girder/views/View';
 import SearchFieldWidget from 'girder/views/widgets/SearchFieldWidget';
 import PluginConfigBreadcrumbWidget from 'girder/views/widgets/PluginConfigBreadcrumbWidget';
 import { restRequest } from 'girder/rest';
 import events from 'girder/events';
+
 import template from '../templates/config.pug';
 import '../stylesheets/config.styl';
 
@@ -34,7 +36,6 @@ const ConfigView = View.extend({
         }).done(_.bind(function (resp) {
             this.render();
             this.$('#g-scoring-user-id').val(resp['covalic.scoring_user_id']);
-
         }, this));
 
         this.searchWidget = new SearchFieldWidget({
@@ -53,7 +54,7 @@ const ConfigView = View.extend({
         this.$el.html(template());
 
         this.searchWidget.setElement(this.$('.g-scoring-user-select-container')).render();
-        this.breadcrumb.setElement( this.$('.g-config-breadcrumb-container')).render();
+        this.breadcrumb.setElement(this.$('.g-config-breadcrumb-container')).render();
 
         return this;
     },

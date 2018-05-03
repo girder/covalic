@@ -14,6 +14,7 @@ var LeaderboardWidget = View.extend({
             phase: this.phase,
             parentView: this
         }).render();
+        return this;
     }
 });
 

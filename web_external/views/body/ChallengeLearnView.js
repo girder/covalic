@@ -24,6 +24,7 @@ var ChallengeLearnView = View.extend({
         $(window).scroll(function () {
             parallax();
         });
+        return this;
     }
 });
 

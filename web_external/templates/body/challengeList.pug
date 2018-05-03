@@ -20,14 +20,12 @@
           img.c-challenge-image(src=challenge.getThumbnailUrl())
           .c-thumbnail-overlay
             if challenge.getAccessLevel() >= AccessType.WRITE
-              a.c-edit-thumbnail.c-tooltip(
-                title="Change thumbnail", href=`#challenge/${challenge.id}/thumbnail`)
-                  i.icon-pencil
+              a.c-edit-thumbnail.c-tooltip(title="Change thumbnail", href=`#challenge/${challenge.id}/thumbnail`)
+                i.icon-pencil
       .c-card-bottom
-        a.c-challenge-link.c-text-link(
-          href=`#challenge/${challenge.id}`, title=challenge.name())
-            = challenge.name()
-            span.c-text-fade
+        a.c-challenge-link.c-text-link(href=`#challenge/${challenge.id}`, title=challenge.name())
+          = challenge.name()
+          span.c-text-fade
         .c-challenge-organizers(title=challenge.get('organizers'))
           | #{challenge.get('organizers')} &nbsp;
           span.c-text-fade

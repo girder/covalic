@@ -16,6 +16,7 @@ var HeaderView = View.extend({
             el: this.$('.c-current-user-wrapper'),
             parentView: this
         }).render();
+        return this;
     }
 });
 

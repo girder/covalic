@@ -147,6 +147,7 @@ var SubmissionView = View.extend({
                 parentView: this
             }).render();
         }
+        return this;
     },
 
     /**

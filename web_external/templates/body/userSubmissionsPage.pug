@@ -55,18 +55,17 @@
               if submission.get('latest')
                 i.icon-ok
             td.c-submission-status
-                if hasScore
-                  - hasSuccessfulSubmission = true
-                  if siteAdmin
-                    a(href=`#job/${submission.get('jobId')}`)= successText
-                  else
-                    = successText
+              if hasScore
+                - hasSuccessfulSubmission = true
+                if siteAdmin
+                  a(href=`#job/${submission.get('jobId')}`)= successText
                 else
-                  - var job = jobs !== undefined && jobs[submission.get('jobId')]
-                  if job
-                    a.c-job-log-tooltip(
-                      href=`#job/${submission.get('jobId')}`,
-                      title=getShortLog(job, 5))= JobStatus.text(job.get('status'))
+                  = successText
+              else
+                - var job = jobs !== undefined && jobs[submission.get('jobId')]
+                if job
+                  a.c-job-log-tooltip(
+                    href=`#job/${submission.get('jobId')}`, title=getShortLog(job, 5))= JobStatus.text(job.get('status'))
             td.c-submission-date= dateStr
             td.c-submission-score
               if hasScore
@@ -80,8 +79,8 @@
               ul.dropdown-menu.dropdown-menu-right
                 li.c-submission-download
                   a(href=submission.downloadUrl())
-                   i.icon-download
-                   | Download data
+                    i.icon-download
+                    | Download data
                 li.c-submission-json
                   a.c-submission-json-link.c-tooltip(c-submission-id=submission.id)
                     i.icon-list-alt
@@ -102,4 +101,4 @@
           i.icon-cancel
           |  No successful submissions on this page
       if hasSubmissions && endOfSubmissions
-          | &ndash; end of submissions &ndash;
+        | &ndash; end of submissions &ndash;

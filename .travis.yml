@@ -1,7 +1,7 @@
 language: python
 python:
     - "2.7"
-    - "3.4"
+    - "3.5"
 
 sudo: false
 
@@ -19,13 +19,13 @@ before_install:
     - cd "${HOME}"
     - curl -L "http://cmake.org/files/v3.1/cmake-3.1.0-Linux-x86_64.tar.gz" | gunzip -c | tar x
     - cd cmake-*/bin && export PATH="${PWD}:${PATH}"
-    - ln -s "${HOME}/girder/.eslintrc" "${TRAVIS_BUILD_DIR}/../.."
+    - ln -s "${HOME}/girder/package.json" "${TRAVIS_BUILD_DIR}/.."  # for eslint config
     - cd "${HOME}/girder/plugins"
     - ln -s "${TRAVIS_BUILD_DIR}" covalic
 install:
     - cd "${HOME}/girder"
     - pip install -e .[thumbnails,worker]
-    - pip install -U -r requirements-dev.txt -r plugins/covalic/requirements.txt
+    - pip install -U -r requirements-dev.txt
     - girder-install web --dev --plugins=covalic
 script:
     - mkdir _build

@@ -11,11 +11,11 @@
       .modal-body
         .form-group
           label.control-label(for="c-phase-name") Name
-          input.input-sm#c-phase-name.form-control(type="text", placeholder="Enter phase name")
+          input#c-phase-name.input-sm.form-control(type="text", placeholder="Enter phase name")
         .form-group
           label.control-label(for="c-phase-description") Description (optional)
-          textarea.input-sm#c-phase-description.form-control(placeholder="Enter phase description")
-        .form-group#c-phase-timeframe
+          textarea#c-phase-description.input-sm.form-control(placeholder="Enter phase description")
+        #c-phase-timeframe.form-group
         .checkbox
           label
             input#c-phase-active(type="checkbox")
