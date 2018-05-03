@@ -42,7 +42,8 @@ var ScoreDetailWidget = View.extend({
                 metricInfo = metricsInfo[metricId] || {},
                 title = metricInfo.title || metricId,
                 description = metricInfo.description
-                    ? renderMarkdown(metricInfo.description) : null,
+                    ? renderMarkdown(metricInfo.description)
+                    : null,
                 weight = metricInfo.weight || 0;
 
             el.popover({
@@ -58,6 +59,7 @@ var ScoreDetailWidget = View.extend({
                 html: true
             });
         }, this);
+        return this;
     },
 
     getScoreForCell: function (dataset, metric) {

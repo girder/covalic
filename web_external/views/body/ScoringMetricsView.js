@@ -80,8 +80,8 @@ var ScoringMetricsView = View.extend({
         'input .c-metric-id': function (e) {
             var el = $(e.currentTarget);
             el.parents('.c-metric-container')
-              .find('a.c-metric-id-panel-title')
-              .text(el.val());
+                .find('a.c-metric-id-panel-title')
+                .text(el.val());
         },
 
         'click .c-initialize-metrics': function () {

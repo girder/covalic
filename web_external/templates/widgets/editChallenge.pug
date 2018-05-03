@@ -11,15 +11,15 @@
       .modal-body
         .form-group
           label.control-label(for="c-challenge-name") Name
-          input.input-sm#c-challenge-name.form-control(type="text", placeholder="Enter challenge name")
+          input#c-challenge-name.input-sm.form-control(type="text", placeholder="Enter challenge name")
         .form-group
           label.control-label(for="c-challenge-organizers") Challenge organizers
-          input.input-sm#c-challenge-organizers.form-control(
+          input#c-challenge-organizers.input-sm.form-control(
             type="text", placeholder="Enter challenge organizers")
         .form-group
           label.control-label(for="c-challenge-description") Short description (optional)
-          textarea.input-sm#c-challenge-description.form-control(placeholder="Enter short description")
-        .form-group#c-challenge-timeframe
+          textarea#c-challenge-description.input-sm.form-control(placeholder="Enter short description")
+        #c-challenge-timeframe.form-group
 
         .g-validation-failed-message
       .modal-footer

@@ -54,9 +54,11 @@ var ChallengeTimelineWidget = View.extend({
                 var phaseStartDateStr = phase.get('startDate');
                 var phaseEndDateStr = phase.get('endDate');
                 var phaseStartDate = !_.isEmpty(phaseStartDateStr)
-                    ? moment(phaseStartDateStr) : null;
+                    ? moment(phaseStartDateStr)
+                    : null;
                 var phaseEndDate = !_.isEmpty(phaseEndDateStr)
-                    ? moment(phaseEndDateStr) : null;
+                    ? moment(phaseEndDateStr)
+                    : null;
 
                 if (phaseStartDate && phaseStartDate.isValid()) {
                     point = this._createPoint(phaseStartDate, now);

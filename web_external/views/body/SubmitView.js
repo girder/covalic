@@ -72,6 +72,7 @@ var SubmitView = View.extend({
         this.listenTo(this.uploadWidget, 'g:filesChanged', this.filesSelected);
         this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
         this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
+        return this;
     },
 
     /**

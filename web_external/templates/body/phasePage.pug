@@ -1,50 +1,50 @@
 .c-phase-header
-    .c-phase-name.g-body-title
-        a.c-challenge-link(href=`#challenge/${challenge.id}`)
-            b= challenge.get('name')
-        i.icon-angle-right
-        = phase.name()
-        .c-phase-properties.pull-right
-            if phase.getAccessLevel() >= AccessType.WRITE
-                .btn-group.pull-right
-                    button.c-phase-actions-button.btn.btn-default.dropdown-toggle(
-                            data-toggle="dropdown", title="Actions")
-                        i.icon-cog
-                        i.icon-down-dir
-                    ul.c-phase-actions-menu.dropdown-menu.pull-right(role="menu")
-                        li(role="presentation")
-                          a.c-edit-phase(role="menuitem") #[i.icon-edit] Edit phase
-                        li(role="presentation")
-                          a.c-ground-truth(href=`#phase/${phase.id}/groundtruth`, role="menuitem")
-                            i.icon-target
-                            |  Ground truth dataset...
-                        li(role="presentation")
-                          a.c-test-data(href=`#phase/${phase.id}/input`, role="menuitem")
-                            i.icon-beaker
-                            |  Input dataset...
-                        li(role="presentation")
-                            a.c-edit-metrics(role="menuitem", href=`#phase/${phase.id}/metrics`)
-                              i.icon-chart-bar
-                              |  Scoring metrics
-                        li(role="presentation")
-                          a.c-configure-submissions(href=`#phase/${phase.id}/configure_submissions`, role="menuitem")
-                            i.icon-upload
-                            |  Configure submissions
-                        if phase.getAccessLevel() >= AccessType.ADMIN
-                            li.divider(role="presentation")
-                            li(role="presentation")
-                              a.c-edit-scoring(role="menuitem")
-                                i.icon-code
-                                |  Customize scoring behavior
-                            li(role="presentation")
-                              a(href=`#phase/${phase.id}/access`, role="menuitem")
-                                i.icon-lock
-                                |  Access control
-                            li(role="presentation")
-                              a.c-delete-phase(role="menuitem") #[i.icon-trash] Delete phase
+  .c-phase-name.g-body-title
+    a.c-challenge-link(href=`#challenge/${challenge.id}`)
+      b= challenge.get('name')
+    i.icon-angle-right
+    = phase.name()
+    .c-phase-properties.pull-right
+      if phase.getAccessLevel() >= AccessType.WRITE
+        .btn-group.pull-right
+          button.c-phase-actions-button.btn.btn-default.dropdown-toggle(
+                  data-toggle="dropdown", title="Actions")
+            i.icon-cog
+            i.icon-down-dir
+          ul.c-phase-actions-menu.dropdown-menu.pull-right(role="menu")
+            li(role="presentation")
+              a.c-edit-phase(role="menuitem") #[i.icon-edit] Edit phase
+            li(role="presentation")
+              a.c-ground-truth(href=`#phase/${phase.id}/groundtruth`, role="menuitem")
+                i.icon-target
+                |  Ground truth dataset...
+            li(role="presentation")
+              a.c-test-data(href=`#phase/${phase.id}/input`, role="menuitem")
+                i.icon-beaker
+                |  Input dataset...
+            li(role="presentation")
+              a.c-edit-metrics(role="menuitem", href=`#phase/${phase.id}/metrics`)
+                i.icon-chart-bar
+                |  Scoring metrics
+            li(role="presentation")
+              a.c-configure-submissions(href=`#phase/${phase.id}/configure_submissions`, role="menuitem")
+                i.icon-upload
+                |  Configure submissions
+            if phase.getAccessLevel() >= AccessType.ADMIN
+              li.divider(role="presentation")
+              li(role="presentation")
+                a.c-edit-scoring(role="menuitem")
+                  i.icon-code
+                  |  Customize scoring behavior
+              li(role="presentation")
+                a(href=`#phase/${phase.id}/access`, role="menuitem")
+                  i.icon-lock
+                  |  Access control
+              li(role="presentation")
+                a.c-delete-phase(role="menuitem") #[i.icon-trash] Delete phase
 
-        .c-phase-description.g-body-subtitle #{phase.get('description')}
-        .g-clear-right
+    .c-phase-description.g-body-subtitle #{phase.get('description')}
+    .g-clear-right
 
 .c-overview-container
   .c-section-header
@@ -54,28 +54,28 @@
   .c-phase-instructions-container
 
 .c-phase-submit-container
-    if userInChallenge
-        a.c-download-test-data.btn.btn-lg.btn-primary.hide
-          i.icon-download
-          if phase.get('type') === 'training'
-            |  Download training dataset
-          else
-            |  Download test dataset
-        a.c-download-ground-truth.btn.btn-lg.btn-primary.hide
-          i.icon-target
-          |  Download ground truth data
-        if phase.get('active')
-            a#c-submit-phase-dataset.btn.btn-lg.btn-success(href=`#phase/${phase.id}/submit`)
-              i.icon-upload-cloud
-              |  Submit your results
-        else
-            button#c-submit-phase-disabled.disabled.btn.btn-lg
-                i.icon-upload-cloud
-                |  Submissions disabled currently
+  if userInChallenge
+    a.c-download-test-data.btn.btn-lg.btn-primary.hide
+      i.icon-download
+      if phase.get('type') === 'training'
+        |  Download training dataset
+      else
+        |  Download test dataset
+    a.c-download-ground-truth.btn.btn-lg.btn-primary.hide
+      i.icon-target
+      |  Download ground truth data
+    if phase.get('active')
+      a#c-submit-phase-dataset.btn.btn-lg.btn-success(href=`#phase/${phase.id}/submit`)
+        i.icon-upload-cloud
+        |  Submit your results
     else
-        button#c-join-phase.btn.btn-lg.btn-primary
-            i.icon-thumbs-up-alt
-            | Participate in this phase
+      button#c-submit-phase-disabled.disabled.btn.btn-lg
+        i.icon-upload-cloud
+        |  Submissions disabled currently
+  else
+    button#c-join-phase.btn.btn-lg.btn-primary
+      i.icon-thumbs-up-alt
+      | Participate in this phase
 
 .c-leaderboard-outer-wrapper
   .c-section-header Leaderboard

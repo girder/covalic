@@ -50,6 +50,7 @@ var SubmissionListWidget = View.extend({
             collection: this.collection,
             parentView: this
         }).render();
+        return this;
     }
 });
 

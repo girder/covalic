@@ -21,6 +21,7 @@ var InitializeMetricsDialog = View.extend({
 
     render: function () {
         this.$el.html(template()).girderModal(this);
+        return this;
     }
 });
 

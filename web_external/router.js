@@ -32,8 +32,6 @@ girderRouter.enabled(false);
 
 var router = new Backbone.Router();
 
-export default router;
-
 // Setup app routes
 router.route('', 'index', function () {
     events.trigger('g:navigateTo', FrontPageView);
@@ -187,7 +185,7 @@ router.route('phase/:id/submissions', 'phaseSubmissions', function (id, params) 
 
 var _wizardPage = function (route, routeName, modelType, viewType) {
     router.route(route, routeName, function (id, params) {
-        var model = new modelType({_id: id}),  // eslint-disable-line new-cap
+        var model = new modelType({_id: id}), // eslint-disable-line new-cap
             wizard = false;
 
         params = parseQueryString(params);
@@ -218,3 +216,5 @@ _wizardPage('phase/:id/instructions', 'phaseInstructions', PhaseModel, PhaseInst
 _wizardPage('phase/:id/input', 'phaseInput', PhaseModel, PhaseInputView);
 _wizardPage('phase/:id/groundtruth', 'phaseGroundTruth', PhaseModel, PhaseGroundTruthView);
 _wizardPage('phase/:id/configure_submissions', 'phaseConfigureSubmission', PhaseModel, PhaseConfigureSubmissionsView);
+
+export default router;

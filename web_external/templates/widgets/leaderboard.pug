@@ -18,8 +18,9 @@ table.table.table-striped.table-condensed.c-leaderboard-table
   tbody
     - var i = 1
     each submission in submissions
-      tr.c-stripe(stripe=((i + start) % 2 ? 'even' : 'odd'))
-        th.c-rank= i + start
+      - var rank = i + start;
+      tr.c-stripe(stripe=(rank % 2 ? 'even' : 'odd'))
+        th.c-rank= rank
         td
           if phaseAdmin
             a.c-user-link(

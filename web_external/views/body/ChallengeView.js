@@ -91,7 +91,7 @@ var ChallengeView = View.extend({
         this.timelineView.setElement(this.$('.c-challenge-timeline-container')).render();
 
         renderMarkdown(this.model.get('instructions') || '*No overview provided.*',
-                       this.$('.c-challenge-instructions-container'));
+            this.$('.c-challenge-instructions-container'));
 
         this.phasesView.setElement(this.$('.c-challenge-phase-container')).render();
 

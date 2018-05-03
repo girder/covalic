@@ -1,5 +1,4 @@
 {
-    "extends": "../../../.eslintrc",
     "globals": {
         "covalic": true,
         "moment": true
