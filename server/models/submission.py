@@ -35,20 +35,40 @@ class Submission(Model):
     def initialize(self):
         self.name = 'covalic_submission'
         leaderboardIdx = ([
-            ('phaseId', 1), ('overallScore', -1), ('latest', 1)
+            ('phaseId', 1), ('overallScore', -1), ('approach', 1), ('latest', 1)
         ], {})
-        userPhaseIdx = ([('creatorId', 1), ('phaseId', 1)], {})
+        userPhaseIdx = ([('creatorId', 1), ('phaseId', 1), ('approach', 1)], {})
         self.ensureIndices((leaderboardIdx, userPhaseIdx, 'folderId',
-                            'overallScore'))
+                            'overallScore', 'approach'))
         self.exposeFields(level=AccessType.READ, fields=(
             '_id', 'creatorId', 'creatorName', 'phaseId', 'folderId', 'created',
             'score', 'title', 'latest', 'overallScore', 'jobId', 'organization', 'organizationUrl',
-            'documentationUrl'
+            'documentationUrl', 'approach'
         ))
+
+    def load(self, *args, **kwargs):
+        doc = super(Submission, self).load(*args, **kwargs)
+        fields = kwargs.get('fields')
+        if (fields is None or 'approach' in fields) and \
+                doc is not None and doc.get('approach') is None:
+            doc['approach'] = 'default'
+        return doc
+
+    def save(self, document, *args, **kwargs):
+        if document.get('approach') == 'default':
+            del document['approach']
+        if 'approach' in document:
+            document['approach'] = document['approach'].lower()
+        document = super(Submission, self).save(document, *args, **kwargs)
+        document.setdefault('approach', 'default')
+        return document
 
     def validate(self, doc):
         if doc.get('created'):
             doc['created'] = validateDate(doc.get('created'), 'created')
+
+        if doc.get('approach') == 'default':
+            del doc['approach']
 
         if doc.get('score') is not None and doc.get('overallScore') is None:
             scoring.computeAverageScores(doc['score'])
@@ -60,6 +80,7 @@ class Submission(Model):
             Model.update(self, query={
                 'phaseId': doc['phaseId'],
                 'creatorId': doc['creatorId'],
+                'approach': doc.get('approach'),
                 'latest': True
             }, update={
                 '$set': {'latest': False}
@@ -103,22 +124,44 @@ class Submission(Model):
         Model.remove(self, doc, progress=progress)
 
     def list(self, phase, limit=50, offset=0, sort=None, userFilter=None,
-             fields=None, latest=True):
+             fields=None, latest=True, approach=None):
         q = {'phaseId': phase['_id']}
 
         if userFilter is not None:
             q['creatorId'] = userFilter['_id']
-        elif latest:
+
+        if latest:
             q['latest'] = True
+
+        if approach is not None:
+            q['approach'] = approach.lower()
+            if approach is 'default':
+                q['approach'] = None
 
         cursor = self.find(q, limit=limit, offset=offset, sort=sort,
                            fields=fields)
         for result in cursor:
+            result.setdefault('approach', 'default')
             yield result
+
+    def listApproaches(self, phase=None, user=None):
+        q = {}
+        if phase is not None:
+            q['phaseId'] = phase['_id']
+
+        if user is not None:
+            q['creatorId'] = user['_id']
+
+        approaches = [
+            approach for approach in self.collection.distinct('approach', filter=q)
+            if approach is not None
+        ]
+        approaches.append('default')
+        return sorted(set(approaches))
 
     def createSubmission(self, creator, phase, folder, job=None, title=None,
                          created=None, organization=None, organizationUrl=None,
-                         documentationUrl=None):
+                         documentationUrl=None, approach=None):
         submission = {
             'creatorId': creator['_id'],
             'creatorName': self.getUserName(creator),
@@ -135,6 +178,8 @@ class Submission(Model):
             submission['organizationUrl'] = organizationUrl
         if documentationUrl is not None:
             submission['documentationUrl'] = documentationUrl
+        if approach is not None:
+            submission['approach'] = approach
 
         if job is not None:
             submission['jobId'] = job['_id']
