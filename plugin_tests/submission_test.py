@@ -186,11 +186,21 @@ class SubmissionModelTest(SubmissionBase):
 
     def testRecomputeOverallScores(self):
         self.generateSubmissionList()
-        self.model('submission', 'covalic').recomputeOverallScores(self.phase1)
 
         submission = self.model('submission', 'covalic').findOne(
             {'title': 'User submission 0 phase 1'})
         self.assertEqual(submission['overallScore'], (1.0 + 0.25) / 2.0)
+
+        self.phase1['metrics'] = {
+            'accuracy': {'weight': 0.3},
+            'error': {'weight': 0.7}
+        }
+        self.model('phase', 'covalic').save(self.phase1)
+        self.model('submission', 'covalic').recomputeOverallScores(self.phase1)
+
+        submission = self.model('submission', 'covalic').findOne(
+            {'title': 'User submission 0 phase 1'})
+        self.assertEqual(submission['overallScore'], 0.25 * 0.3 + 1.0 * 0.7)
 
     def testCreateUnscored(self):
         self.generateSubmissionList()
