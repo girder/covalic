@@ -1,5 +1,17 @@
 ---
 - hosts: all
+  gather_facts: false
+  pre_tasks:
+    - name: Install python2 for ansible
+      raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal)"
+      register: output
+      changed_when: output.stdout != ""
+      become: true
+
+    - name: Gathering Facts
+      setup:
+      become: true
+
   roles:
     - vagrant
     - mongodb

@@ -11,27 +11,27 @@
 
 - name: install system curl
   apt: name=curl state=present
-  sudo: yes
+  become: yes
   tags: girder
 
 - name: install pycurl package in order to use the apt_repository module
   apt: pkg=python-pycurl state=present
-  sudo: yes
+  become: yes
   tags: girder
 
 - name: add nodejs ppa
-  shell: curl -sL https://deb.nodesource.com/setup_6.x | sudo bash -
-  sudo: yes
+  shell: curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
+  become: yes
   tags: girder
 
 - name: update apt cache
   apt: update_cache=yes
-  sudo: yes
+  become: yes
   tags: girder
 
 - name: install package dependencies
   apt: name={{ item }} state=present
-  sudo: yes
+  become: yes
   with_items:
     - libssl-dev
     - python-pip
@@ -58,7 +58,7 @@
     state: directory
     recurse: yes
     mode: 0777
-  sudo: yes
+  become: yes
   tags:
     - girder
 
@@ -84,28 +84,28 @@
 
 - name: get the most recent version of pip
   pip: name=pip extra_args="-U"
-  sudo: yes
+  become: yes
   tags:
     - girder
     - deploy-update
 
 - name: install girder using pip editable install
   command: pip install -e "{{ girder_root }}[thumbnails,worker]"
-  sudo: yes
+  become: yes
   tags:
     - girder
     - deploy-update
 
 - name: install girder-client pip package
   pip: name=girder-client
-  sudo: yes
+  become: yes
   tags:
     - girder
     - deploy-update
 
 - name: update npm
   command: npm install -g npm
-  sudo: yes
+  become: yes
   tags:
     - girder
     - deploy-update
@@ -122,12 +122,12 @@
 
 - name: install Girder as a service
   template: src=girder.service.j2 dest=/lib/systemd/system/girder.service mode=644 owner=root
-  sudo: yes
+  become: yes
   tags: girder
 
 - name: Start Girder as a service
   systemd: name=girder state=restarted enabled=yes daemon_reload=yes
-  sudo: yes
+  become: yes
   tags:
     - girder
     - rewire
@@ -135,29 +135,29 @@
 - name: add www-data to developers so nginx can serve static content
   user: name=www-data state=present groups=developers append=yes
   when: vagrant is not defined
-  sudo: yes
+  become: yes
   tags: girder
 
 - name: disable default nginx site
   command: rm /etc/nginx/sites-enabled/default removes=/etc/nginx/sites-enabled/default
-  sudo: yes
+  become: yes
   tags: girder
 
 - name: add the girder production nginx site
   template: src=nginx_prod.j2 dest=/etc/nginx/sites-available/girder
-  sudo: yes
+  become: yes
   when: pod == 'prod'
   tags: girder
 
 - name: add the girder non-production nginx site
   template: src=nginx.j2 dest=/etc/nginx/sites-available/girder
-  sudo: yes
+  become: yes
   when: pod != 'prod'
   tags: girder
 
 - name: enable girder nginx site
   command: ln -s /etc/nginx/sites-available/girder /etc/nginx/sites-enabled/girder creates=/etc/nginx/sites-enabled/girder
-  sudo: yes
+  become: yes
   tags: girder
 
 - name: create /etc/nginx/ssl
@@ -167,26 +167,26 @@
         state=directory
         mode=0770
         recurse=no
-  sudo: yes
+  become: yes
   tags: girder
   when: pod == 'prod'
 
 - name: copy ssl_certificate
   copy: content="{{prod_cert}}" dest=/etc/nginx/ssl/challenge_kitware_com.pem mode=640 owner=root
-  sudo: yes
+  become: yes
   tags: girder
   when: pod == 'prod'
 
 - name: copy ssl_key
   copy: content="{{prod_key}}" dest=/etc/nginx/ssl/challenge.kitware.com.key mode=640 owner=root
-  sudo: yes
+  become: yes
   tags: girder
   when: pod == 'prod'
 
 # force a restart of nginx to pick up any changes in girder
 - name: Restart nginx service
   service: name=nginx state=restarted enabled=yes
-  sudo: yes
+  become: yes
   tags:
     - girder
 
@@ -242,7 +242,7 @@
 
 - name: Restart Girder as a service to make sure our plugins are running
   service: name=girder state=restarted enabled=yes
-  sudo: yes
+  become: yes
   tags:
     - girder
     - deploy-update
@@ -340,7 +340,7 @@
     - girder-assetstore
 
 - name: format filesystem for assetstore
-  sudo: yes
+  become: yes
   filesystem: force=no fstype=ext4 dev={{assetstore_devicename}}
   when: girder_assetstore_type == 'filesystem' and girder_assetstore_local_fs is not defined
   tags:
@@ -348,7 +348,7 @@
     - girder-assetstore
 
 - name: create local mountpoint
-  sudo: yes
+  become: yes
   file: dest=/opt/covalic/assetstore mode=755 owner={{girder_exec_user}} group={{girder_exec_group}} state=directory
   when: girder_assetstore_type == 'filesystem'
   tags:
@@ -356,7 +356,7 @@
     - girder-assetstore
 
 - name: Mount assetstore volume
-  sudo: yes
+  become: yes
   mount: name=/opt/covalic/assetstore src={{assetstore_devicename}} fstype=ext4 state=mounted opts=defaults,nofail,nobootwait dump=0 passno=2
   when: girder_assetstore_type == 'filesystem' and girder_assetstore_local_fs is not defined
   tags:
@@ -364,7 +364,7 @@
     - girder-assetstore
 
 - name: enforce ownership of assetstore
-  sudo: yes
+  become: yes
   file: dest=/opt/covalic/assetstore mode=755 owner={{girder_exec_user}} group={{girder_exec_group}} state=directory recurse=yes
   when: girder_assetstore_type == 'filesystem'
   tags:
@@ -390,7 +390,7 @@
 # force a restart of nginx to pick up any changes in girder
 - name: Restart nginx service
   service: name=nginx state=restarted enabled=yes
-  sudo: yes
+  become: yes
   tags:
     - girder
     - deploy-update
@@ -398,7 +398,7 @@
 
 - name: Restart Girder as a service (to catch changes to route table)
   service: name=girder state=restarted enabled=yes
-  sudo: yes
+  become: yes
   tags:
     - girder
     - deploy-update

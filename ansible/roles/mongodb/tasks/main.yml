@@ -1,17 +1,17 @@
 ---
 - name: MongoDB | Fetch GPG key
-  sudo: yes
+  become: yes
   command: apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
   tags: mongodb
 
 - name: MongoDB | Add 10 gen repository
-  sudo: yes
+  become: yes
   shell:
     echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
   tags: mongodb
 
 - name: MongoDB | Install latest mongodb
-  sudo: yes
+  become: yes
   apt: pkg={{ item }} update-cache=yes
   with_items:
     - mongodb-org
@@ -20,14 +20,14 @@
 
 - name: Get the most recent version of pip
   pip: name=pip extra_args="-U"
-  sudo: yes
+  become: yes
   tags:
     - mongodb
     - deploy-update
 
 - name: Get boto pip package
   pip: name=boto version=2.39.0
-  sudo: yes
+  become: yes
   tags:
     - mongodb
     - deploy-update
@@ -35,7 +35,7 @@
 # TODO this will have to be redone for clustered mongo
 # change the mongodb from listening only on the local ip to the internal ip
 - name: Make mongo listen on private IP interface
-  sudo: yes
+  become: yes
   lineinfile:
     dest: /etc/mongod.conf
     state: present
@@ -46,7 +46,7 @@
     - rewire
 
 - name: Ensure db directory exists
-  sudo: yes
+  become: yes
   file:
     path: "{{ mongo_dbpath }}"
     state: directory
@@ -57,7 +57,7 @@
     - rewire
 
 - name: Run mongo daemon
-  sudo: yes
+  become: yes
   systemd: name=mongod state=restarted
   tags:
     - mongodb
@@ -73,7 +73,7 @@
     - rewire
 
 - name: Install backup_db.sh script
-  sudo: yes
+  become: yes
   template:
     dest: /home/ubuntu/backup_db.sh
     src: backup_db.sh
@@ -83,7 +83,7 @@
     - deploy-update
 
 - name: Install S3 upload script
-  sudo: yes
+  become: yes
   template:
     dest: /home/ubuntu/upload_to_s3.py
     src: upload_to_s3.py
