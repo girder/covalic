@@ -6,9 +6,9 @@
         mode=0775
         state=directory
         recurse=no
-  sudo: yes
+  become: yes
 
 - name: install curl
-  apt: pkg=curl state=installed
-  sudo: yes
+  apt: pkg=curl state=present
+  become: yes
   tags: common

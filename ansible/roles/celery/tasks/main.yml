@@ -1,7 +1,7 @@
 ---
 - name: Update apt cache and install docker prerequisites
   apt: update_cache=yes name={{ item }} state=present
-  sudo: yes
+  become: yes
   with_items:
     - apt-transport-https
     - ca-certificates
@@ -10,21 +10,21 @@
   tags: celery
 
 - name: Add GPG key for docker
-  sudo: yes
+  become: yes
   shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
   tags:
     - celery
     - deploy-update
 
 - name: Add docker PPA
-  sudo: yes
+  become: yes
   shell: add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
   tags:
     - celery
     - deploy-update
 
 - name: Install worker dependencies
-  sudo: yes
+  become: yes
   apt: update-cache=yes name={{ item }} state=present
   with_items:
     - libffi-dev
@@ -43,13 +43,13 @@
 
 - name: Start docker daemon
   service: name=docker state=started enabled=yes
-  sudo: yes
+  become: yes
   tags:
     - celery
     - deploy-update
 
 - name: Clone girder_worker
-  sudo: yes
+  become: yes
   git:
       repo: git://github.com/girder/girder_worker.git
       dest: /opt/girder_worker
@@ -62,13 +62,13 @@
 
 - name: Install girder_worker using pip editable install
   command: pip install -e "/opt/girder_worker[girder_io,docker]"
-  sudo: yes
+  become: yes
   tags:
     - celery
     - deploy-update
 
 - name: Create local worker config file
-  sudo: yes
+  become: yes
   template:
     src: worker.local.cfg.j2
     dest: /opt/girder_worker/girder_worker/worker.local.cfg
@@ -80,7 +80,7 @@
     - deploy-update
 
 - name: Change ownership of worker to correct user
-  sudo: yes
+  become: yes
   file:
     dest: /opt/girder_worker
     owner: "{{worker_exec_user}}"
@@ -100,12 +100,12 @@
         name={{worker_exec_user}}
         groups=docker
         append=yes
-  sudo: yes
+  become: yes
   tags: celery
 
 - name: Restart docker daemon
   service: name=docker state=restarted enabled=yes
-  sudo: yes
+  become: yes
   tags:
     - celery
     - deploy-update
@@ -116,12 +116,12 @@
       dest: /lib/systemd/system/girder_worker.service
       mode: 644
       owner: root
-  sudo: yes
+  become: yes
   tags: celery
 
 - name: Restart celery worker as a service
   systemd: name=girder_worker state=restarted enabled=yes daemon_reload=yes
-  sudo: yes
+  become: yes
   tags:
     - celery
     - deploy-update

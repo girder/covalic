@@ -1,6 +1,6 @@
 ---
 - name: Install rabbitmq system package
-  sudo: yes
+  become: yes
   apt: update-cache=yes name=rabbitmq-server state=present
   tags:
     - mq
@@ -8,5 +8,5 @@
 
 - name: Enable rabbitmq-server to survive reboot
   service: name=rabbitmq-server enabled=yes
-  sudo: yes
+  become: yes
   tags: mq
