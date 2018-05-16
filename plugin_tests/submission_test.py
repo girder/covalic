@@ -88,7 +88,8 @@ class SubmissionBase(base.TestCase):
             public=False)
 
         metrics = {
-            'accuracy': {'weight': 1}
+            'accuracy': {'weight': 0.5},
+            'error': {'weight': 0.5}
         }
         self.phase1 = self.model('phase', 'covalic').createPhase(
             'phase 1', self.challenge, creator=self.admin, ordinal=1
@@ -108,24 +109,30 @@ class SubmissionBase(base.TestCase):
         super(SubmissionBase, self).tearDown()
 
     def createSubmission(self, phase, user, title, score=None, **kwargs):
-        scoreDict = [{
-            'dataset': 'Average',
-            'metrics': [{
-                'name': 'accuracy',
-                'value': score
-            }]
-        }]
         folder = self.model('folder').createFolder(
             user, title, parentType='user', creator=user)
         submission = self.model('submission', 'covalic').createSubmission(
             user, phase, folder, title=title, **kwargs)
         if score is not None:
+            scoreDict = [{
+                'dataset': 'dataset1',
+                'metrics': [{
+                    'name': 'accuracy',
+                    'value': score[0]
+                }, {
+                    'name': 'error',
+                    'value': score[1]
+                }]
+            }]
             submission['score'] = scoreDict
         return self.model('submission', 'covalic').save(submission)
 
     def generateSubmissionList(self):
         for i in range(3):
-            score = 0.25 * (i + 1)
+            score = [
+                0.25 * (i + 1),
+                0.25 * (4 - i),
+            ]
             self.createSubmission(
                 self.phase1, self.user, 'User submission %i phase 1' % i, score=score
             )
@@ -183,7 +190,7 @@ class SubmissionModelTest(SubmissionBase):
 
         submission = self.model('submission', 'covalic').findOne(
             {'title': 'User submission 0 phase 1'})
-        self.assertEqual(submission['overallScore'], 0.25)
+        self.assertEqual(submission['overallScore'], (1.0 + 0.25) / 2.0)
 
     def testCreateUnscored(self):
         self.generateSubmissionList()
@@ -365,10 +372,22 @@ class SubmissionRestTest(SubmissionBase):
         submission = self.createSubmission(self.phase1, self.user, 'submission')
 
         score = json.dumps([{
-            'dataset': 'Average',
+            'dataset': 'dataset1',
             'metrics': [{
                 'name': 'accuracy',
-                'value': 0.5
+                'value': 0.1
+            }, {
+                'name': 'error',
+                'value': 0.9
+            }]
+        }, {
+            'dataset': 'dataset2',
+            'metrics': [{
+                'name': 'accuracy',
+                'value': 0.3
+            }, {
+                'name': 'error',
+                'value': None
             }]
         }])
         # users cannot submit scores
@@ -392,4 +411,32 @@ class SubmissionRestTest(SubmissionBase):
             path='/covalic_submission/%s' % str(submission['_id']), user=self.user
         )
         self.assertStatusOk(resp)
-        self.assertEqual(resp.json['overallScore'], 0.5)
+        self.assertEqual(resp.json['overallScore'], (0.2 + 0.9) / 2.0)
+        self.assertEqual(resp.json['score'], [{
+            'dataset': 'Average',
+            'metrics': [{
+                'name': 'accuracy',
+                'value': 0.2
+            }, {
+                'name': 'error',
+                'value': 0.9
+            }]
+        }, {
+            'dataset': 'dataset1',
+            'metrics': [{
+                'name': 'accuracy',
+                'value': 0.1
+            }, {
+                'name': 'error',
+                'value': 0.9
+            }]
+        }, {
+            'dataset': 'dataset2',
+            'metrics': [{
+                'name': 'accuracy',
+                'value': 0.3
+            }, {
+                'name': 'error',
+                'value': None
+            }]
+        }])
