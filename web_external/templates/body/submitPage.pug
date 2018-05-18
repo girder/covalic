@@ -28,6 +28,10 @@
   .form-group
     label Submission title
     input.c-submission-title-input.form-control(type="text", maxlength=maxTextLength)
+  .form-group
+    label Submission approach
+    input.c-submission-approach-input.form-control.typeahead(
+      type='text', data-provide='typeahead', autocomplete='off', value=submission.get('approach'))
   if phase.enableOrganization()
     .form-group
       label

@@ -12,7 +12,7 @@
     .c-details-area
       if submission.get('title')
         .c-submission-title-text= submission.get('title')
-      .c-submission-subtitle Submitted #[b= created] by #[b= submission.get('creatorName')]
+      .c-submission-subtitle Submitted #[b= created] by #[b= submission.get('creatorName')] with approach #[b= submission.get('approach')]
 
 .c-submission-display-body
   if download

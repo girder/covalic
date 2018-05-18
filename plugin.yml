@@ -9,3 +9,6 @@ webpack:
   main:
     plugin: web_client/main.js
     covalic: web_external/main.js
+npm:
+  dependencies:
+    bootstrap-3-typeahead: ^4.0.2

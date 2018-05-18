@@ -1,3 +1,4 @@
+import 'bootstrap-3-typeahead';
 import _ from 'underscore';
 import events from 'girder/events';
 import { getCurrentUser } from 'girder/auth';
@@ -34,6 +35,10 @@ var SubmitView = View.extend({
         'input .c-submission-documentation-url-input': function (event) {
             this.documentationUrl = $(event.currentTarget).val().trim();
             this.validateInputs();
+        },
+        'input .c-submission-approach-input': function (event) {
+            this.submission.set('approach', $(event.currentTarget).val().trim() || 'default');
+            this.validateInputs();
         }
     },
 
@@ -47,13 +52,20 @@ var SubmitView = View.extend({
         this.organization = null;
         this.organizationUrl = null;
         this.documentationUrl = null;
+        this.approaches = [];
+        this.submission = new SubmissionModel({approach: 'default'});
 
-        this.render();
+        this.submission.fetchApproaches(getCurrentUser(), this.phase).done((approaches) => {
+            this.approaches = approaches;
+            this.render();
+        });
     },
 
     render: function () {
         this.$el.html(template({
             phase: this.phase,
+            submission: this.submission,
+            approaches: this.approaches,
             maxTextLength: 80,
             maxUrlLength: 1024
         }));
@@ -72,6 +84,9 @@ var SubmitView = View.extend({
         this.listenTo(this.uploadWidget, 'g:filesChanged', this.filesSelected);
         this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
         this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
+        this.$('.c-submission-approach-input').typeahead({
+            source: this.approaches
+        });
         return this;
     },
 
@@ -184,16 +199,16 @@ var SubmitView = View.extend({
     },
 
     uploadFinished: function () {
-        var submission = new SubmissionModel();
-        submission.on('c:submissionPosted', function () {
-            router.navigate(`submission/${submission.id}`, {trigger: true});
+        this.submission.on('c:submissionPosted', function () {
+            router.navigate(`submission/${this.submission.id}`, {trigger: true});
         }, this).postSubmission({
             phaseId: this.phase.id,
             folderId: this.folder.id,
             title: this.title,
             organization: this.organization,
             organizationUrl: this.organizationUrl,
-            documentationUrl: this.documentationUrl
+            documentationUrl: this.documentationUrl,
+            approach: this.submission.get('approach')
         });
     }
 });
