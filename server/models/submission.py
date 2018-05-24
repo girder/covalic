@@ -129,8 +129,7 @@ class Submission(Model):
 
         if userFilter is not None:
             q['creatorId'] = userFilter['_id']
-
-        if latest:
+        elif latest:
             q['latest'] = True
 
         if approach is not None:

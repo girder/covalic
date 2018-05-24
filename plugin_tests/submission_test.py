@@ -249,7 +249,7 @@ class SubmissionModelTest(SubmissionBase):
         self.assertEqual(len(submissions), 0)
         submissions = list(self.model('submission', 'covalic').list(
             self.phase1, userFilter=self.admin, approach='default'))
-        self.assertEqual(len(submissions), 1)
+        self.assertEqual(len(submissions), 2)
         submissions = list(self.model('submission', 'covalic').list(
             self.phase1, userFilter=self.user, approach='D'))
         self.assertEqual(len(submissions), 1)
@@ -497,7 +497,7 @@ class SubmissionRestTest(SubmissionBase):
             params={'phaseId': self.phase1['_id'], 'userId': self.user['_id']}
         )
         self.assertStatusOk(resp)
-        self.assertEqual(len(resp.json), 1)
+        self.assertEqual(len(resp.json), 3)
 
     def testListUserApproaches(self):
         userApproaches = ['A', 'C', 'B']
