@@ -127,17 +127,21 @@ class SubmissionBase(base.TestCase):
             submission['score'] = scoreDict
         return self.model('submission', 'covalic').save(submission)
 
-    def generateSubmissionList(self):
+    def generateSubmissionList(self, userApproaches=None, adminApproaches=None):
+        userApproaches = userApproaches or [None, None, None]
+        adminApproaches = adminApproaches or [None, None, None]
         for i in range(3):
             score = [
                 0.25 * (i + 1),
                 0.25 * (4 - i),
             ]
             self.createSubmission(
-                self.phase1, self.user, 'User submission %i phase 1' % i, score=score
+                self.phase1, self.user, 'User submission %i phase 1' % i, score=score,
+                approach=userApproaches[i]
             )
             self.createSubmission(
-                self.phase1, self.admin, 'Admin submission %i phase 1' % i, score=score
+                self.phase1, self.admin, 'Admin submission %i phase 1' % i, score=score,
+                approach=adminApproaches[i]
             )
             self.createSubmission(
                 self.phase2, self.user, 'User submission %i phase 2' % i, score=score
@@ -162,9 +166,23 @@ class SubmissionModelTest(SubmissionBase):
         )
 
         self.assertIsNotNone(submission)
+
+        # 'default' should be injected as the approach, but it should not be present
+        # in the database.
+        self.assertEqual(submission['approach'], 'default')
+        self.assertNotIn('approach', self.model('submission', 'covalic').findOne(submission['_id']))
+
         self.model('submission', 'covalic').remove(submission)
         self.assertIsNone(self.model('submission', 'covalic').findOne(submission['_id']))
         self.assertIsNone(self.model('folder').findOne(submission['folderId']))
+
+    def testCreateWithApproach(self):
+        submission = self.createSubmission(
+            self.phase1, self.user, 'Phase 1 submission',
+            approach='Approach 1'
+        )
+        self.assertIsNotNone(submission)
+        self.assertEqual(submission['approach'], 'approach 1')
 
     def testListSubmissionsByPhase(self):
         self.generateSubmissionList()
@@ -183,6 +201,101 @@ class SubmissionModelTest(SubmissionBase):
         submissions = list(self.model('submission', 'covalic').list(
             self.phase1, latest=True))
         self.assertEqual(len(submissions), 2)
+
+    def testListByApproach(self):
+        userApproaches = ['A', 'C', 'B']
+        adminApproaches = ['A', 'default', 'D']
+        self.generateSubmissionList(
+            userApproaches=userApproaches, adminApproaches=adminApproaches
+        )
+
+        # by approach only
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, approach='default', latest=False))
+        self.assertEqual(len(submissions), 1)
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, approach='A', latest=False))
+        self.assertEqual(len(submissions), 2)
+
+        # by approach and user
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, userFilter=self.user, approach='default', latest=False))
+        self.assertEqual(len(submissions), 0)
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, userFilter=self.admin, approach='default', latest=False))
+        self.assertEqual(len(submissions), 1)
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, userFilter=self.user, approach='A', latest=False))
+        self.assertEqual(len(submissions), 1)
+
+    def testListLatestByApproach(self):
+        userApproaches = ['A', 'A', 'D']
+        adminApproaches = ['default', 'D', 'default']
+        self.generateSubmissionList(
+            userApproaches=userApproaches, adminApproaches=adminApproaches
+        )
+
+        # by approach only
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, approach='default'))
+        self.assertEqual(len(submissions), 1)
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, approach='D'))
+        self.assertEqual(len(submissions), 2)
+
+        # by approach and user
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, userFilter=self.user, approach='default'))
+        self.assertEqual(len(submissions), 0)
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, userFilter=self.admin, approach='default'))
+        self.assertEqual(len(submissions), 2)
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, userFilter=self.user, approach='D'))
+        self.assertEqual(len(submissions), 1)
+
+    def testListSubmissionApproaches(self):
+        userApproaches = ['A', 'C', 'B']
+        adminApproaches = ['A', 'default', 'D']
+        self.generateSubmissionList(
+            userApproaches=userApproaches, adminApproaches=adminApproaches
+        )
+
+        # list all globally
+        self.assertEqual(
+            self.model('submission', 'covalic').listApproaches(),
+            ['a', 'b', 'c', 'd', 'default']
+        )
+
+        # list by phase
+        self.assertEqual(
+            self.model('submission', 'covalic').listApproaches(phase=self.phase1),
+            ['a', 'b', 'c', 'd', 'default']
+        )
+        self.assertEqual(
+            self.model('submission', 'covalic').listApproaches(phase=self.phase2),
+            ['default']
+        )
+
+        # list by user
+        self.assertEqual(
+            self.model('submission', 'covalic').listApproaches(user=self.admin),
+            ['a', 'd', 'default']
+        )
+        self.assertEqual(
+            self.model('submission', 'covalic').listApproaches(user=self.user),
+            ['a', 'b', 'c', 'default']
+        )
+
+        # list by user and phase
+        self.assertEqual(
+            self.model('submission', 'covalic').listApproaches(user=self.admin, phase=self.phase1),
+            ['a', 'd', 'default']
+        )
+        self.assertEqual(
+            self.model('submission', 'covalic').listApproaches(user=self.user, phase=self.phase2),
+            ['default']
+        )
 
     def testRecomputeOverallScores(self):
         self.generateSubmissionList()
@@ -232,6 +345,7 @@ class SubmissionRestTest(SubmissionBase):
         )
         self.assertStatusOk(resp)
         self.assertDictContains({
+            'approach': 'default',
             'created': '2000-01-01T00:00:00+00:00',
             'creatorId': str(self.user['_id']),
             'creatorName': 'First Last',
@@ -245,6 +359,7 @@ class SubmissionRestTest(SubmissionBase):
         resp = self.request(
             path='/covalic_submission/%s' % id, method='PUT', user=self.admin,
             params={
+                'approach': 'A',
                 'title': 'modified title',
                 'date': '2010-01-01 00:00:00',
                 'organization': 'org',
@@ -255,6 +370,7 @@ class SubmissionRestTest(SubmissionBase):
         )
         self.assertStatusOk(resp)
         self.assertDictContains({
+            'approach': 'a',
             'created': '2010-01-01T00:00:00+00:00',
             'title': 'modified title',
             'latest': False,
@@ -289,7 +405,8 @@ class SubmissionRestTest(SubmissionBase):
                 'phaseId': self.phase1['_id'],
                 'folderId': folder['_id'],
                 'title': 'submission phase 1',
-                'date': '2000-01-01 00:00:00'
+                'date': '2000-01-01 00:00:00',
+                'approach': 'A'
             }
         )
         self.assertStatus(resp, 403)
@@ -301,7 +418,8 @@ class SubmissionRestTest(SubmissionBase):
                 'phaseId': self.phase1['_id'],
                 'folderId': folder['_id'],
                 'title': 'submission phase 1',
-                'userId': self.admin['_id']
+                'userId': self.admin['_id'],
+                'approach': 'A'
             }
         )
         self.assertStatus(resp, 403)
@@ -312,7 +430,8 @@ class SubmissionRestTest(SubmissionBase):
             params={
                 'phaseId': self.phase2['_id'],
                 'folderId': folder['_id'],
-                'title': 'submission phase 1'
+                'title': 'submission phase 1',
+                'approach': 'A'
             }
         )
         self.assertStatus(resp, 400)
@@ -324,10 +443,12 @@ class SubmissionRestTest(SubmissionBase):
                 'phaseId': self.phase1['_id'],
                 'folderId': folder['_id'],
                 'title': 'submission phase 1',
+                'approach': 'A'
             }
         )
         self.assertStatusOk(resp)
         self.assertDictContains({
+            'approach': 'a',
             'creatorId': str(self.user['_id']),
             'creatorName': 'First Last',
             'folderId': str(folder['_id']),
@@ -377,6 +498,48 @@ class SubmissionRestTest(SubmissionBase):
         )
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json), 3)
+
+    def testListUserApproaches(self):
+        userApproaches = ['A', 'C', 'B']
+        adminApproaches = ['A', 'default', 'D']
+        self.generateSubmissionList(
+            userApproaches=userApproaches, adminApproaches=adminApproaches
+        )
+
+        # all for the current user
+        resp = self.request(path='/covalic_submission/approaches', user=self.admin)
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, ['a', 'd', 'default'])
+        resp = self.request(path='/covalic_submission/approaches', user=self.user)
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, ['a', 'b', 'c', 'default'])
+
+        # by phase for the current user
+        resp = self.request(
+            path='/covalic_submission/approaches', user=self.admin,
+            params={'phaseId': self.phase1['_id']}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, ['a', 'd', 'default'])
+        resp = self.request(
+            path='/covalic_submission/approaches', user=self.user,
+            params={'phaseId': self.phase2['_id']}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, ['default'])
+
+        # for a specific user
+        resp = self.request(
+            path='/covalic_submission/approaches', user=self.admin,
+            params={'phaseId': self.phase1['_id'], 'userId': self.user['_id']}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, ['a', 'b', 'c', 'default'])
+        resp = self.request(
+            path='/covalic_submission/approaches', user=self.user,
+            params={'phaseId': self.phase1['_id'], 'userId': self.admin['_id']}
+        )
+        self.assertStatus(resp, 403)
 
     def testPostScore(self):
         submission = self.createSubmission(self.phase1, self.user, 'submission')

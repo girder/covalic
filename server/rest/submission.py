@@ -40,6 +40,7 @@ class Submission(Resource):
         self.resourceName = 'covalic_submission'
 
         self.route('GET', (), self.listSubmissions)
+        self.route('GET', ('approaches',), self.listUserApproaches)
         self.route('GET', (':id',), self.getSubmission)
         self.route('GET', ('unscored',), self.getUnscoredSubmissions)
         self.route('POST', (), self.postSubmission)
@@ -110,9 +111,11 @@ class Submission(Resource):
                     paramType='query', level=AccessType.READ, required=False, destName='userFilter')
         .param('latest', 'Only include the latest scored submission for each user.',
                required=False, dataType='boolean', default=True)
+        .param('approach', 'Only include this approach in the results',
+               required=False)
         .pagingParams(defaultSort='overallScore', defaultSortDir=SortDir.DESCENDING)
     )
-    def listSubmissions(self, phase, userFilter, latest, limit, offset, sort):
+    def listSubmissions(self, phase, userFilter, latest, limit, offset, sort, approach):
         user = self.getCurrentUser()
 
         # If scores are hidden, do not allow sorting by score fields
@@ -130,8 +133,27 @@ class Submission(Resource):
 
         submissions = self.model('submission', 'covalic').list(
             phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter,
-            fields=fields, latest=latest)
+            fields=fields, latest=latest, approach=approach)
         return [self._filterScore(phase, s, user) for s in submissions]
+
+    @access.user
+    @autoDescribeRoute(
+        Description('List existing approaches for the current user.')
+        .modelParam('phaseId', 'Show only approaches used in this phase',
+                    model='phase', plugin='covalic', paramType='query',
+                    level=AccessType.READ, required=False, destName='phase')
+        .modelParam('userId', 'Show approaches used by this user (default: current user)',
+                    model='user', paramType='query', level=AccessType.READ,
+                    destName='user', required=False)
+    )
+    def listUserApproaches(self, phase, user):
+        if user is None:
+            user = self.getCurrentUser()
+        else:
+            self.requireAdmin(self.getCurrentUser(),
+                              'Only admins can see other user\'s approaches.')
+
+        return self.model('submission', 'covalic').listApproaches(phase=phase, user=user)
 
     @access.user
     @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='covalic',
@@ -152,6 +174,7 @@ class Submission(Resource):
                required=False)
         .param('documentationUrl', 'URL of documentation associated with the submission.',
                required=False)
+        .param('approach', 'The submission approach.', required=False)
         .errorResponse('You are not a member of the participant group.', 403)
         .errorResponse('The ID was invalid.')
     )
@@ -182,6 +205,8 @@ class Submission(Resource):
         if phase.get('enableDocumentationUrl', False):
             self._checkRequireParam(phase, params, 'documentationUrl', 'requireDocumentationUrl')
             documentationUrl = self._getStrippedParam(params, 'documentationUrl')
+
+        approach = self._getStrippedParam(params, 'approach')
 
         # Site admins may override the submission creation date
         created = None
@@ -224,7 +249,7 @@ class Submission(Resource):
         title = params['title'].strip()
         submission = self.model('submission', 'covalic').createSubmission(
             user, phase, folder, job, title, created, organization, organizationUrl,
-            documentationUrl)
+            documentationUrl, approach)
 
         if not self.model('phase', 'covalic').hasAccess(
                 phase, user=scoreUser, level=AccessType.ADMIN):
@@ -313,6 +338,7 @@ class Submission(Resource):
                required=False)
         .param('disqualified', 'Whether the submission is disqualified. Disqualified '
                'submissions do not appear in the leaderboard.', dataType='boolean', required=False)
+        .param('approach', 'The submission approach.', required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Site admin access is required.', 403)
     )
@@ -340,6 +366,9 @@ class Submission(Resource):
         documentationUrl = self._getStrippedParam(params, 'documentationUrl')
         if documentationUrl is not None:
             submission['documentationUrl'] = documentationUrl
+        approach = self._getStrippedParam(params, 'approach')
+        if approach is not None:
+            submission['approach'] = approach
 
         # Note that this does not enforce the requirement that only a single submission
         # per user per phase is marked as the 'latest' submission. If access to this endpoint
