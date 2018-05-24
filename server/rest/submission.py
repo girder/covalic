@@ -139,7 +139,7 @@ class Submission(Resource):
     @access.user
     @autoDescribeRoute(
         Description('List existing approaches for the current user.')
-        .modelParam('phaseId', 'Show only approaches uses in this phase',
+        .modelParam('phaseId', 'Show only approaches used in this phase',
                     model='phase', plugin='covalic', paramType='query',
                     level=AccessType.READ, required=False, destName='phase')
         .modelParam('userId', 'Show approaches used by this user (default: current user)',
