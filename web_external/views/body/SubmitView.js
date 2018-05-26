@@ -37,7 +37,7 @@ var SubmitView = View.extend({
             this.validateInputs();
         },
         'input .c-submission-approach-input': function (event) {
-            this.approach = $(event.currentTarget).val().trim() || 'default';
+            this.approach = $(event.currentTarget).val().trim();
             this.validateInputs();
         }
     },
@@ -53,7 +53,7 @@ var SubmitView = View.extend({
         this.organizationUrl = null;
         this.documentationUrl = null;
         this.approaches = [];
-        this.approach = 'default';
+        this.approach = null;
 
         this.submission = new SubmissionModel();
         this.submission.fetchApproaches(getCurrentUser(), this.phase).done((approaches) => {

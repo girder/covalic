@@ -18,6 +18,13 @@
     unique, but it will appear in the leaderboard with your submission. The title
     should be no more than #{maxTextLength} characters.
   p.
+    Users are allowed to tag submissions as belonging to a specific "approach" to solving
+    the problem.  Each approach is scored independently and displayed on the leaderboard
+    with the user's name.  The text box below will autocomplete with existing approaches,
+    or you can choose to provide a new approach for this submission.  By default this tag
+    is empty, indicating the standard approach.
+
+  p.
     Use the button below to select all of the files, or drag and drop them onto
     the button. If the selection is valid, you can upload them. Once done, your
     submission is complete and your result will be scored. When the scoring is
@@ -29,7 +36,7 @@
     label Submission title
     input.c-submission-title-input.form-control(type="text", maxlength=maxTextLength)
   .form-group
-    label Submission approach
+    label Submission approach (optional)
     input.c-submission-approach-input.form-control.typeahead(
       type='text', data-provide='typeahead', autocomplete='off', value=approach)
   if phase.enableOrganization()
