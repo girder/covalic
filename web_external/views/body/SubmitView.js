@@ -37,7 +37,7 @@ var SubmitView = View.extend({
             this.validateInputs();
         },
         'input .c-submission-approach-input': function (event) {
-            this.submission.set('approach', $(event.currentTarget).val().trim() || 'default');
+            this.approach = $(event.currentTarget).val().trim() || 'default';
             this.validateInputs();
         }
     },
@@ -53,8 +53,9 @@ var SubmitView = View.extend({
         this.organizationUrl = null;
         this.documentationUrl = null;
         this.approaches = [];
-        this.submission = new SubmissionModel({approach: 'default'});
+        this.approach = 'default';
 
+        this.submission = new SubmissionModel();
         this.submission.fetchApproaches(getCurrentUser(), this.phase).done((approaches) => {
             this.approaches = approaches;
             this.render();
@@ -63,6 +64,7 @@ var SubmitView = View.extend({
 
     render: function () {
         this.$el.html(template({
+            approach: this.approach,
             phase: this.phase,
             submission: this.submission,
             approaches: this.approaches,
@@ -208,7 +210,7 @@ var SubmitView = View.extend({
             organization: this.organization,
             organizationUrl: this.organizationUrl,
             documentationUrl: this.documentationUrl,
-            approach: this.submission.get('approach')
+            approach: this.approach
         });
     }
 });
