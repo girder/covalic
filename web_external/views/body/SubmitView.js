@@ -92,6 +92,11 @@ var SubmitView = View.extend({
         return this;
     },
 
+    destroy: function () {
+        this.$('.c-submission-approach-input').typeahead('destroy');
+        return View.prototype.destroy.apply(this, arguments);
+    },
+
     /**
      * Validate all text inputs. Enable upload button if inputs valid and
      * uploaded files are valid.
