@@ -36,10 +36,7 @@ var SubmitView = View.extend({
             this.documentationUrl = $(event.currentTarget).val().trim();
             this.validateInputs();
         },
-        'input .c-submission-approach-input': function (event) {
-            this.approach = $(event.currentTarget).val().trim();
-            this.validateInputs();
-        }
+        'input .c-submission-approach-input': '_updateApproach'
     },
 
     initialize: function (settings) {
@@ -87,7 +84,8 @@ var SubmitView = View.extend({
         this.listenTo(this.uploadWidget, 'g:uploadStarted', this.uploadStarted);
         this.listenTo(this.uploadWidget, 'g:uploadFinished', this.uploadFinished);
         this.$('.c-submission-approach-input').typeahead({
-            source: this.approaches
+            source: this.approaches,
+            afterSelect: () => this._updateApproach()
         });
         return this;
     },
@@ -168,6 +166,10 @@ var SubmitView = View.extend({
         this.filesCorrect = matchInfo.ok;
 
         this.validateInputs();
+    },
+
+    _updateApproach: function () {
+        this.approach = this.$('.c-submission-approach-input').val().trim();
     },
 
     _matchInput: function (inputs, groundtruths) {
