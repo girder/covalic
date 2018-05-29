@@ -94,7 +94,7 @@ var SubmitView = View.extend({
 
     destroy: function () {
         this.$('.c-submission-approach-input').typeahead('destroy');
-        return View.prototype.destroy.apply(this, arguments);
+        return View.prototype.destroy.call(this);
     },
 
     /**
