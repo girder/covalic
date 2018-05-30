@@ -147,11 +147,12 @@ class Submission(Resource):
                     destName='user', required=False)
     )
     def listUserApproaches(self, phase, user):
+        currentUser = self.getCurrentUser()
         if user is None:
-            user = self.getCurrentUser()
-        else:
-            self.requireAdmin(self.getCurrentUser(),
-                              'Only admins can see other user\'s approaches.')
+            user = currentUser
+
+        if user['_id'] != currentUser['_id']:
+            self.requireAdmin(currentUser, 'Only admins can see other user\'s approaches.')
 
         return self.model('submission', 'covalic').listApproaches(phase=phase, user=user)
 

@@ -541,13 +541,23 @@ class SubmissionRestTest(SubmissionBase):
         self.assertStatusOk(resp)
         self.assertEqual(resp.json, ['default'])
 
-        # for a specific user
+        # for a specific user as admin
         resp = self.request(
             path='/covalic_submission/approaches', user=self.admin,
             params={'phaseId': self.phase1['_id'], 'userId': self.user['_id']}
         )
         self.assertStatusOk(resp)
         self.assertEqual(resp.json, ['A', 'b', 'c', 'default'])
+
+        # for self as non-admin
+        resp = self.request(
+            path='/covalic_submission/approaches', user=self.user,
+            params={'phaseId': self.phase1['_id'], 'userId': self.user['_id']}
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json, ['A', 'b', 'c', 'default'])
+
+        # a normal user cannot query approaches for another user
         resp = self.request(
             path='/covalic_submission/approaches', user=self.user,
             params={'phaseId': self.phase1['_id'], 'userId': self.admin['_id']}
