@@ -55,10 +55,6 @@ class Submission(Model):
         return doc
 
     def save(self, document, *args, **kwargs):
-        if document.get('approach') == 'default':
-            del document['approach']
-        if 'approach' in document:
-            document['approach'] = document['approach'].lower()
         document = super(Submission, self).save(document, *args, **kwargs)
         document.setdefault('approach', 'default')
         return document
@@ -67,7 +63,7 @@ class Submission(Model):
         if doc.get('created'):
             doc['created'] = validateDate(doc.get('created'), 'created')
 
-        if doc.get('approach') == 'default':
+        if doc.get('approach') in {'default', ''}:
             del doc['approach']
 
         if doc.get('score') is not None and doc.get('overallScore') is None:
@@ -133,8 +129,8 @@ class Submission(Model):
             q['latest'] = True
 
         if approach is not None:
-            q['approach'] = approach.lower()
-            if approach is 'default':
+            q['approach'] = approach
+            if approach in {'default', ''}:
                 q['approach'] = None
 
         cursor = self.find(q, limit=limit, offset=offset, sort=sort,

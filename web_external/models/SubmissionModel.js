@@ -16,7 +16,8 @@ var SubmissionModel = Model.extend({
                 title: opts.title,
                 organization: opts.organization,
                 organizationUrl: opts.organizationUrl,
-                documentationUrl: opts.documentationUrl
+                documentationUrl: opts.documentationUrl,
+                approach: opts.approach || null
             }
         }).done((resp) => {
             this.set(resp);
@@ -42,6 +43,20 @@ var SubmissionModel = Model.extend({
         } else {
             return val;
         }
+    },
+
+    fetchApproaches: function (user, phase) {
+        const data = {};
+        if (user && user.id) {
+            data.userId = user.id;
+        }
+        if (phase && phase.id) {
+            data.phaseId = phase.id;
+        }
+        return restRequest({
+            url: `${this.resourceName}/approaches`,
+            data
+        });
     }
 });
 

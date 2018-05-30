@@ -22,11 +22,13 @@ table.table.table-striped.table-condensed.c-leaderboard-table
       tr.c-stripe(stripe=(rank % 2 ? 'even' : 'odd'))
         th.c-rank= rank
         td
+          - var approachString = submission.get('approach') === 'default' ? '' : ` (${submission.get('approach')})`
           if phaseAdmin
             a.c-user-link(
               href=`#user/${submission.get('creatorId')}`)= submission.get('creatorName')
+            = approachString
           else
-            = submission.get('creatorName')
+            = `${submission.get('creatorName')}${approachString}`
         td= submission.get('title') || '--'
         if enableOrganization
           td
