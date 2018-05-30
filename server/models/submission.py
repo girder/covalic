@@ -57,8 +57,6 @@ class Submission(Model):
     def save(self, document, *args, **kwargs):
         if document.get('approach') == 'default':
             del document['approach']
-        if 'approach' in document:
-            document['approach'] = document['approach'].lower()
         document = super(Submission, self).save(document, *args, **kwargs)
         document.setdefault('approach', 'default')
         return document
@@ -133,7 +131,7 @@ class Submission(Model):
             q['latest'] = True
 
         if approach is not None:
-            q['approach'] = approach.lower()
+            q['approach'] = approach
             if approach is 'default':
                 q['approach'] = None
 
