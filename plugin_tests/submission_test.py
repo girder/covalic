@@ -184,6 +184,14 @@ class SubmissionModelTest(SubmissionBase):
         self.assertIsNotNone(submission)
         self.assertEqual(submission['approach'], 'Approach 1')
 
+    def testCreateWithEmptyStringApproach(self):
+        submission = self.createSubmission(
+            self.phase1, self.user, 'Phase 1 submission',
+            approach=''
+        )
+        self.assertIsNotNone(submission)
+        self.assertEqual(submission['approach'], 'default')
+
     def testListSubmissionsByPhase(self):
         self.generateSubmissionList()
         submissions = list(self.model('submission', 'covalic').list(
@@ -226,6 +234,11 @@ class SubmissionModelTest(SubmissionBase):
         self.assertEqual(len(submissions), 1)
         submissions = list(self.model('submission', 'covalic').list(
             self.phase1, userFilter=self.user, approach='A', latest=False))
+        self.assertEqual(len(submissions), 1)
+
+        # approach == '' should be the same as 'default'
+        submissions = list(self.model('submission', 'covalic').list(
+            self.phase1, userFilter=self.admin, approach='', latest=False))
         self.assertEqual(len(submissions), 1)
 
     def testListLatestByApproach(self):
