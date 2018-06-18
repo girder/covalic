@@ -17,7 +17,8 @@ var SubmissionModel = Model.extend({
                 organization: opts.organization,
                 organizationUrl: opts.organizationUrl,
                 documentationUrl: opts.documentationUrl,
-                approach: opts.approach || null
+                approach: opts.approach || null,
+                meta: JSON.stringify(opts.meta || {})
             }
         }).done((resp) => {
             this.set(resp);
