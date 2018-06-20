@@ -19,12 +19,26 @@
 
 import json
 
+import bson.json_util
 from girder.api import access
 from girder.api.describe import Description, describeRoute
 from girder.api.rest import filtermodel, loadmodel, getApiUrl, Resource, \
     RestException
 from girder.constants import AccessType
 from girder.utility.progress import ProgressContext
+
+
+def _loadMetadata(params):
+    if 'meta' not in params:
+        return
+    try:
+        meta = bson.json_util.loads(params['meta'])
+    except ValueError:
+        raise RestException('Parameter meta must be valid JSON.')
+
+    if not isinstance(meta, dict):
+        raise RestException('Parameter meta must be a JSON object.')
+    return meta
 
 
 class Phase(Resource):
@@ -112,6 +126,8 @@ class Phase(Resource):
                dataType='boolean', default=True, required=False)
         .param('requireDocumentationUrl', 'Require submission Documentation URL field.',
                dataType='boolean', default=True, required=False)
+        .param('meta', 'A JSON object containing additional metadata.',
+               required=False)
     )
     def createPhase(self, challenge, params):
         self.requireParams('name', params)
@@ -146,6 +162,7 @@ class Phase(Resource):
         endDate = params.get('endDate')
 
         type = params.get('type', '').strip()
+        meta = _loadMetadata(params)
 
         phase = self.model('phase', 'covalic').createPhase(
             name=params['name'].strip(), description=description,
@@ -157,7 +174,8 @@ class Phase(Resource):
             enableDocumentationUrl=enableDocumentationUrl,
             requireOrganization=requireOrganization,
             requireOrganizationUrl=requireOrganizationUrl,
-            requireDocumentationUrl=requireDocumentationUrl
+            requireDocumentationUrl=requireDocumentationUrl,
+            meta=meta
         )
 
         return phase
@@ -246,6 +264,8 @@ class Phase(Resource):
                dataType='boolean', default=True, required=False)
         .param('requireDocumentationUrl', 'Require submission Documentation URL field.',
                dataType='boolean', default=True, required=False)
+        .param('meta', 'A JSON object containing additional metadata. '
+               'If present, replaces the existing metadata.', required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Write permission denied on the phase.', 403)
     )
@@ -308,6 +328,9 @@ class Phase(Resource):
             'endDate', phase.get('endDate', None))
 
         phase['type'] = params.get('type', phase.get('type', '')).strip()
+        meta = _loadMetadata(params)
+        if meta is not None:
+            phase['meta'] = meta
 
         return self.model('phase', 'covalic').updatePhase(phase)
 
