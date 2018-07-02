@@ -20,9 +20,12 @@
 import datetime
 
 from girder.constants import AccessType
+from girder.models.collection import Collection
 from girder.models.model_base import AccessControlledModel, ValidationException
 from girder.utility.progress import noProgress
-from girder.plugins.covalic.utility import validateDate
+
+from .phase import Phase
+from ..utility import validateDate
 
 
 class Challenge(AccessControlledModel):
@@ -55,13 +58,14 @@ class Challenge(AccessControlledModel):
         Count up the recursive size of the challenge. This sums the size of
         each individual phase, then adds 1 for the challenge itself.
         """
+        phaseModel = Phase()
         count = 1
 
-        phases = self.model('phase', 'covalic').find({
+        phases = phaseModel.find({
             'challengeId': challenge['_id']
         }, fields=(), limit=0)
         for phase in phases:
-            count += self.model('phase', 'covalic').subtreeCount(phase)
+            count += phaseModel.subtreeCount(phase)
 
         return count
 
@@ -102,11 +106,11 @@ class Challenge(AccessControlledModel):
 
     def remove(self, challenge, progress=noProgress):
         # Remove all phases for this challenge
-        phases = self.model('phase', 'covalic').find({
+        phases = Phase().find({
             'challengeId': challenge['_id']
         }, limit=0)
         for phase in phases:
-            self.model('phase', 'covalic').remove(phase, progress=progress)
+            Phase().remove(phase, progress=progress)
         phases.close()
 
         AccessControlledModel.remove(self, challenge)
@@ -117,23 +121,25 @@ class Challenge(AccessControlledModel):
     def createChallenge(self, name, creator, description='', instructions='',
                         public=True, organizers='', startDate=None,
                         endDate=None):
+        collectionModel = Collection()
+
         if not name.strip():
             # pre-validate this since we have to create a collection first
             # with the same name.
             raise ValidationException(
                 'You must provide a name for your challenge.', field='name')
 
-        collection = self.model('collection').findOne({
+        collection = collectionModel.findOne({
             'name': name
         })
 
         if collection is None:
-            collection = self.model('collection').createCollection(
+            collection = collectionModel.createCollection(
                 name, creator=creator, public=public)
         else:
             # If using a pre-existing collection, we must make sure we have
             # full access to it.
-            self.model('collection').requireAccess(
+            collectionModel.requireAccess(
                 collection, user=creator, level=AccessType.ADMIN)
 
         challenge = {

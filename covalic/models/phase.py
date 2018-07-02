@@ -23,9 +23,13 @@ import six
 
 from bson.objectid import ObjectId
 from girder.constants import AccessType
+from girder.models.collection import Collection
+from girder.models.folder import Folder
+from girder.models.group import Group
 from girder.models.model_base import AccessControlledModel, ValidationException
 from girder.utility.progress import noProgress
-from girder.plugins.covalic.utility import validateDate
+
+from ..utility import validateDate
 
 
 class Phase(AccessControlledModel):
@@ -97,14 +101,15 @@ class Phase(AccessControlledModel):
         Returns the subtree count of this phase, which is the number of
         submissions, plus one record for the phase itself.
         """
-        return self.model(
-            'submission', 'covalic').getAllSubmissions(phase).count() + 1
+        from .submission import Submission  # prevent circular import
+        return Submission().getAllSubmissions(phase).count() + 1
 
     def remove(self, phase, progress=noProgress):
         """
         Remove this phase, which also removes all submissions to it.
         """
-        subModel = self.model('submission', 'covalic')
+        from .submission import Submission  # prevent circular import
+        subModel = Submission()
         for sub in subModel.getAllSubmissions(phase):
             subModel.remove(sub)
             progress.update(increment=1,
@@ -186,8 +191,8 @@ class Phase(AccessControlledModel):
         :param meta: dict
         :param meta: Additional metadata associated with a phase
         """
-        collection = self.model('collection').load(challenge['collectionId'],
-                                                   force=True)
+        collection = Collection().load(challenge['collectionId'],
+                                       force=True)
 
         # We must validate the phase before we actually create anything.
         phase = {
@@ -214,36 +219,38 @@ class Phase(AccessControlledModel):
         }
         self.validate(phase)
 
-        folder = self.model('folder').createFolder(
+        folderModel = Folder()
+        groupModel = Group()
+        folder = folderModel.createFolder(
             collection, name, parentType='collection', public=public,
             creator=creator, allowRename=True)
         phase['folderId'] = folder['_id']
 
         if groundTruthFolder is None:
-            groundTruthFolder = self.model('folder').createFolder(
+            groundTruthFolder = folderModel.createFolder(
                 folder, 'Ground truth', parentType='folder', public=False,
                 creator=creator, allowRename=True)
         phase['groundTruthFolderId'] = groundTruthFolder['_id']
 
         if testDataFolder is None:
-            testDataFolder = self.model('folder').createFolder(
+            testDataFolder = folderModel.createFolder(
                 folder, 'Test dataset', parentType='folder', public=False,
                 creator=creator, allowRename=True)
         phase['testDataFolderId'] = testDataFolder['_id']
 
         if participantGroup is None:
             groupName = '%s %s participants' % (challenge['name'], name)
-            participantGroup = self.model('group').findOne({'name': groupName})
+            participantGroup = groupModel.findOne({'name': groupName})
             if participantGroup is None:
-                participantGroup = self.model('group').createGroup(
+                participantGroup = groupModel.createGroup(
                     groupName, creator, public=public)
         phase['participantGroupId'] = participantGroup['_id']
 
         self.setPublic(phase, public=public)
         self.setUserAccess(phase, user=creator, level=AccessType.ADMIN)
         self.setGroupAccess(phase, participantGroup, level=AccessType.READ)
-        self.model('folder').setGroupAccess(testDataFolder, participantGroup,
-                                            level=AccessType.READ, save=True)
+        folderModel.setGroupAccess(testDataFolder, participantGroup,
+                                   level=AccessType.READ, save=True)
 
         return self.save(phase)
 

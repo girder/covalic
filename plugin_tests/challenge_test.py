@@ -17,8 +17,6 @@
 #  limitations under the License.
 ###############################################################################
 
-import os
-import six
 import datetime
 import dateutil.parser
 import dateutil.tz
@@ -51,10 +49,10 @@ class ChallengeTestCase(base.TestCase):
 
     def testChallengeCreationRequiredParams(self):
         self.ensureRequiredParams(
-                path='/challenge',
-                method='POST',
-                required=['name'],
-                user=self.user)
+            path='/challenge',
+            method='POST',
+            required=['name'],
+            user=self.user)
 
     def testChallengeCreationMinimal(self):
         params = {
@@ -198,6 +196,7 @@ class ChallengeTestCase(base.TestCase):
         endDate = endDate.replace(tzinfo=dateutil.tz.tzutc())
         self.assertEqual(endDate, datetime.datetime(2015, 12, 1, 14, 0, 0, 0,
                                                     dateutil.tz.tzutc()))
+
     def testGetChallengeInvalid(self):
         resp = self.request(path='/challenge/1', user=self.user)
         self.assertValidationError(resp, field='id')
@@ -235,6 +234,7 @@ class ChallengeTestCase(base.TestCase):
         endDate = endDate.replace(tzinfo=dateutil.tz.tzutc())
         self.assertEqual(endDate, datetime.datetime(2015, 4, 1, 14, 0, 0, 0,
                                                     dateutil.tz.tzutc()))
+
     def testChallengeClearDates(self):
         challenge = self.model('challenge', 'covalic').createChallenge(
             name='challenge',

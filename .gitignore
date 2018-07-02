@@ -8,3 +8,5 @@ tmp
 *~
 /.vagrant/
 __pycache__/
+node_modules/
+*.egg-info

@@ -26,8 +26,9 @@ from girder.api import access
 from girder.api.describe import Description, describeRoute
 from girder.api.rest import filtermodel, loadmodel, Resource, RestException
 from girder.constants import AccessType
-from girder.plugins.thumbnails.worker import createThumbnail
 from girder.utility.progress import ProgressContext
+from girder_thumbnails.worker import createThumbnail
+
 from ..utility import getAssetsFolder
 
 

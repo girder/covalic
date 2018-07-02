@@ -20,18 +20,12 @@
 from tests import base
 from girder.constants import AccessType
 
-getChallengeUserEmails = None
-getPhaseUserEmails = None
+from covalic.utility.user_emails import getChallengeUserEmails, getPhaseUserEmails
 
 
 def setUpModule():
     base.enabledPlugins.append('covalic')
     base.startServer()
-
-    global getChallengeUserEmails, getPhaseUserEmails
-    from girder.plugins import covalic
-    from girder.plugins.covalic.utility.user_emails import \
-        getChallengeUserEmails, getPhaseUserEmails
 
 
 def tearDownModule():
@@ -193,7 +187,6 @@ class EmailUtilityTestCase(base.TestCase):
         self.assertIn('user1@email.com', emails)
         self.assertIn('user4@email.com', emails)
         self.assertEqual(len(emails), 2)
-
 
     def testGetPhaseAdminEmailIncludeChallengeAdmins(self):
         challenge = self.challengeModel.createChallenge(

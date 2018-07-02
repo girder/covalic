@@ -26,14 +26,20 @@ from girder.api.rest import getCurrentUser
 from girder.api.v1 import resource
 from girder.constants import AccessType, SettingKey, STATIC_ROOT_DIR
 from girder.models.model_base import ValidationException
-from girder.plugins.jobs.constants import JobStatus
+from girder.plugin import getPlugin, GirderPlugin, registerPluginWebroot
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
-from girder.utility.plugin_utilities import registerPluginWebroot
+from girder_jobs.constants import JobStatus
+
 from .rest import challenge, phase, submission
 from .constants import PluginSettings, JOB_LOG_PREFIX
+from .models.challenge import Challenge
+from .models.phase import Phase
+from .models.submission import Submission
 from .utility import getAssetsFolder
 from .utility.user_emails import getPhaseUserEmails
+
+_HERE = os.path.abspath(os.path.dirname(__file__))
 
 
 class CustomAppRoot(ModelImporter):
@@ -226,19 +232,33 @@ def onUserSave(event):
     subModel.update(query, update)
 
 
-def load(info):
-    resource.allowedSearchTypes.add('challenge.covalic')
+class CovalicPlugin(GirderPlugin):
+    DISPLAY_NAME = 'COVALIC Challenges'
+    NPM_PACKAGE_NAME = '@girder/covalic'
 
-    info['apiRoot'].challenge = challenge.Challenge()
-    info['apiRoot'].challenge_phase = phase.Phase()
-    info['apiRoot'].covalic_submission = submission.Submission()
+    def load(self, info):
+        getPlugin('gravatar').load(info)
+        getPlugin('jobs').load(info)
+        getPlugin('remote_worker').load(info)
+        getPlugin('thumbnails').load(info)
 
-    registerPluginWebroot(CustomAppRoot(), info['name'])
+        mail_utils.addTemplateDirectory(os.path.join(_HERE, 'mail_templates'))
+        ModelImporter.registerModel('challenge', Challenge(), 'covalic')
+        ModelImporter.registerModel('phase', Phase(), 'covalic')
+        ModelImporter.registerModel('submission', Submission(), 'covalic')
 
-    events.bind('jobs.job.update', 'covalic', onJobUpdate)
-    events.bind('model.setting.validate', 'covalic', validateSettings)
-    events.bind('model.challenge_challenge.save.after', 'covalic',
-                challengeSaved)
-    events.bind('model.challenge_phase.save.after', 'covalic',
-                onPhaseSave)
-    events.bind('model.user.save.after', 'covalic', onUserSave)
+        resource.allowedSearchTypes.add('challenge.covalic')
+
+        info['apiRoot'].challenge = challenge.Challenge()
+        info['apiRoot'].challenge_phase = phase.Phase()
+        info['apiRoot'].covalic_submission = submission.Submission()
+
+        registerPluginWebroot(CustomAppRoot(), 'covalic')
+
+        events.bind('jobs.job.update', 'covalic', onJobUpdate)
+        events.bind('model.setting.validate', 'covalic', validateSettings)
+        events.bind('model.challenge_challenge.save.after', 'covalic',
+                    challengeSaved)
+        events.bind('model.challenge_phase.save.after', 'covalic',
+                    onPhaseSave)
+        events.bind('model.user.save.after', 'covalic', onUserSave)

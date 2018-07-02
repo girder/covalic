@@ -20,6 +20,10 @@
 import json
 import mock
 
+from girder_jobs.models.job import Job
+from girder_remote_worker.constants import PluginSettings as WorkerSettings
+from covalic.constants import PluginSettings as CovalicSettings
+
 from tests import base
 
 
@@ -35,10 +39,6 @@ def tearDownModule():
 class SubmissionBase(base.TestCase):
     def setUp(self):
         super(SubmissionBase, self).setUp()
-
-        from girder.plugins.jobs.models.job import Job
-        from girder.plugins.worker.constants import PluginSettings as WorkerSettings
-        from girder.plugins.covalic.constants import PluginSettings as CovalicSettings
 
         self.scheduleJobMock = mock.patch.object(Job, 'scheduleJob')
         self.scheduleJobMock.start()

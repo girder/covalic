@@ -22,18 +22,19 @@ import math
 import os
 import posixpath
 
-from ..constants import PluginSettings
-from ..utility.user_emails import getPhaseUserEmails
-from ..models.phase import Phase
-from ..models.submission import Submission
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
-from girder.models.model_base import AccessException, ValidationException
 from girder.models.folder import Folder
-from girder.plugins.worker import utils
+from girder.models.model_base import AccessException, ValidationException
 from girder.utility import mail_utils
+from girder_remote_worker import utils
+
+from ..constants import PluginSettings
+from ..utility.user_emails import getPhaseUserEmails
+from ..models.phase import Phase
+from ..models.submission import Submission
 
 
 class Submission(Resource):

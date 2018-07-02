@@ -20,10 +20,14 @@
 import datetime
 
 from girder.constants import AccessType
+from girder.models.folder import Folder
 from girder.models.model_base import Model, ValidationException
-from girder.plugins.covalic.utility import validateDate
-from girder.plugins.covalic import scoring
+from girder.models.user import User
 from girder.utility.progress import noProgress
+
+from .phase import Phase
+from .. import scoring
+from ..utility import validateDate
 
 
 class Submission(Model):
@@ -71,7 +75,7 @@ class Submission(Model):
 
         if doc.get('score') is not None and doc.get('overallScore') is None:
             scoring.computeAverageScores(doc['score'])
-            phase = self.model('phase', 'covalic').load(
+            phase = Phase().load(
                 doc['phaseId'], force=True)
             doc['overallScore'] = scoring.computeOverallScore(doc, phase)
             doc['latest'] = True
@@ -116,9 +120,10 @@ class Submission(Model):
                 self.save(submission, validate=False)
 
     def remove(self, doc, progress=noProgress):
-        folder = self.model('folder').load(doc['folderId'], force=True)
+        folderModel = Folder()
+        folder = folderModel.load(doc['folderId'], force=True)
         if folder:
-            self.model('folder').remove(folder)
+            folderModel.remove(folder)
 
         Model.remove(self, doc, progress=progress)
 
@@ -193,9 +198,9 @@ class Submission(Model):
         the phase. Phase admins should have read access on the submission
         folders.
         """
-        folderModel = self.model('folder')
-        userModel = self.model('user')
-        phaseModel = self.model('phase', 'covalic')
+        folderModel = Folder()
+        userModel = User()
+        phaseModel = Phase()
 
         # Get phase admin users
         phaseAcl = phaseModel.getFullAccessList(phase)
