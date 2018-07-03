@@ -24,9 +24,9 @@ import posixpath
 from girder import events
 from girder.api.rest import getCurrentUser
 from girder.api.v1 import resource
-from girder.constants import AccessType, SettingKey, STATIC_ROOT_DIR
+from girder.constants import AccessType, STATIC_ROOT_DIR
 from girder.models.model_base import ValidationException
-from girder.plugin import getPlugin, GirderPlugin, registerPluginWebroot
+from girder.plugin import getPlugin, GirderPlugin, loadedPlugins, registerPluginWebroot
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
 from girder_jobs.constants import JobStatus
@@ -70,7 +70,7 @@ class CustomAppRoot(ModelImporter):
               href="${staticRoot}/built/fontello/css/animation.css">
         <link rel="stylesheet" href="${staticRoot}/built/girder_lib.min.css">
         <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/covalic/covalic.min.css">
+              href="${staticRoot}/built/plugins/covalic_external/plugin.min.css">
         % for plugin in pluginCss:
             <link rel="stylesheet"
                   href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
@@ -88,7 +88,7 @@ class CustomAppRoot(ModelImporter):
         % for plugin in pluginJs:
           <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
         % endfor
-        <script src="${staticRoot}/built/plugins/covalic/covalic.min.js"></script>
+        <script src="${staticRoot}/built/plugins/covalic_external/plugin.min.js"></script>
       </body>
     </html>
     """
@@ -99,8 +99,8 @@ class CustomAppRoot(ModelImporter):
             self.vars['pluginJs'] = []
 
             builtDir = os.path.join(
-                STATIC_ROOT_DIR, 'clients', 'web', 'static', 'built', 'plugins')
-            plugins = self.model('setting').get(SettingKey.PLUGINS_ENABLED, ())
+                STATIC_ROOT_DIR, 'built', 'plugins')
+            plugins = loadedPlugins()
 
             for plugin in plugins:
                 if os.path.exists(os.path.join(builtDir, plugin,
@@ -234,7 +234,12 @@ def onUserSave(event):
 
 class CovalicPlugin(GirderPlugin):
     DISPLAY_NAME = 'COVALIC Challenges'
-    NPM_PACKAGE_NAME = '@girder/covalic'
+
+    def npmPackages(self):
+        return {
+            '@girder/covalic': 'file:%s/web_client' % _HERE,
+            '@girder/covalic-external': 'file:%s/web_external' % _HERE
+        }
 
     def load(self, info):
         getPlugin('gravatar').load(info)

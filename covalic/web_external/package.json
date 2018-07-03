@@ -1,5 +1,5 @@
 {
-    "name": "@girder/covalic",
+    "name": "@girder/covalic-external",
     "version": "0.2.0",
     "description": "An application for hosting grand challenges.",
     "bugs": {
@@ -10,8 +10,15 @@
         "type": "git",
         "url": "https://github.com/girder/covalic.git"
     },
+    "dependencies": {
+        "bootstrap-3-typeahead": "^4.0.2"
+    },
+    "peerDependencies": {
+        "@girder/jobs": "*"
+    },
     "girderPlugin": {
-        "name": "covalic",
-        "main": "./main.js"
+        "name": "covalic_external",
+        "main": "./main.js",
+        "dependencies": ["jobs"]
     }
 }

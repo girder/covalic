@@ -7,9 +7,9 @@ import FolderModel from 'girder/models/FolderModel';
 import ItemModel from 'girder/models/ItemModel';
 import UserModel from 'girder/models/UserModel';
 import eventStream from 'girder/utilities/EventStream';
-import JobModel from 'girder_plugins/jobs/models/JobModel';
-import JobStatus from 'girder_plugins/jobs/JobStatus';
-import JobDetailsWidget from 'girder_plugins/jobs/views/JobDetailsWidget';
+import JobModel from '@girder/jobs/models/JobModel';
+import JobStatus from '@girder/jobs/JobStatus';
+import JobDetailsWidget from '@girder/jobs/views/JobDetailsWidget';
 
 import eventStreamEnabled from '../../eventStreamEnabled';
 import PhaseModel from '../../models/PhaseModel';
