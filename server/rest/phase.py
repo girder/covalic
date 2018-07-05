@@ -242,28 +242,26 @@ class Phase(Resource):
             'active', 'Whether the phase will accept and score additional '
             'submissions.', dataType='boolean', required=False)
         .param('hideScores', 'Whether submission scores should be hidden from '
-               'participants.', dataType='boolean', default=False,
-               required=False)
+               'participants.', dataType='boolean', required=False)
         .param('startDate', 'The start date of the phase (ISO 8601 format).',
                dataType='dateTime', required=False)
         .param('endDate', 'The end date of the phase (ISO 8601 format).',
                dataType='dateTime', required=False)
         .param('type', 'The type of the phase.', required=False)
         .param('matchSubmissions', 'Whether to require that submission '
-               'filenames match ground truth filenames', dataType='boolean',
-               default=True, required=False)
+               'filenames match ground truth filenames', dataType='boolean', required=False)
         .param('enableOrganization', 'Enable submission Organization field.', dataType='boolean',
-               default=False, required=False)
+               required=False)
         .param('enableOrganizationUrl', 'Enable submission Organization URL field.',
-               dataType='boolean', default=False, required=False)
+               dataType='boolean', required=False)
         .param('enableDocumentationUrl', 'Enable submission Documentation URL field.',
-               dataType='boolean', default=False, required=False)
+               dataType='boolean', required=False)
         .param('requireOrganization', 'Require submission Organization field.', dataType='boolean',
-               default=True, required=False)
+               required=False)
         .param('requireOrganizationUrl', 'Require submission Organization URL field.',
-               dataType='boolean', default=True, required=False)
+               dataType='boolean', required=False)
         .param('requireDocumentationUrl', 'Require submission Documentation URL field.',
-               dataType='boolean', default=True, required=False)
+               dataType='boolean', required=False)
         .param('meta', 'A JSON object containing additional metadata. '
                'If present, replaces the existing metadata.', required=False)
         .errorResponse('ID was invalid.')
