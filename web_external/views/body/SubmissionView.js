@@ -11,6 +11,7 @@ import JobModel from 'girder_plugins/jobs/models/JobModel';
 import JobStatus from 'girder_plugins/jobs/JobStatus';
 import JobDetailsWidget from 'girder_plugins/jobs/views/JobDetailsWidget';
 
+import eventStreamEnabled from '../../eventStreamEnabled';
 import PhaseModel from '../../models/PhaseModel';
 import SubmissionModel from '../../models/SubmissionModel';
 import ScoreDetailWidget from '../widgets/ScoreDetailWidget';
@@ -48,6 +49,9 @@ JobStatus.registerStatus({
         icon: 'icon-upload'
     }
 });
+
+// Time in ms between polling for job updates when the eventStream is disabled.
+const jobPollingDelay = 1000;
 
 var SubmissionView = View.extend({
     events: {
@@ -88,32 +92,33 @@ var SubmissionView = View.extend({
 
         this.phase = new PhaseModel({
             _id: this.submission.get('phaseId')
-        }).on('g:fetched', function () {
+        });
+        this.job = new JobModel({
+            _id: this.submission.get('jobId')
+        });
+
+        this.phase.fetch().done(() => {
+            var currentUser = getCurrentUser();
             this.render();
 
-            if (!this.submission.get('score')) {
-                eventStream.on('g:event.job_status', this._statusHandler, this);
-                eventStream.on('g:event.progress', this._progressHandler, this);
-
-                var currentUser = getCurrentUser();
-                if (currentUser && (currentUser.id === this.submission.get('creatorId') ||
-                                    currentUser.get('admin'))) {
-                    this.job = new JobModel({
-                        _id: this.submission.get('jobId')
-                    }).on('g:fetched', function () {
-                        if (this.job.get('status') === JobStatus.ERROR) {
-                            this._renderProcessingError();
-                        } else if (this.job.get('status') === JobStatus.SUCCESS) {
-                            this.submission.once('g:fetched', this.render, this).fetch();
-                        } else {
-                            this.render();
-                        }
-                    }, this);
-                    this.job.fetch();
-                }
+            // Detect if the submission is unscored.  If so, then automatically
+            // update the page when the scoring job status changes.
+            if (!this.submission.get('score') && currentUser &&
+                (currentUser.id === this.submission.get('creatorId') || currentUser.get('admin'))
+            ) {
+                this.job.fetch().done(() => {
+                    if (this.job.get('status') === JobStatus.ERROR) {
+                        this._renderProcessingError();
+                    } else if (this.job.get('status') === JobStatus.SUCCESS) {
+                        this.submission.fetch().done(() => this.render());
+                    } else {
+                        this._waitForScoringJob();
+                        this.render();
+                    }
+                });
             }
-        }, this);
-        this.phase.fetch();
+        });
+        this._pollingHandle = null;
     },
 
     render: function () {
@@ -148,6 +153,11 @@ var SubmissionView = View.extend({
             }).render();
         }
         return this;
+    },
+
+    destroy: function () {
+        this._stopPollingForScore();
+        View.prototype.destroy.call(this);
     },
 
     /**
@@ -241,6 +251,51 @@ var SubmissionView = View.extend({
             parentView: this,
             job: this.job
         }).render();
+    },
+
+    /**
+     * Respond to job updates by either polling or listening to the eventstream.
+     */
+    _waitForScoringJob: function () {
+        if (eventStreamEnabled()) {
+            eventStream.on('g:event.job_status', this._statusHandler, this);
+            eventStream.on('g:event.progress', this._progressHandler, this);
+        } else {
+            this._stopPollingForScore();
+            this._pollForScore();
+        }
+    },
+
+    /**
+     * Poll the job model and wait for status updates, rerendering
+     * when the status changes.
+     */
+    _pollForScore: function () {
+        this._pollingHandle = window.setTimeout(() => {
+            this._pollingHandle = null;
+            this.job.fetch().done(() => {
+                const status = this.job.get('status');
+
+                if (status === JobStatus.ERROR) {
+                    this._renderProcessingError();
+                } else if (status === JobStatus.SUCCESS) {
+                    this.submission.fetch().done(() => this.render());
+                } else {
+                    if (status !== this._lastJobStatus) {
+                        this._lastJobStatus = status;
+                        this.render();
+                    }
+                    this._pollForScore();
+                }
+            });
+        }, jobPollingDelay);
+    },
+
+    _stopPollingForScore: function () {
+        if (this._pollingHandle) {
+            window.clearTimeout(this._pollingHandle);
+            this._pollingHandle = null;
+        }
     }
 });
 
