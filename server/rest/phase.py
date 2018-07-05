@@ -30,7 +30,7 @@ from girder.utility.progress import ProgressContext
 
 def _loadMetadata(params):
     if 'meta' not in params:
-        return
+        return None
     try:
         meta = bson.json_util.loads(params['meta'])
     except ValueError:
