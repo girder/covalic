@@ -24,11 +24,14 @@ import posixpath
 
 from ..constants import PluginSettings
 from ..utility.user_emails import getPhaseUserEmails
+from ..models.phase import Phase
+from ..models.submission import Submission
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
 from girder.models.model_base import AccessException, ValidationException
+from girder.models.folder import Folder
 from girder.plugins.worker import utils
 from girder.utility import mail_utils
 
@@ -157,15 +160,15 @@ class Submission(Resource):
         return self.model('submission', 'covalic').listApproaches(phase=phase, user=user)
 
     @access.user
-    @loadmodel(map={'phaseId': 'phase'}, model='phase', plugin='covalic',
-               level=AccessType.READ)
-    @loadmodel(map={'folderId': 'folder'}, model='folder',
-               level=AccessType.ADMIN)
-    @filtermodel(model='submission', plugin='covalic')
-    @describeRoute(
+    @filtermodel(model=Submission)
+    @autoDescribeRoute(
         Description('Make a submission to the challenge.')
-        .param('phaseId', 'The ID of the challenge phase to submit to.')
-        .param('folderId', 'The folder ID containing the submission data.')
+        .modelParam('phaseId', 'The ID of the challenge phase to submit to.',
+                    model=Phase, level=AccessType.READ, paramType='query',
+                    destName='phase')
+        .modelParam('folderId', 'The folder ID containing the submission data.',
+                    model=Folder, level=AccessType.ADMIN, paramType='query',
+                    destName='folder')
         .param('title', 'Title for the submission')
         .param('date', 'The date of the submission.', required=False)
         .param('userId', 'The ID of the user to submit on behalf of.',
@@ -176,10 +179,12 @@ class Submission(Resource):
         .param('documentationUrl', 'URL of documentation associated with the submission.',
                required=False)
         .param('approach', 'The submission approach.', required=False)
+        .jsonParam('meta', 'A JSON object containing additional submission metadata.',
+                   paramType='form', requireObject=True, required=False)
         .errorResponse('You are not a member of the participant group.', 403)
         .errorResponse('The ID was invalid.')
     )
-    def postSubmission(self, phase, folder, params):
+    def postSubmission(self, phase, folder, **params):
         user = self.getCurrentUser()
 
         if not phase.get('active') and (not user or not user.get('admin')):
@@ -211,13 +216,13 @@ class Submission(Resource):
 
         # Site admins may override the submission creation date
         created = None
-        if 'date' in params:
+        if params['date'] is not None:
             self.requireAdmin(user, 'Administrator access required to override '
                                     'the submission creation date.')
             created = params['date']
 
         # Site admins may submit on behalf of another user
-        if 'userId' in params:
+        if params['userId'] is not None:
             self.requireAdmin(user, 'Administrator access required to submit '
                                     'to this phase on behalf of another user.')
             user = self.model('user').load(params['userId'], force=True,
@@ -250,7 +255,7 @@ class Submission(Resource):
         title = params['title'].strip()
         submission = self.model('submission', 'covalic').createSubmission(
             user, phase, folder, job, title, created, organization, organizationUrl,
-            documentationUrl, approach)
+            documentationUrl, approach, params.get('meta'))
 
         if not self.model('phase', 'covalic').hasAccess(
                 phase, user=scoreUser, level=AccessType.ADMIN):
@@ -324,11 +329,11 @@ class Submission(Resource):
         return self._filterScore(phase, submission, user)
 
     @access.admin
-    @loadmodel(model='submission', plugin='covalic')
-    @filtermodel(model='submission', plugin='covalic')
-    @describeRoute(
-        Description('Overwrite metadata for a submission.')
-        .param('id', 'The ID of the submission.', paramType='path')
+    @filtermodel(model=Submission)
+    @autoDescribeRoute(
+        Description('Overwrite the properties of a submission.')
+        .modelParam('id', 'The ID of the challenge phase to submit to.',
+                    model=Submission, paramType='path', destName='submission')
         .param('title', 'Title for the submission', required=False)
         .param('date', 'The date of the submission.', required=False)
         .param('organization', 'Organization associated with the submission.',
@@ -340,10 +345,13 @@ class Submission(Resource):
         .param('disqualified', 'Whether the submission is disqualified. Disqualified '
                'submissions do not appear in the leaderboard.', dataType='boolean', required=False)
         .param('approach', 'The submission approach.', required=False)
+        .jsonParam('meta', 'A JSON object containing additional submission metadata. '
+                   'If present, replaces the existing metadata.',
+                   paramType='form', requireObject=True, required=False)
         .errorResponse('ID was invalid.')
         .errorResponse('Site admin access is required.', 403)
     )
-    def updateSubmission(self, submission, params):
+    def updateSubmission(self, submission, **params):
         # Ensure write access on the containing challenge phase, in case this
         # endpoint is ever opened to non-site-admins
         user = self.getCurrentUser()
@@ -370,11 +378,14 @@ class Submission(Resource):
         approach = self._getStrippedParam(params, 'approach')
         if approach is not None:
             submission['approach'] = approach
+        meta = params.get('meta')
+        if meta is not None:
+            submission['meta'] = meta
 
         # Note that this does not enforce the requirement that only a single submission
         # per user per phase is marked as the 'latest' submission. If access to this endpoint
         # is expanded beyond admin users, then that requirement should be enforced.
-        disqualified = self.boolParam('disqualified', params)
+        disqualified = params['disqualified']
         if disqualified is not None:
             submission['latest'] = not disqualified
 

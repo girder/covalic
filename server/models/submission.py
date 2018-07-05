@@ -43,7 +43,7 @@ class Submission(Model):
         self.exposeFields(level=AccessType.READ, fields=(
             '_id', 'creatorId', 'creatorName', 'phaseId', 'folderId', 'created',
             'score', 'title', 'latest', 'overallScore', 'jobId', 'organization', 'organizationUrl',
-            'documentationUrl', 'approach'
+            'documentationUrl', 'approach', 'meta'
         ))
 
     def load(self, *args, **kwargs):
@@ -52,11 +52,14 @@ class Submission(Model):
         if (fields is None or 'approach' in fields) and \
                 doc is not None and doc.get('approach') is None:
             doc['approach'] = 'default'
+        if doc is not None:
+            doc.setdefault('meta', {})
         return doc
 
     def save(self, document, *args, **kwargs):
         document = super(Submission, self).save(document, *args, **kwargs)
         document.setdefault('approach', 'default')
+        document.setdefault('meta', {})
         return document
 
     def validate(self, doc):
@@ -156,7 +159,7 @@ class Submission(Model):
 
     def createSubmission(self, creator, phase, folder, job=None, title=None,
                          created=None, organization=None, organizationUrl=None,
-                         documentationUrl=None, approach=None):
+                         documentationUrl=None, approach=None, meta=None):
         submission = {
             'creatorId': creator['_id'],
             'creatorName': self.getUserName(creator),
@@ -164,7 +167,8 @@ class Submission(Model):
             'folderId': folder['_id'],
             'created': created or datetime.datetime.utcnow(),
             'score': None,
-            'title': title
+            'title': title,
+            'meta': meta or {}
         }
 
         if organization is not None:

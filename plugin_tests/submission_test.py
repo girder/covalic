@@ -636,3 +636,29 @@ class SubmissionRestTest(SubmissionBase):
                 'value': None
             }]
         }])
+
+    def testSubmissionWithMetadata(self):
+        folder = self.model('folder').createFolder(
+            self.admin, 'submission phase 1', parentType='user', creator=self.user
+        )
+        resp = self.request(
+            path='/covalic_submission', method='POST', user=self.user,
+            params={
+                'phaseId': self.phase1['_id'],
+                'folderId': folder['_id'],
+                'title': 'submission phase 1',
+                'meta': '{"test": 1}'
+            }
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['meta'], {'test': 1})
+
+        resp = self.request(
+            path='/covalic_submission/%s' % resp.json['_id'],
+            method='PUT', user=self.admin,
+            params={
+                'meta': '{"test2": 2}'
+            }
+        )
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json['meta'], {'test2': 2})
