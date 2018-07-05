@@ -20,6 +20,7 @@
 import datetime
 import dateutil.parser
 import dateutil.tz
+import json
 
 from tests import base
 
@@ -148,6 +149,22 @@ class PhaseTestCase(base.TestCase):
                             params=params)
         self.assertValidationError(resp, 'endDate')
 
+    def testPhaseCreationWithMetadata(self):
+        params = {
+            'challengeId': str(self.challenge['_id']),
+            'name': 'challenge',
+            'meta': json.dumps({'test': 1})
+        }
+        resp = self.request(path='/challenge_phase', method='POST', user=self.user,
+                            params=params)
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json.get('meta'), {'test': 1})
+
+        resp = self.request(path='/challenge_phase/%s' % resp.json['_id'], method='GET',
+                            user=self.user)
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json.get('meta'), {'test': 1})
+
     def testListPhase(self):
         self.model('phase', 'covalic').createPhase(
             challenge=self.challenge,
@@ -159,7 +176,7 @@ class PhaseTestCase(base.TestCase):
             'challengeId': str(self.challenge['_id'])
         }
         resp = self.request(path='/challenge_phase', user=self.user,
-            params=params)
+                            params=params)
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json), 1)
 
@@ -170,7 +187,7 @@ class PhaseTestCase(base.TestCase):
             ordinal=1)
 
         resp = self.request(path='/challenge_phase', user=self.user,
-            params=params)
+                            params=params)
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json), 2)
 
@@ -290,6 +307,22 @@ class PhaseTestCase(base.TestCase):
         self.assertTrue(resp.json['requireOrganization'])
         self.assertTrue(resp.json['requireOrganizationUrl'])
         self.assertTrue(resp.json['requireDocumentationUrl'])
+
+    def testPhaseUpdateMetadata(self):
+        phase = self.model('phase', 'covalic').createPhase(
+            challenge=self.challenge,
+            name='phase 1',
+            creator=self.user,
+            ordinal=1,
+            meta={'test': 1}
+        )
+        params = {
+            'meta': json.dumps({'test2': 2})
+        }
+        resp = self.request(path='/challenge_phase/%s' % phase['_id'],
+                            method='PUT', user=self.user, params=params)
+        self.assertStatusOk(resp)
+        self.assertEqual(resp.json.get('meta'), {'test2': 2})
 
     def testPhaseClearDates(self):
         phase = self.model('phase', 'covalic').createPhase(

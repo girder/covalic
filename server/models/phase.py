@@ -41,7 +41,8 @@ class Phase(AccessControlledModel):
             'ordinal', 'startDate', 'endDate', 'type', 'hideScores',
             'matchSubmissions', 'enableOrganization', 'enableOrganizationUrl',
             'enableDocumentationUrl', 'requireOrganization',
-            'requireOrganizationUrl', 'requireDocumentationUrl', 'metrics'})
+            'requireOrganizationUrl', 'requireDocumentationUrl', 'metrics',
+            'meta'})
         self.exposeFields(level=AccessType.ADMIN, fields={'scoreTask'})
 
     def list(self, challenge, user=None, limit=50, offset=0, sort=None):
@@ -119,7 +120,8 @@ class Phase(AccessControlledModel):
                     type='', hideScores=False, matchSubmissions=True,
                     enableOrganization=False, enableOrganizationUrl=False,
                     enableDocumentationUrl=False, requireOrganization=False,
-                    requireOrganizationUrl=False, requireDocumentationUrl=False):
+                    requireOrganizationUrl=False, requireDocumentationUrl=False,
+                    meta=None):
         """
         Create a new phase for a challenge. Will create a top-level folder under
         the challenge's collection. Will also create a new group for the
@@ -181,6 +183,8 @@ class Phase(AccessControlledModel):
         :type requireOrganizationUrl: bool
         :param requireDocumentationUrl: Require submission Documentation URL field.
         :type requireDocumentationUrl: bool
+        :param meta: dict
+        :param meta: Additional metadata associated with a phase
         """
         collection = self.model('collection').load(challenge['collectionId'],
                                                    force=True)
@@ -205,7 +209,8 @@ class Phase(AccessControlledModel):
             'enableDocumentationUrl': enableDocumentationUrl,
             'requireOrganization': requireOrganization,
             'requireOrganizationUrl': requireOrganizationUrl,
-            'requireDocumentationUrl': requireDocumentationUrl
+            'requireDocumentationUrl': requireDocumentationUrl,
+            'meta': meta or {}
         }
         self.validate(phase)
 
