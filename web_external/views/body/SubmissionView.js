@@ -254,7 +254,7 @@ var SubmissionView = View.extend({
     },
 
     /**
-     * Respond to job updates by either polling of listening to the eventstream.
+     * Respond to job updates by either polling or listening to the eventstream.
      */
     _waitForScoringJob: function () {
         if (eventStreamEnabled()) {
