@@ -22,7 +22,6 @@ import math
 import os
 import posixpath
 
-from ..constants import PluginSettings
 from ..utility.user_emails import getPhaseUserEmails
 from ..models.phase import Phase
 from ..models.submission import Submission
@@ -30,9 +29,8 @@ from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
-from girder.models.model_base import AccessException, ValidationException
+from girder.exceptions import AccessException, GirderException, ValidationException
 from girder.models.folder import Folder
-from girder.plugins.worker import utils
 from girder.utility import mail_utils
 
 
@@ -192,6 +190,7 @@ class Submission(Resource):
                                       'because it is not currently active.')
 
         self.requireParams('title', params)
+        title = self._getStrippedParam(params, 'title')
 
         # Only users in the participant group (or with write access) may submit
         if phase['participantGroupId'] not in user['groups']:
@@ -228,103 +227,28 @@ class Submission(Resource):
             user = self.model('user').load(params['userId'], force=True,
                                            exc=True)
 
-        jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
+        submissionModel = self.model('submission', 'covalic')
+
+        submission = submissionModel.createSubmission(
+            creator=user,
+            phase=phase,
+            folder=folder,
+            job=None,
+            title=title,
+            created=created,
+            organization=organization,
+            organizationUrl=organizationUrl,
+            documentationUrl=documentationUrl,
+            approach=approach,
+            meta=params.get('meta'))
+
         apiUrl = os.path.dirname(cherrypy.url())
-        jobModel = self.model('job', 'jobs')
 
-        job = jobModel.createJob(
-            title=jobTitle, type='covalic_score', handler='worker_handler',
-            user=user)
-        scoreUserId = self.model('setting').get(PluginSettings.SCORING_USER_ID)
-
-        if not scoreUserId:
-            raise Exception('No scoring user ID is set. Please set one on the '
-                            'plugin configuration page.')
-        scoreUser = self.model('user').load(scoreUserId, force=True)
-
-        if not scoreUser:
-            raise Exception('Invalid scoring user setting (%s).' % scoreUserId)
-
-        scoreToken = self.model('token').createToken(user=scoreUser, days=7)
-        self.model('folder').setUserAccess(
-            folder, user=scoreUser, level=AccessType.READ, save=True)
-
-        groundTruth = self.model('folder').load(phase['groundTruthFolderId'],
-                                                force=True)
-
-        title = params['title'].strip()
-        submission = self.model('submission', 'covalic').createSubmission(
-            user, phase, folder, job, title, created, organization, organizationUrl,
-            documentationUrl, approach, params.get('meta'))
-
-        if not self.model('phase', 'covalic').hasAccess(
-                phase, user=scoreUser, level=AccessType.ADMIN):
-            self.model('phase', 'covalic').setUserAccess(
-                phase, user=scoreUser, level=AccessType.ADMIN, save=True)
-
-        if not self.model('folder').hasAccess(
-                groundTruth, user=scoreUser, level=AccessType.READ):
-            self.model('folder').setUserAccess(
-                groundTruth, user=scoreUser, level=AccessType.READ,
-                save=True)
-
-        task = phase.get('scoreTask', {})
-        image = task.get('dockerImage') or 'girder/covalic-metrics:latest'
-        containerArgs = task.get('dockerArgs') or [
-            '--groundtruth=$input{groundtruth}',
-            '--submission=$input{submission}'
-        ]
-
-        kwargs = {
-            'task': {
-                'name': jobTitle,
-                'mode': 'docker',
-                'docker_image': image,
-                'container_args': containerArgs,
-                'inputs': [{
-                    'id': 'submission',
-                    'type': 'string',
-                    'format': 'text',
-                    'target': 'filepath',
-                    'filename': 'submission.zip'
-                }, {
-                    'id': 'groundtruth',
-                    'type': 'string',
-                    'format': 'text',
-                    'target': 'filepath',
-                    'filename': 'groundtruth.zip'
-                }],
-                'outputs': [{
-                    'id': '_stdout',
-                    'format': 'string',
-                    'type': 'string'
-                }]
-            },
-            'inputs': {
-                'submission': utils.girderInputSpec(
-                    folder, 'folder', token=scoreToken),
-                'groundtruth': utils.girderInputSpec(
-                    groundTruth, 'folder', token=scoreToken)
-            },
-            'outputs': {
-                '_stdout': {
-                    'mode': 'http',
-                    'method': 'POST',
-                    'format': 'string',
-                    'url': '/'.join((apiUrl, 'covalic_submission',
-                                     str(submission['_id']), 'score')),
-                    'headers': {'Girder-Token': scoreToken['_id']}
-                }
-            },
-            'jobInfo': utils.jobInfoSpec(job),
-            'validate': False,
-            'auto_convert': False,
-            'cleanup': True
-        }
-        job['kwargs'] = kwargs
-        job['covalicSubmissionId'] = submission['_id']
-        job = jobModel.save(job)
-        jobModel.scheduleJob(job)
+        try:
+            submission = submissionModel.scoreSubmission(submission, apiUrl)
+        except GirderException:
+            submissionModel.remove(submission)
+            raise
 
         return self._filterScore(phase, submission, user)
 

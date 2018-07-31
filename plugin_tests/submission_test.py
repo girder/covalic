@@ -335,6 +335,17 @@ class SubmissionModelTest(SubmissionBase):
         latest = self.model('submission', 'covalic').findOne({'title': 'User submission 2 phase 1'})
         self.assertEqual(latest['latest'], True)
 
+    def testScoreSubmission(self):
+        submission = self.createSubmission(self.phase1, self.user, 'submission')
+        self.assertNotIn('jobId', submission)
+
+        submission = self.model('submission', 'covalic').scoreSubmission(
+            submission, 'http://127.0.0.1/api/v1')
+        self.assertIn('jobId', submission)
+
+        job = self.model('job', 'jobs').load(submission['jobId'], force=True)
+        self.assertIsNotNone(job)
+
 
 class SubmissionRestTest(SubmissionBase):
     def setUp(self):
@@ -366,6 +377,7 @@ class SubmissionRestTest(SubmissionBase):
             'phaseId': str(self.phase1['_id']),
             'title': 'submission phase 1'
         }, resp.json)
+        self.assertIn('jobId', resp.json)
         id = resp.json['_id']
 
         # modify a submission
@@ -468,6 +480,7 @@ class SubmissionRestTest(SubmissionBase):
             'phaseId': str(self.phase1['_id']),
             'title': 'submission phase 1'
         }, resp.json)
+        self.assertIn('jobId', resp.json)
         id = resp.json['_id']
 
         # user cannot modify submissions
