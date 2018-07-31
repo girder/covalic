@@ -29,7 +29,7 @@ from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
-from girder.exceptions import AccessException, GirderException, ValidationException
+from girder.exceptions import AccessException, GirderException, RestException, ValidationException
 from girder.models.folder import Folder
 from girder.utility import mail_utils
 
@@ -47,6 +47,7 @@ class Submission(Resource):
         self.route('POST', (), self.postSubmission)
         self.route('PUT', (':id',), self.updateSubmission)
         self.route('POST', (':id', 'score'), self.postScore)
+        self.route('POST', (':id', 'rescore'), self.rescoreSubmission)
         self.route('DELETE', (':id',), self.deleteSubmission)
 
     def _filterScore(self, phase, submission, user):
@@ -361,6 +362,11 @@ class Submission(Resource):
             submission['phaseId'], user=self.getCurrentUser(), exc=True,
             level=AccessType.ADMIN)
 
+        # Record whether submission is being re-scored
+        rescoring = 'overallScore' in submission
+
+        # Save document to trigger computing overall score
+        submission.pop('overallScore', None)
         submission['score'] = score
         submission = self.model('submission', 'covalic').save(submission)
 
@@ -436,6 +442,34 @@ class Submission(Resource):
                required=False)
         .errorResponse('Phase ID was invalid.')
         .errorResponse('Admin access was denied for the challenge phase.', 403))
+
+    @access.admin
+    @filtermodel(model=Submission)
+    @autoDescribeRoute(
+        Description('Re-run scoring for a submission.')
+        .modelParam('id', 'The ID of the submission.', model=Submission, paramType='path',
+                    destName='submission')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Site admin access is required.', 403)
+    )
+    def rescoreSubmission(self, submission):
+        phaseModel = self.model('phase', 'covalic')
+        submissionModel = self.model('submission', 'covalic')
+
+        user = self.getCurrentUser()
+
+        # Allow rescoring only the latest submission
+        if not submission.get('latest', False):
+            raise RestException('Only the latest submission may be re-scored.')
+
+        phase = phaseModel.load(submission['phaseId'], force=True)
+
+        # Get API URL like in postSubmission(), but remove this endpoint's parameters
+        apiUrl = '/'.join(cherrypy.url().split('/')[:-3])
+
+        submission = submissionModel.scoreSubmission(submission, apiUrl)
+
+        return self._filterScore(phase, submission, user)
 
     @access.user
     @loadmodel(model='submission', plugin='covalic')

@@ -650,6 +650,52 @@ class SubmissionRestTest(SubmissionBase):
             }]
         }])
 
+    def testPostRescore(self):
+        submission1 = self.createSubmission(self.phase1, self.user, 'submission1')
+        submission2 = self.createSubmission(self.phase1, self.user, 'submission2')
+
+        score = json.dumps([{
+            'dataset': 'dataset1',
+            'metrics': [{
+                'name': 'accuracy',
+                'value': 0.1
+            }, {
+                'name': 'error',
+                'value': 0.9
+            }]
+        }])
+
+        # post scores as admin
+        for submission in [submission1, submission2]:
+            resp = self.request(
+                path='/covalic_submission/%s/score' % str(submission['_id']),
+                method='POST', user=self.admin,
+                body=score, type='application/json'
+            )
+            self.assertStatus(resp, 200)
+
+        # cannot re-score submissions that aren't 'latest'
+        resp = self.request(
+            path='/covalic_submission/%s/rescore' % submission1['_id'],
+            method='POST', user=self.admin
+        )
+        self.assertStatus(resp, 400)
+
+        # re-score submission as admin
+        resp = self.request(
+            path='/covalic_submission/%s/rescore' % submission2['_id'],
+            method='POST', user=self.admin
+        )
+        self.assertStatusOk(resp)
+        self.assertIn('jobId', resp.json)
+
+        # user cannot re-score submission
+        resp = self.request(
+            path='/covalic_submission/%s/rescore' % submission2['_id'],
+            method='POST', user=self.user
+        )
+        self.assertStatus(resp, 403)
+
     def testSubmissionWithMetadata(self):
         folder = self.model('folder').createFolder(
             self.admin, 'submission phase 1', parentType='user', creator=self.user
