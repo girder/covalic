@@ -38,6 +38,16 @@ class PhaseTestCase(base.TestCase):
     def setUp(self):
         base.TestCase.setUp(self)
 
+        adminUser = {
+            'email': 'admin@email.com',
+            'login': 'adminlogin',
+            'firstName': 'First',
+            'lastName': 'Last',
+            'password': 'adminpassword',
+            'admin': True
+        }
+        self.admin = self.model('user').createUser(**adminUser)
+
         user = {
             'email': 'good@email.com',
             'login': 'goodlogin',
@@ -358,3 +368,67 @@ class PhaseTestCase(base.TestCase):
         resp = self.request(path='/challenge_phase/1', method='DELETE',
                             user=self.user)
         self.assertValidationError(resp, 'id')
+
+    def testPhaseRescore(self):
+        from girder.plugins.covalic.constants import PluginSettings as CovalicSettings
+
+        # Configure scoring user
+        scoringUserParams = {
+            'email': 'scoring@email.com',
+            'login': 'scoringlogin',
+            'firstName': 'First',
+            'lastName': 'Last',
+            'password': 'scoringpassword',
+            'admin': False
+        }
+        scoringUser = self.model('user').createUser(**scoringUserParams)
+
+        self.model('setting').set(
+            CovalicSettings.SCORING_USER_ID,
+            scoringUser['_id']
+        )
+
+        # Create phase
+        metrics = {
+            'accuracy': {'weight': 0.5},
+            'error': {'weight': 0.5}
+        }
+        phase = self.model('phase', 'covalic').createPhase(
+            'phase 1', self.challenge, creator=self.user, ordinal=1)
+        phase['metrics'] = metrics
+        phase['active'] = True
+        phase = self.model('phase', 'covalic').save(phase)
+
+        # Create submission
+        folder = self.model('folder').createFolder(
+            self.user, 'submission', parentType='user', creator=self.user)
+        submission = self.model('submission', 'covalic').createSubmission(
+            self.user, phase, folder, title='submission')
+
+        # Add score to submission
+        scoreDict = [{
+            'dataset': 'dataset1',
+            'metrics': [{
+                'name': 'accuracy',
+                'value': 0.9
+            }, {
+                'name': 'error',
+                'value': 0.1
+            }]
+        }]
+        submission['score'] = scoreDict
+        submission = self.model('submission', 'covalic').save(submission)
+
+        # User can't re-score phase
+        resp = self.request(path='/challenge_phase/%s/rescore' % phase['_id'], method='POST',
+                            user=self.user)
+        self.assertStatus(resp, 403)
+
+        # Rescore phase as admin
+        self.assertNotIn('jobId', submission)
+        resp = self.request(path='/challenge_phase/%s/rescore' % phase['_id'], method='POST',
+                            user=self.admin)
+        self.assertStatusOk(resp)
+
+        submission = self.model('submission', 'covalic').load(submission['_id'])
+        self.assertIn('jobId', submission)

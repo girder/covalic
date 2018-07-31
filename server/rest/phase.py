@@ -17,6 +17,7 @@
 #  limitations under the License.
 ###############################################################################
 
+import cherrypy
 import json
 
 import bson.json_util
@@ -60,6 +61,7 @@ class Phase(Resource):
         self.route('PUT', (':id', 'metrics'), self.setMetrics)
         self.route('PUT', (':id', 'scoring_info'), self.setScoringInfo)
         self.route('POST', (':id', 'metrics', 'init'), self.initMetrics)
+        self.route('POST', (':id', 'rescore'), self.rescorePhase)
 
     @access.public
     @loadmodel(map={'challengeId': 'challenge'}, model='challenge',
@@ -576,3 +578,23 @@ class Phase(Resource):
         phaseModel = self.model('phase', 'covalic')
         return self.model('phase', 'covalic').filter(
             phaseModel.save(phase), self.getCurrentUser())
+
+    @access.admin
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
+    @describeRoute(
+        Description('Re-run scoring for the latest submissions in the phase.')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Site admin access is required.', 403)
+    )
+    def rescorePhase(self, phase, params):
+        submissionModel = self.model('submission', 'covalic')
+
+        submissions = submissionModel.list(
+            phase, limit=0, sort=[('created', 1)], fields={'score': False}, latest=True)
+
+        # Get API URL by removing this endpoint's parameters
+        apiUrl = '/'.join(cherrypy.url().split('/')[:-3])
+
+        for submission in submissions:
+            submissionModel.scoreSubmission(submission, apiUrl)
