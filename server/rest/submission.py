@@ -328,7 +328,7 @@ class Submission(Resource):
 
         return self._filterScore(phase, submission, user)
 
-    @access.admin
+    @access.user
     @filtermodel(model=Submission)
     @autoDescribeRoute(
         Description('Overwrite the properties of a submission.')
@@ -349,11 +349,10 @@ class Submission(Resource):
                    'If present, replaces the existing metadata.',
                    paramType='form', requireObject=True, required=False)
         .errorResponse('ID was invalid.')
-        .errorResponse('Site admin access is required.', 403)
+        .errorResponse('Write access to phase is required.', 403)
     )
     def updateSubmission(self, submission, **params):
-        # Ensure write access on the containing challenge phase, in case this
-        # endpoint is ever opened to non-site-admins
+        # Ensure write access on the containing challenge phase
         user = self.getCurrentUser()
         phase = self.model('phase', 'covalic').load(
             submission['phaseId'], user=user, exc=True, level=AccessType.WRITE)
