@@ -349,7 +349,7 @@ class Submission(Resource):
                    'If present, replaces the existing metadata.',
                    paramType='form', requireObject=True, required=False)
         .errorResponse('ID was invalid.')
-        .errorResponse('Site admin access is required.', 403)
+        .errorResponse('Write access to phase is required.', 403)
     )
     def updateSubmission(self, submission, **params):
         # Ensure write access on the containing challenge phase
