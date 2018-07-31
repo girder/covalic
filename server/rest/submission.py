@@ -380,17 +380,18 @@ class Submission(Resource):
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
 
         # Mail user
-        html = mail_utils.renderTemplate(
-            'covalic.submissionCompleteUser.mako',
-            {
-                'phase': phase,
-                'challenge': challenge,
-                'submission': submission,
-                'host': covalicHost
-            })
-        mail_utils.sendEmail(
-            to=user['email'], subject='Your submission has been scored',
-            text=html)
+        if not rescoring:
+            html = mail_utils.renderTemplate(
+                'covalic.submissionCompleteUser.mako',
+                {
+                    'phase': phase,
+                    'challenge': challenge,
+                    'submission': submission,
+                    'host': covalicHost
+                })
+            mail_utils.sendEmail(
+                to=user['email'], subject='Your submission has been scored',
+                text=html)
 
         # Mail admins
         emails = sorted(getPhaseUserEmails(
