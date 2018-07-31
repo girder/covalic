@@ -254,9 +254,14 @@ class Submission(Model):
         folder = folderModel.load(submission['folderId'], force=True)
         user = userModel.load(submission['creatorId'], force=True)
 
+        otherFields = {}
+        if 'overallScore' in submission:
+            otherFields['rescoring'] = True
+
         jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
         job = jobModel.createJob(
-            title=jobTitle, type='covalic_score', handler='worker_handler', user=user)
+            title=jobTitle, type='covalic_score', handler='worker_handler', user=user,
+            otherFields=otherFields)
 
         scoreUserId = settingModel.get(PluginSettings.SCORING_USER_ID)
         if not scoreUserId:

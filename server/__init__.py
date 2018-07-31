@@ -181,6 +181,8 @@ def onJobUpdate(event):
         user = ModelImporter.model('user').load(
             event.info['job']['userId'], force=True)
 
+        rescoring = job.get('rescoring', False)
+
         # Mail admins, include full log
         emails = sorted(getPhaseUserEmails(
             phase, AccessType.WRITE, includeChallengeUsers=True))
