@@ -20,10 +20,14 @@
 import datetime
 
 from girder.constants import AccessType
+from girder.exceptions import GirderException
 from girder.models.model_base import Model, ValidationException
 from girder.plugins.covalic.utility import validateDate
 from girder.plugins.covalic import scoring
+from girder.plugins.worker import utils
 from girder.utility.progress import noProgress
+
+from ..constants import PluginSettings
 
 
 class Submission(Model):
@@ -234,3 +238,111 @@ class Submission(Model):
                     folderModel.save(folder, validate=False)
         except TypeError:
             raise ValidationException('A list of submissions is required.')
+
+    def scoreSubmission(self, submission, apiUrl):
+        """
+        Run a Girder Worker job to score a submission.
+        """
+        folderModel = self.model('folder')
+        jobModel = self.model('job', 'jobs')
+        phaseModel = self.model('phase', 'covalic')
+        settingModel = self.model('setting')
+        tokenModel = self.model('token')
+        userModel = self.model('user')
+
+        phase = phaseModel.load(submission['phaseId'], force=True)
+        folder = folderModel.load(submission['folderId'], force=True)
+        user = userModel.load(submission['creatorId'], force=True)
+
+        otherFields = {}
+        if 'overallScore' in submission:
+            otherFields['rescoring'] = True
+
+        jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
+        job = jobModel.createJob(
+            title=jobTitle, type='covalic_score', handler='worker_handler', user=user,
+            otherFields=otherFields)
+
+        scoreUserId = settingModel.get(PluginSettings.SCORING_USER_ID)
+        if not scoreUserId:
+            raise GirderException(
+                'No scoring user ID is set. Please set one on the plugin configuration page.')
+
+        scoreUser = userModel.load(scoreUserId, force=True)
+        if not scoreUser:
+            raise GirderException('Invalid scoring user setting (%s).' % scoreUserId)
+
+        scoreToken = tokenModel.createToken(user=scoreUser, days=7)
+        folderModel.setUserAccess(
+            folder, user=scoreUser, level=AccessType.READ, save=True)
+
+        groundTruth = folderModel.load(phase['groundTruthFolderId'], force=True)
+
+        if not phaseModel.hasAccess(phase, user=scoreUser, level=AccessType.ADMIN):
+            phaseModel.setUserAccess(
+                phase, user=scoreUser, level=AccessType.ADMIN, save=True)
+
+        if not folderModel.hasAccess(groundTruth, user=scoreUser, level=AccessType.READ):
+            folderModel.setUserAccess(
+                groundTruth, user=scoreUser, level=AccessType.READ, save=True)
+
+        task = phase.get('scoreTask', {})
+        image = task.get('dockerImage') or 'girder/covalic-metrics:latest'
+        containerArgs = task.get('dockerArgs') or [
+            '--groundtruth=$input{groundtruth}',
+            '--submission=$input{submission}'
+        ]
+
+        kwargs = {
+            'task': {
+                'name': jobTitle,
+                'mode': 'docker',
+                'docker_image': image,
+                'container_args': containerArgs,
+                'inputs': [{
+                    'id': 'submission',
+                    'type': 'string',
+                    'format': 'text',
+                    'target': 'filepath',
+                    'filename': 'submission.zip'
+                }, {
+                    'id': 'groundtruth',
+                    'type': 'string',
+                    'format': 'text',
+                    'target': 'filepath',
+                    'filename': 'groundtruth.zip'
+                }],
+                'outputs': [{
+                    'id': '_stdout',
+                    'format': 'string',
+                    'type': 'string'
+                }]
+            },
+            'inputs': {
+                'submission': utils.girderInputSpec(
+                    folder, 'folder', token=scoreToken),
+                'groundtruth': utils.girderInputSpec(
+                    groundTruth, 'folder', token=scoreToken)
+            },
+            'outputs': {
+                '_stdout': {
+                    'mode': 'http',
+                    'method': 'POST',
+                    'format': 'string',
+                    'url': '/'.join((apiUrl, 'covalic_submission',
+                                     str(submission['_id']), 'score')),
+                    'headers': {'Girder-Token': scoreToken['_id']}
+                }
+            },
+            'jobInfo': utils.jobInfoSpec(job),
+            'validate': False,
+            'auto_convert': False,
+            'cleanup': True
+        }
+        job['kwargs'] = kwargs
+        job['covalicSubmissionId'] = submission['_id']
+        job = jobModel.save(job)
+        jobModel.scheduleJob(job)
+
+        submission['jobId'] = job['_id']
+        return self.save(submission, validate=False)

@@ -181,6 +181,8 @@ def onJobUpdate(event):
         user = ModelImporter.model('user').load(
             event.info['job']['userId'], force=True)
 
+        rescoring = job.get('rescoring', False)
+
         # Mail admins, include full log
         emails = sorted(getPhaseUserEmails(
             phase, AccessType.WRITE, includeChallengeUsers=True))
@@ -196,15 +198,16 @@ def onJobUpdate(event):
             to=emails, subject='Submission processing error', text=html)
 
         # Mail user, include minimal log
-        html = mail_utils.renderTemplate('covalic.submissionErrorUser.mako', {
-            'submission': submission,
-            'challenge': challenge,
-            'phase': phase,
-            'host': covalicHost,
-            'log': minimalLog
-        })
-        mail_utils.sendEmail(
-            to=user['email'], subject='Submission processing error', text=html)
+        if not rescoring:
+            html = mail_utils.renderTemplate('covalic.submissionErrorUser.mako', {
+                'submission': submission,
+                'challenge': challenge,
+                'phase': phase,
+                'host': covalicHost,
+                'log': minimalLog
+            })
+            mail_utils.sendEmail(
+                to=user['email'], subject='Submission processing error', text=html)
 
 
 def onUserSave(event):
