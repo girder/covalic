@@ -21,6 +21,7 @@ import datetime
 import dateutil.parser
 import dateutil.tz
 import json
+import mock
 
 from tests import base
 
@@ -371,6 +372,7 @@ class PhaseTestCase(base.TestCase):
 
     def testPhaseRescore(self):
         from girder.plugins.covalic.constants import PluginSettings as CovalicSettings
+        from girder.plugins.jobs.models.job import Job
 
         # Configure scoring user
         scoringUserParams = {
@@ -426,9 +428,10 @@ class PhaseTestCase(base.TestCase):
 
         # Rescore phase as admin
         self.assertNotIn('jobId', submission)
-        resp = self.request(path='/challenge_phase/%s/rescore' % phase['_id'], method='POST',
-                            user=self.admin)
-        self.assertStatusOk(resp)
+        with mock.patch.object(Job, 'scheduleJob'):
+            resp = self.request(path='/challenge_phase/%s/rescore' % phase['_id'], method='POST',
+                                user=self.admin)
+            self.assertStatusOk(resp)
 
         submission = self.model('submission', 'covalic').load(submission['_id'])
         self.assertIn('jobId', submission)
