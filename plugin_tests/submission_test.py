@@ -21,7 +21,7 @@ import json
 import mock
 
 from girder_jobs.models.job import Job
-from girder_remote_worker.constants import PluginSettings as WorkerSettings
+from girder_worker.constants import PluginSettings as WorkerSettings
 from covalic.constants import PluginSettings as CovalicSettings
 
 from tests import base

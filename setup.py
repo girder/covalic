@@ -44,7 +44,7 @@ setup(
     },
     packages=find_packages(exclude=['plugin_tests']),
     zip_safe=False,
-    install_requires=['girder', 'girder-gravatar', 'girder-remote-worker', 'girder-thumbnails',
+    install_requires=['girder', 'girder-gravatar', 'girder-worker', 'girder-thumbnails',
                       'girder-jobs'],
     entry_points={
         'girder.plugin': [

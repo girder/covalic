@@ -244,7 +244,7 @@ class CovalicPlugin(GirderPlugin):
     def load(self, info):
         getPlugin('gravatar').load(info)
         getPlugin('jobs').load(info)
-        getPlugin('remote_worker').load(info)
+        getPlugin('worker').load(info)
         getPlugin('thumbnails').load(info)
 
         mail_utils.addTemplateDirectory(os.path.join(_HERE, 'mail_templates'))
