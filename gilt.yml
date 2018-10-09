@@ -1,0 +1,21 @@
+- git: https://github.com/ImageMarkup/isic-archive.git
+  version: master
+  files:
+    - src: ansible/roles/mongodb
+      dst: ansible/roles/mongodb
+
+- git: https://github.com/girder/girder.git
+  version: ansible-role-girder3
+  files:
+    - src: devops/ansible-role-girder
+      dst: ansible/roles/girder
+
+- git: https://github.com/girder/girder_worker.git
+  version: master
+  files:
+    - src: devops/ansible/roles/girder-worker
+      dst: ansible/roles/girder-worker
+
+- git: https://github.com/geerlingguy/ansible-role-docker.git
+  version: a42939be873
+  dst: ansible/roles/docker/
