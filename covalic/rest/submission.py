@@ -29,7 +29,7 @@ from girder.constants import AccessType, SortDir
 from girder.models.folder import Folder
 from girder.models.model_base import AccessException, ValidationException
 from girder.utility import mail_utils
-from girder_worker import utils
+from girder_worker.girder_plugin import utils
 
 from ..constants import PluginSettings
 from ..utility.user_emails import getPhaseUserEmails

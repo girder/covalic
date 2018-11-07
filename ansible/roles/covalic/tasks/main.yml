@@ -1,0 +1,7 @@
+---
+
+- name: Install Covalic
+  pip:
+    name: "{{ ansible_user_dir }}/covalic"
+    extra_args: "--editable"
+    virtualenv: "{{ girder_virtualenv }}"

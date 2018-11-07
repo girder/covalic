@@ -1,42 +1,95 @@
 ---
 - hosts: all
-  gather_facts: false
+
+  vars:
+    girder_admin_username: "girder"
+    girder_admin_password: "girder"
+    girder_virtualenv: "{{ ansible_user_dir }}/.venvs/girder"
+
   pre_tasks:
-    - name: Install python2 for ansible
-      raw: bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qqy python-minimal)"
-      register: output
-      changed_when: output.stdout != ""
+    - name: Install python prereqs
+      apt:
+        name:
+          - python3-dev
+          # This is necessary to install for girder-client. When using ansible_local
+          # the provisioner runs via Python2, so python2-pip is necessary for installing
+          # girder-client in a way that the ansible module can be used.
+          - python-pip
+          - python3-pip
+          - python3-venv
       become: true
 
-    - name: Gathering Facts
-      setup:
+      # Since we want to use the girder module, girder-client is effectively
+      # a system-wide dependency.
+    - name: Install girder-client
+      pip:
+        name: girder-client
+        executable: /usr/bin/pip2
       become: true
+
+    - name: Create virtualenv
+      command: |
+        /usr/bin/python3.6 -m venv "{{ girder_virtualenv }}"
+      args:
+        creates: "{{ girder_virtualenv }}"
+
+    - name: Install pip deps
+      pip:
+        name: wheel
+        virtualenv: "{{ girder_virtualenv }}"
 
   roles:
-    - vagrant
     - mongodb
-    - girder
-    - mq
-    - celery
-  vars:
-    pod: dev  # girder config actually requires pod to be set
-    vagrant: true
-    girder_admin_user: covalic
-    girder_admin_email: covalic@kitware.com
-    girder_admin_password: covalic
-    girder_socket_host: localhost
-    girder_socket_port: 8080
-    girder_exec_user: vagrant
-    girder_exec_group: vagrant
-    girder_plugins:
-      - covalic
-    girder_celery_user: celery
-    girder_celery_email: covalic-celery@kitware.com
-    girder_celery_password: celery
-    girder_root: /opt/covalic/girder
-    girder_assetstore_type: filesystem
-    girder_assetstore_name: local_fs
-    girder_assetstore_local_fs: true
-    worker_exec_user: vagrant
-    worker_exec_group: vagrant
-    mongo_dbpath: /data/db
+    - role: girder
+    - covalic
+    - role: girder-worker
+      girder_worker_virtualenv: "{{ girder_virtualenv }}"
+    - role: docker
+      become: true
+
+  post_tasks:
+    - name: Install challenge submission plugin
+      pip:
+        name: "git+https://github.com/ImageMarkup/isic_challenge_submission@girder3"
+        virtualenv: "{{ girder_virtualenv }}"
+
+    - name: Install the prerelease of girder worker
+      pip:
+        name: girder-worker
+        extra_args: "--pre --upgrade"
+        virtualenv: "{{ girder_virtualenv }}"
+
+    - name: Configure Girder to bind to public interface
+      ini_file:
+        dest: "{{ ansible_user_dir }}/.girder/girder.cfg"
+        section: "global"
+        option: "server.socket_host"
+        value: '"0.0.0.0"'
+      notify: Restart Girder
+
+    - name: Wait for Girder to be responsive
+      wait_for:
+        port: 8080
+        delay: 5
+
+    - name: Create admin user
+      girder:
+        user:
+          firstName: "Provision"
+          lastName: "Admin"
+          login: "{{ girder_admin_username }}"
+          password: "{{ girder_admin_password }}"
+          email: "provision.admin@isic-archive.com"
+          admin: yes
+        state: present
+
+    - name: Create assetstore
+      girder:
+        username: "{{ girder_admin_username }}"
+        password: "{{ girder_admin_password }}"
+        assetstore:
+          name: "Default"
+          type: "filesystem"
+          root: "{{ ansible_user_dir }}/assetstore"
+          current: true
+        state: present
