@@ -248,9 +248,9 @@ class CovalicPlugin(GirderPlugin):
         getPlugin('thumbnails').load(info)
 
         mail_utils.addTemplateDirectory(os.path.join(_HERE, 'mail_templates'))
-        ModelImporter.registerModel('challenge', Challenge(), 'covalic')
-        ModelImporter.registerModel('phase', Phase(), 'covalic')
-        ModelImporter.registerModel('submission', Submission(), 'covalic')
+        ModelImporter.registerModel('challenge', Challenge, 'covalic')
+        ModelImporter.registerModel('phase', Phase, 'covalic')
+        ModelImporter.registerModel('submission', Submission, 'covalic')
 
         resource.allowedSearchTypes.add('challenge.covalic')
 
