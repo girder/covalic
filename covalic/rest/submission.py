@@ -24,7 +24,7 @@ import posixpath
 
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute, describeRoute
-from girder.api.rest import Resource, filtermodel, loadmodel
+from girder.api.rest import Resource, filtermodel, loadmodel, getApiUrl
 from girder.constants import AccessType, SortDir
 from girder.models.folder import Folder
 from girder.models.model_base import AccessException, ValidationException
@@ -230,7 +230,7 @@ class Submission(Resource):
                                            exc=True)
 
         jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
-        apiUrl = os.path.dirname(cherrypy.url())
+        apiUrl = getApiUrl()
         jobModel = self.model('job', 'jobs')
 
         job = jobModel.createJob(
