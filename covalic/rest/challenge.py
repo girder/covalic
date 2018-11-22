@@ -27,10 +27,13 @@ from girder.api.describe import Description, describeRoute
 from girder.api.rest import filtermodel, loadmodel, Resource, RestException
 from girder.constants import AccessType
 from girder.models.file import File
+from girder.models.user import User
 from girder.utility.progress import ProgressContext
 from girder_thumbnails.worker import createThumbnail
 
 from covalic.models.challenge import Challenge
+from covalic.models.phase import Phase
+from covalic.models.submission import Submission
 from covalic.utility import getAssetsFolder
 
 
@@ -43,6 +46,7 @@ class ChallengeResource(Resource):
         self.route('GET', (), self.listChallenges)
         self.route('GET', (':id',), self.getChallenge)
         self.route('GET', (':id', 'access'), self.getAccess)
+        self.route('GET', (':id', 'stats'), self.getStats)
         self.route('POST', (), self.createChallenge)
         self.route('PUT', (':id',), self.updateChallenge)
         self.route('PUT', (':id', 'access'), self.updateAccess)
@@ -216,6 +220,55 @@ class ChallengeResource(Resource):
     )
     def getAccess(self, challenge, params):
         return Challenge().getFullAccessList(challenge)
+
+    @access.public
+    @loadmodel(model='challenge', plugin='covalic', level=AccessType.READ)
+    @describeRoute(
+        Description('Get statistics for a challenge.')
+        .param('id', 'The ID of the challenge.', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Read permission denied on the challenge.', 403)
+    )
+    def getStats(self, challenge, params):
+        participantCount = User().find({
+            'groups': {'$in': Phase().collection.distinct(
+                'participantGroupId',
+                {'challengeId': challenge['_id']}
+            )}
+        }).count()
+        submissionStats = Submission().collection.aggregrate([
+            {
+                '$match': {
+                    'challengeId': challenge['_id'],
+                    'latest': True
+                }
+            }, {
+                '$facet': {
+                    'submissionCount': [
+                        {
+                            '$count': 'count'
+                        }
+                    ],
+                    'submittingParticipantCount': [
+                        {
+                            '$group': {
+                                '_id': '$creatorId'
+                            }
+                        }, {
+                            '$count': 'count'
+                        }
+                    ]
+                }
+            }
+        ]).next()
+        submissionCount = submissionStats['submissionCount'][0]['count']
+        submittingParticipantCount = submissionStats['submittingParticipantCount'][0]['count']
+
+        return {
+            'submissionCount': submissionCount,
+            'participantCount': participantCount,
+            'submittingParticipantCount': submittingParticipantCount,
+        }
 
     @access.user
     @loadmodel(model='challenge', plugin='covalic', level=AccessType.ADMIN)
