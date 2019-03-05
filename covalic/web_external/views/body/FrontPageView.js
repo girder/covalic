@@ -1,5 +1,5 @@
-import { cancelRestRequests } from 'girder/rest';
-import GirderFrontPageView from 'girder/views/body/FrontPageView';
+import { cancelRestRequests } from '@girder/core/rest';
+import GirderFrontPageView from '@girder/core/views/body/FrontPageView';
 
 import template from '../../templates/body/frontPage.pug';
 import '../../stylesheets/body/frontPage.styl';

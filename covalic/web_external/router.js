@@ -1,9 +1,9 @@
 import _ from 'underscore';
 import Backbone from 'backbone';
-import events from 'girder/events';
-import girderRouter from 'girder/router';
-import { AccessType } from 'girder/constants';
-import { parseQueryString } from 'girder/misc';
+import events from '@girder/core/events';
+import girderRouter from '@girder/core/router';
+import { AccessType } from '@girder/core/constants';
+import { parseQueryString } from '@girder/core/misc';
 
 import ChallengeAccessView from './views/body/ChallengeAccessView';
 import ChallengeInstructionsView from './views/body/ChallengeInstructionsView';

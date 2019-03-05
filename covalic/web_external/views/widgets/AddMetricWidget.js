@@ -2,7 +2,7 @@ import _ from 'underscore';
 
 import View from '../view';
 import template from '../../templates/widgets/addMetricWidget.pug';
-import 'girder/utilities/jquery/girderModal';
+import '@girder/core/utilities/jquery/girderModal';
 
 var AddMetricWidget = View.extend({
     events: {

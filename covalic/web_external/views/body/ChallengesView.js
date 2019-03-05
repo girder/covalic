@@ -1,8 +1,8 @@
-import { getCurrentUser } from 'girder/auth';
-import { AccessType } from 'girder/constants';
-import { cancelRestRequests } from 'girder/rest';
-import PaginateWidget from 'girder/views/widgets/PaginateWidget';
-import SearchFieldWidget from 'girder/views/widgets/SearchFieldWidget';
+import { getCurrentUser } from '@girder/core/auth';
+import { AccessType } from '@girder/core/constants';
+import { cancelRestRequests } from '@girder/core/rest';
+import PaginateWidget from '@girder/core/views/widgets/PaginateWidget';
+import SearchFieldWidget from '@girder/core/views/widgets/SearchFieldWidget';
 
 import router from '../../router';
 import View from '../view';

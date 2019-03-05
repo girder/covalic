@@ -1,6 +1,6 @@
 import _ from 'underscore';
-import Model from 'girder/models/Model';
-import { apiRoot, restRequest } from 'girder/rest';
+import Model from '@girder/core/models/Model';
+import { apiRoot, restRequest } from '@girder/core/rest';
 
 var SubmissionModel = Model.extend({
     resourceName: 'covalic_submission',

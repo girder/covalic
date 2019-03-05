@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import moment from 'moment';
-import TimelineWidget from 'girder/views/widgets/TimelineWidget';
+import TimelineWidget from '@girder/core/views/widgets/TimelineWidget';
 
 import View from '../view';
 import ChallengePhaseCollection from '../../collections/ChallengePhaseCollection';

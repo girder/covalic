@@ -1,9 +1,9 @@
 import _ from 'underscore';
-import View from 'girder/views/View';
-import SearchFieldWidget from 'girder/views/widgets/SearchFieldWidget';
-import PluginConfigBreadcrumbWidget from 'girder/views/widgets/PluginConfigBreadcrumbWidget';
-import { restRequest } from 'girder/rest';
-import events from 'girder/events';
+import View from '@girder/core/views/View';
+import SearchFieldWidget from '@girder/core/views/widgets/SearchFieldWidget';
+import PluginConfigBreadcrumbWidget from '@girder/core/views/widgets/PluginConfigBreadcrumbWidget';
+import { restRequest } from '@girder/core/rest';
+import events from '@girder/core/events';
 
 import template from '../templates/config.pug';
 import '../stylesheets/config.styl';

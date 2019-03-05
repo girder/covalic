@@ -1,9 +1,9 @@
 import 'bootstrap-3-typeahead';
 import _ from 'underscore';
-import events from 'girder/events';
-import { getCurrentUser } from 'girder/auth';
-import FolderModel from 'girder/models/FolderModel';
-import UploadWidget from 'girder/views/widgets/UploadWidget';
+import events from '@girder/core/events';
+import { getCurrentUser } from '@girder/core/auth';
+import FolderModel from '@girder/core/models/FolderModel';
+import UploadWidget from '@girder/core/views/widgets/UploadWidget';
 
 import SubmissionModel from '../../models/SubmissionModel';
 import View from '../view';

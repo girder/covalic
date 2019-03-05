@@ -1,4 +1,4 @@
-import eventStream from 'girder/utilities/EventStream';
+import eventStream from '@girder/core/utilities/EventStream';
 
 let status = false;
 eventStream.on('g:eventStream.start', () => {

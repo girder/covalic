@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import { handleClose, handleOpen } from 'girder/dialog';
-import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
-import 'girder/utilities/jquery/girderModal';
+import { handleClose, handleOpen } from '@girder/core/dialog';
+import DateTimeRangeWidget from '@girder/core/views/widgets/DateTimeRangeWidget';
+import '@girder/core/utilities/jquery/girderModal';
 
 import View from '../view';
 import ChallengeModel from '../../models/ChallengeModel';

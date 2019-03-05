@@ -1,4 +1,4 @@
-import { cancelRestRequests, staticRoot } from 'girder/rest';
+import { cancelRestRequests, staticRoot } from '@girder/core/rest';
 
 import View from '../view';
 import template from '../../templates/body/challengeLearn.pug';

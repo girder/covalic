@@ -1,8 +1,8 @@
-import { AccessType } from 'girder/constants';
-import { confirm } from 'girder/dialog';
-import events from 'girder/events';
-import { renderMarkdown } from 'girder/misc';
-import { cancelRestRequests } from 'girder/rest';
+import { AccessType } from '@girder/core/constants';
+import { confirm } from '@girder/core/dialog';
+import events from '@girder/core/events';
+import { renderMarkdown } from '@girder/core/misc';
+import { cancelRestRequests } from '@girder/core/rest';
 
 import router from '../../router';
 import View from '../view';

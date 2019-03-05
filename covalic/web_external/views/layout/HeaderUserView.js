@@ -1,7 +1,7 @@
 import _ from 'underscore';
-import events from 'girder/events';
-import { getCurrentUser, setCurrentUser } from 'girder/auth';
-import { restRequest } from 'girder/rest';
+import events from '@girder/core/events';
+import { getCurrentUser, setCurrentUser } from '@girder/core/auth';
+import { restRequest } from '@girder/core/rest';
 
 import View from '../view';
 import router from '../../router';

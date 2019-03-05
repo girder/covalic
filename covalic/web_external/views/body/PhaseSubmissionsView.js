@@ -1,7 +1,7 @@
 import _ from 'underscore';
-import { cancelRestRequests } from 'girder/rest';
-import UserCollection from 'girder/collections/UserCollection';
-import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+import { cancelRestRequests } from '@girder/core/rest';
+import UserCollection from '@girder/core/collections/UserCollection';
+import PaginateWidget from '@girder/core/views/widgets/PaginateWidget';
 
 import View from '../view';
 import UserSubmissionsView from './UserSubmissionsView';

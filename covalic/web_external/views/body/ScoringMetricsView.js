@@ -1,6 +1,6 @@
 import _ from 'underscore';
-import events from 'girder/events';
-import { cancelRestRequests } from 'girder/rest';
+import events from '@girder/core/events';
+import { cancelRestRequests } from '@girder/core/rest';
 
 import ChallengeModel from '../../models/ChallengeModel';
 import AddMetricWidget from '../widgets/AddMetricWidget';

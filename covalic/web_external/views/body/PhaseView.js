@@ -1,12 +1,12 @@
 import _ from 'underscore';
-import { getCurrentUser } from 'girder/auth';
-import { AccessType } from 'girder/constants';
-import { confirm } from 'girder/dialog';
-import events from 'girder/events';
-import { renderMarkdown } from 'girder/misc';
-import { cancelRestRequests, restRequest } from 'girder/rest';
-import FolderModel from 'girder/models/FolderModel';
-import ItemModel from 'girder/models/ItemModel';
+import { getCurrentUser } from '@girder/core/auth';
+import { AccessType } from '@girder/core/constants';
+import { confirm } from '@girder/core/dialog';
+import events from '@girder/core/events';
+import { renderMarkdown } from '@girder/core/misc';
+import { cancelRestRequests, restRequest } from '@girder/core/rest';
+import FolderModel from '@girder/core/models/FolderModel';
+import ItemModel from '@girder/core/models/ItemModel';
 
 import router from '../../router';
 import View from '../view';

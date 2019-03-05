@@ -1,6 +1,6 @@
 import View from '../view';
 import template from '../../templates/widgets/editScoringWidget.pug';
-import 'girder/utilities/jquery/girderModal';
+import '@girder/core/utilities/jquery/girderModal';
 
 var EditScoringWidget = View.extend({
     events: {

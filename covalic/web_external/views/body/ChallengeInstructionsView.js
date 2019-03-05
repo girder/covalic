@@ -1,5 +1,5 @@
-import FolderModel from 'girder/models/FolderModel';
-import MarkdownWidget from 'girder/views/widgets/MarkdownWidget';
+import FolderModel from '@girder/core/models/FolderModel';
+import MarkdownWidget from '@girder/core/views/widgets/MarkdownWidget';
 
 import router from '../../router';
 import View from '../view';

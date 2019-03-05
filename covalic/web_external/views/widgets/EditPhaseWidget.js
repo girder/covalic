@@ -1,11 +1,11 @@
 import _ from 'underscore';
-import { handleClose, handleOpen } from 'girder/dialog';
-import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
+import { handleClose, handleOpen } from '@girder/core/dialog';
+import DateTimeRangeWidget from '@girder/core/views/widgets/DateTimeRangeWidget';
 
 import View from '../view';
 import PhaseModel from '../../models/PhaseModel';
 import template from '../../templates/widgets/editPhaseWidget.pug';
-import 'girder/utilities/jquery/girderModal';
+import '@girder/core/utilities/jquery/girderModal';
 
 var EditPhaseWidget = View.extend({
     events: {

@@ -1,12 +1,12 @@
 import _ from 'underscore';
 import 'bootstrap/js/dropdown';
 import moment from 'moment';
-import { getCurrentUser } from 'girder/auth';
-import { SORT_DESC } from 'girder/constants';
-import { confirm } from 'girder/dialog';
-import events from 'girder/events';
-import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
-import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+import { getCurrentUser } from '@girder/core/auth';
+import { SORT_DESC } from '@girder/core/constants';
+import { confirm } from '@girder/core/dialog';
+import events from '@girder/core/events';
+import LoadingAnimation from '@girder/core/views/widgets/LoadingAnimation';
+import PaginateWidget from '@girder/core/views/widgets/PaginateWidget';
 import JobModel from '@girder/jobs/models/JobModel';
 import JobStatus from '@girder/jobs/JobStatus';
 

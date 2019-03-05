@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { AccessType } from 'girder/constants';
+import { AccessType } from '@girder/core/constants';
 
 import View from '../view';
 import ChallengePhaseCollection from '../../collections/ChallengePhaseCollection';

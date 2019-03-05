@@ -1,5 +1,5 @@
-import AccessControlledModel from 'girder/models/AccessControlledModel';
-import { apiRoot, restRequest } from 'girder/rest';
+import AccessControlledModel from '@girder/core/models/AccessControlledModel';
+import { apiRoot, restRequest } from '@girder/core/rest';
 
 var ChallengeModel = AccessControlledModel.extend({
     resourceName: 'challenge',

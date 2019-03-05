@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import { renderMarkdown } from 'girder/misc';
+import { renderMarkdown } from '@girder/core/misc';
 
 import View from '../view';
 import template from '../../templates/widgets/scoreDetails.pug';

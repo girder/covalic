@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import DateTimeRangeWidget from 'girder/views/widgets/DateTimeRangeWidget';
+import DateTimeRangeWidget from '@girder/core/views/widgets/DateTimeRangeWidget';
 
 import router from '../../router';
 import View from '../view';

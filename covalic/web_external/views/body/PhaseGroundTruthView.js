@@ -1,8 +1,8 @@
-import { confirm } from 'girder/dialog';
-import events from 'girder/events';
-import AccessWidget from 'girder/views/widgets/AccessWidget';
-import UploadWidget from 'girder/views/widgets/UploadWidget';
-import FolderModel from 'girder/models/FolderModel';
+import { confirm } from '@girder/core/dialog';
+import events from '@girder/core/events';
+import AccessWidget from '@girder/core/views/widgets/AccessWidget';
+import UploadWidget from '@girder/core/views/widgets/UploadWidget';
+import FolderModel from '@girder/core/models/FolderModel';
 
 import router from '../../router';
 import View from '../view';

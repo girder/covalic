@@ -1,4 +1,4 @@
-import events from 'girder/events';
+import events from '@girder/core/events';
 
 import router from '../../router';
 import View from '../view';

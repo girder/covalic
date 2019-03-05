@@ -1,7 +1,7 @@
 import View from '../view';
 import PhaseModel from '../../models/PhaseModel';
 import template from '../../templates/widgets/selectPhase.pug';
-import 'girder/utilities/jquery/girderModal';
+import '@girder/core/utilities/jquery/girderModal';
 
 var SelectPhaseWidget = View.extend({
     events: {

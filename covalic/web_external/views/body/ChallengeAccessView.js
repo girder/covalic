@@ -1,6 +1,6 @@
 import _ from 'underscore';
-import events from 'girder/events';
-import AccessWidget from 'girder/views/widgets/AccessWidget';
+import events from '@girder/core/events';
+import AccessWidget from '@girder/core/views/widgets/AccessWidget';
 
 import router from '../../router';
 import View from '../view';

@@ -1,8 +1,8 @@
 import _ from 'underscore';
 import moment from 'moment';
-import { AccessType, SORT_DESC } from 'girder/constants';
-import LoadingAnimation from 'girder/views/widgets/LoadingAnimation';
-import PaginateWidget from 'girder/views/widgets/PaginateWidget';
+import { AccessType, SORT_DESC } from '@girder/core/constants';
+import LoadingAnimation from '@girder/core/views/widgets/LoadingAnimation';
+import PaginateWidget from '@girder/core/views/widgets/PaginateWidget';
 
 import View from '../view';
 import SubmissionCollection from '../../collections/SubmissionCollection';

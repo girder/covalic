@@ -1,6 +1,6 @@
-import ItemCollection from 'girder/collections/ItemCollection';
-import AccessControlledModel from 'girder/models/AccessControlledModel';
-import { restRequest } from 'girder/rest';
+import ItemCollection from '@girder/core/collections/ItemCollection';
+import AccessControlledModel from '@girder/core/models/AccessControlledModel';
+import { restRequest } from '@girder/core/rest';
 
 var PhaseModel = AccessControlledModel.extend({
     resourceName: 'challenge_phase',

@@ -1,8 +1,8 @@
 import Backbone from 'backbone';
-import App from 'girder/views/App';
-import eventStream from 'girder/utilities/EventStream';
-import { getCurrentUser } from 'girder/auth';
-import { splitRoute } from 'girder/misc';
+import App from '@girder/core/views/App';
+import eventStream from '@girder/core/utilities/EventStream';
+import { getCurrentUser } from '@girder/core/auth';
+import { splitRoute } from '@girder/core/misc';
 
 import router from './router';
 import HeaderView from './views/layout/HeaderView';
