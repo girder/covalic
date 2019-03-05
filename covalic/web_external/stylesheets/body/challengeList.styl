@@ -1,4 +1,4 @@
-@import '~nib/index.styl'
+@import "~nib/index.styl"
 
 .c-challenge-list-header
   padding-bottom 10px
@@ -26,7 +26,7 @@
   border-top 1px solid #ddd
   background-color #efefef
   padding 30px 0 0 30px
-  background linear-gradient(top, #e4e4e4 0%, #efefef 4px)
+  background linear-gradient(top, #e4e4e4 0, #efefef 4px)
 
 .c-challenge-card
   display inline-block
@@ -34,7 +34,7 @@
   margin-bottom 25px
   width 220px
   height 280px
-  box-shadow 0 2px 4px rgba(0,0,0,0.1)
+  box-shadow 0 2px 4px rgba(0, 0, 0, 0.1)
   background white
   padding 10px
 
@@ -57,8 +57,8 @@
     right 0
 
   .c-thumbnail-overlay
-    transition all .35s ease
-    background rgba(0,0,0,0.3)
+    transition all 0.35s ease
+    background rgba(0, 0, 0, 0.3)
     cursor pointer
     height 100%
     width 100%
@@ -97,16 +97,16 @@
       height 20px
       width 45px
       position absolute
-      background linear-gradient(left, rgba(255,255,255,0), rgba(255,255,255,1))
+      background linear-gradient(left, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))
       right 0
 
 .c-edit-thumbnail
   position absolute
-  z-index 1
+  z-index 5
   right 5px
   top 5px
   border-radius 3px
-  background-color rgba(255,255,255,0.84)
+  background-color rgba(255, 255, 255, 0.84)
   color #333
   padding 3px
 
@@ -121,12 +121,12 @@
   padding 0 10px
   line-height 30px
   height 30px
-  box-shadow 0 2px 4px rgba(0,0,0,0.15)
+  box-shadow 0 2px 4px rgba(0, 0, 0, 0.15)
 
   &:hover
     color white
     background-color #44d788
-    box-shadow 0 2px 3px rgba(0,0,0,0.22)
+    box-shadow 0 2px 3px rgba(0, 0, 0, 0.22)
 
   &:focus
     color white

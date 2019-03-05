@@ -208,12 +208,9 @@ class EmailUtilityTestCase(base.TestCase):
         self.assertEqual(len(emails), 1)
 
         # Grant challenge access to other users
-        Challenge().setUserAccess(challenge, self.user2,
-                                          level=AccessType.READ)
-        Challenge().setUserAccess(challenge, self.user3,
-                                          level=AccessType.WRITE)
-        Challenge().setUserAccess(challenge, self.user4,
-                                          level=AccessType.ADMIN)
+        Challenge().setUserAccess(challenge, self.user2, level=AccessType.READ)
+        Challenge().setUserAccess(challenge, self.user3, level=AccessType.WRITE)
+        Challenge().setUserAccess(challenge, self.user4, level=AccessType.ADMIN)
         Challenge().save(challenge)
 
         # Verify users with READ access or above
