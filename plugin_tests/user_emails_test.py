@@ -17,9 +17,12 @@
 #  limitations under the License.
 ###############################################################################
 
-from tests import base
 from girder.constants import AccessType
+from girder.models.user import User
+from tests import base
 
+from covalic.models.challenge import Challenge
+from covalic.models.phase import Phase
 from covalic.utility.user_emails import getChallengeUserEmails, getPhaseUserEmails
 
 
@@ -45,7 +48,7 @@ class EmailUtilityTestCase(base.TestCase):
             'password': 'user1password',
             'admin': False
         }
-        self.user1 = self.model('user').createUser(**user)
+        self.user1 = User().createUser(**user)
 
         # Create user 2
         user = {
@@ -56,7 +59,7 @@ class EmailUtilityTestCase(base.TestCase):
             'password': 'user2password',
             'admin': False
         }
-        self.user2 = self.model('user').createUser(**user)
+        self.user2 = User().createUser(**user)
 
         # Create user 3
         user = {
@@ -67,7 +70,7 @@ class EmailUtilityTestCase(base.TestCase):
             'password': 'user3password',
             'admin': False
         }
-        self.user3 = self.model('user').createUser(**user)
+        self.user3 = User().createUser(**user)
 
         # Create user 4
         user = {
@@ -78,7 +81,7 @@ class EmailUtilityTestCase(base.TestCase):
             'password': 'user4password',
             'admin': False
         }
-        self.user4 = self.model('user').createUser(**user)
+        self.user4 = User().createUser(**user)
 
         # Create user 5
         user = {
@@ -89,13 +92,10 @@ class EmailUtilityTestCase(base.TestCase):
             'password': 'user5password',
             'admin': False
         }
-        self.user5 = self.model('user').createUser(**user)
-
-        self.challengeModel = self.model('challenge', 'covalic')
-        self.phaseModel = self.model('phase', 'covalic')
+        self.user5 = User().createUser(**user)
 
     def testGetChallengeUserEmails(self):
-        challenge = self.challengeModel.createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge 1',
             creator=self.user1,
             public=False)
@@ -106,15 +106,15 @@ class EmailUtilityTestCase(base.TestCase):
         self.assertEqual(len(emails), 1)
 
         # Grant challenge access to other users
-        self.challengeModel.setUserAccess(challenge, self.user2,
-                                          level=AccessType.READ)
-        self.challengeModel.setUserAccess(challenge, self.user3,
-                                          level=AccessType.WRITE)
-        self.challengeModel.setUserAccess(challenge, self.user4,
-                                          level=AccessType.ADMIN)
-        self.challengeModel.setUserAccess(challenge, self.user5,
-                                          level=AccessType.READ)
-        self.challengeModel.save(challenge)
+        Challenge().setUserAccess(challenge, self.user2,
+                                  level=AccessType.READ)
+        Challenge().setUserAccess(challenge, self.user3,
+                                  level=AccessType.WRITE)
+        Challenge().setUserAccess(challenge, self.user4,
+                                  level=AccessType.ADMIN)
+        Challenge().setUserAccess(challenge, self.user5,
+                                  level=AccessType.READ)
+        Challenge().save(challenge)
 
         # Verify users with READ access or above
         emails = getChallengeUserEmails(challenge, AccessType.READ)
@@ -139,12 +139,12 @@ class EmailUtilityTestCase(base.TestCase):
         self.assertEqual(len(emails), 2)
 
     def testGetPhaseAdminEmail(self):
-        challenge = self.challengeModel.createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge 1',
             creator=self.user1,
             public=False)
 
-        phase = self.phaseModel.createPhase(
+        phase = Phase().createPhase(
             challenge=challenge,
             name='phase 1',
             creator=self.user1,
@@ -157,11 +157,11 @@ class EmailUtilityTestCase(base.TestCase):
         self.assertEqual(len(emails), 1)
 
         # Grant phase access to other users
-        self.phaseModel.setUserAccess(phase, self.user2, level=AccessType.READ)
-        self.phaseModel.setUserAccess(phase, self.user3, level=AccessType.WRITE)
-        self.phaseModel.setUserAccess(phase, self.user4, level=AccessType.ADMIN)
-        self.phaseModel.setUserAccess(phase, self.user5, level=AccessType.READ)
-        self.phaseModel.save(phase)
+        Phase().setUserAccess(phase, self.user2, level=AccessType.READ)
+        Phase().setUserAccess(phase, self.user3, level=AccessType.WRITE)
+        Phase().setUserAccess(phase, self.user4, level=AccessType.ADMIN)
+        Phase().setUserAccess(phase, self.user5, level=AccessType.READ)
+        Phase().save(phase)
 
         # Verify users with READ access or above
         emails = getPhaseUserEmails(phase, AccessType.READ,
@@ -189,12 +189,12 @@ class EmailUtilityTestCase(base.TestCase):
         self.assertEqual(len(emails), 2)
 
     def testGetPhaseAdminEmailIncludeChallengeAdmins(self):
-        challenge = self.challengeModel.createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge 1',
             creator=self.user1,
             public=False)
 
-        phase = self.phaseModel.createPhase(
+        phase = Phase().createPhase(
             challenge=challenge,
             name='phase 1',
             creator=self.user1,
@@ -208,13 +208,13 @@ class EmailUtilityTestCase(base.TestCase):
         self.assertEqual(len(emails), 1)
 
         # Grant challenge access to other users
-        self.challengeModel.setUserAccess(challenge, self.user2,
+        Challenge().setUserAccess(challenge, self.user2,
                                           level=AccessType.READ)
-        self.challengeModel.setUserAccess(challenge, self.user3,
+        Challenge().setUserAccess(challenge, self.user3,
                                           level=AccessType.WRITE)
-        self.challengeModel.setUserAccess(challenge, self.user4,
+        Challenge().setUserAccess(challenge, self.user4,
                                           level=AccessType.ADMIN)
-        self.challengeModel.save(challenge)
+        Challenge().save(challenge)
 
         # Verify users with READ access or above
         emails = getPhaseUserEmails(phase, AccessType.READ,
@@ -241,8 +241,8 @@ class EmailUtilityTestCase(base.TestCase):
         self.assertEqual(len(emails), 2)
 
         # Grant phase access to another user
-        self.phaseModel.setUserAccess(phase, self.user5, level=AccessType.ADMIN)
-        self.phaseModel.save(phase)
+        Phase().setUserAccess(phase, self.user5, level=AccessType.ADMIN)
+        Phase().save(phase)
 
         # Verify users with READ access or above
         emails = getPhaseUserEmails(phase, AccessType.READ,

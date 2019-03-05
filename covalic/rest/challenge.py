@@ -26,15 +26,17 @@ from girder.api import access
 from girder.api.describe import Description, describeRoute
 from girder.api.rest import filtermodel, loadmodel, Resource, RestException
 from girder.constants import AccessType
+from girder.models.file import File
 from girder.utility.progress import ProgressContext
 from girder_thumbnails.worker import createThumbnail
 
-from ..utility import getAssetsFolder
+from covalic.models.challenge import Challenge
+from covalic.utility import getAssetsFolder
 
 
-class Challenge(Resource):
+class ChallengeResource(Resource):
     def __init__(self):
-        super(Challenge, self).__init__()
+        super(ChallengeResource, self).__init__()
 
         self.resourceName = 'challenge'
 
@@ -99,7 +101,7 @@ class Challenge(Resource):
                 raise RestException('Invalid timeframe parameter.')
 
         user = self.getCurrentUser()
-        return list(self.model('challenge', 'covalic').list(
+        return list(Challenge().list(
             user=user, offset=offset, limit=limit, sort=sort, filters=filters))
 
     @access.user
@@ -129,7 +131,7 @@ class Challenge(Resource):
         startDate = params.get('startDate')
         endDate = params.get('endDate')
 
-        return self.model('challenge', 'covalic').createChallenge(
+        return Challenge().createChallenge(
             name=params['name'].strip(), description=description, public=public,
             instructions=instructions, creator=user, organizers=organizers,
             startDate=startDate, endDate=endDate)
@@ -165,7 +167,7 @@ class Challenge(Resource):
         challenge['endDate'] = params.get(
             'endDate', challenge.get('endDate', None))
 
-        return self.model('challenge', 'covalic').save(challenge)
+        return Challenge().save(challenge)
 
     @access.user
     @loadmodel(model='challenge', plugin='covalic', level=AccessType.ADMIN)
@@ -183,11 +185,11 @@ class Challenge(Resource):
         self.requireParams('access', params)
 
         public = self.boolParam('public', params, default=False)
-        self.model('challenge', 'covalic').setPublic(challenge, public)
+        Challenge().setPublic(challenge, public)
 
         try:
             access = json.loads(params['access'])
-            return self.model('challenge', 'covalic').setAccessList(
+            return Challenge().setAccessList(
                 challenge, access, save=True)
         except ValueError:
             raise RestException('The access parameter must be JSON.')
@@ -213,7 +215,7 @@ class Challenge(Resource):
         .errorResponse('Admin access was denied for the challenge.', 403)
     )
     def getAccess(self, challenge, params):
-        return self.model('challenge', 'covalic').getFullAccessList(challenge)
+        return Challenge().getFullAccessList(challenge)
 
     @access.user
     @loadmodel(model='challenge', plugin='covalic', level=AccessType.ADMIN)
@@ -232,9 +234,9 @@ class Challenge(Resource):
                              message='Calculating total size...') as ctx:
             if progress:
                 ctx.update(
-                    total=self.model('challenge', 'covalic').subtreeCount(
+                    total=Challenge().subtreeCount(
                         challenge))
-            self.model('challenge', 'covalic').remove(challenge, progress=ctx)
+            Challenge().remove(challenge, progress=ctx)
         return {'message': 'Deleted challenge %s.' % challenge['name']}
 
     @access.public
@@ -255,8 +257,8 @@ class Challenge(Resource):
             if thumbnail['size'] >= size:
                 break
 
-        file = self.model('file').load(thumbnail['fileId'], force=True)
-        return self.model('file').download(file)
+        file = File().load(thumbnail['fileId'], force=True)
+        return File().download(file)
     downloadThumb.description = (
         Description('Get the thumbnail for the given challenge.')
         .notes('If the challenge has no thumbnail, this will redirect to an '
@@ -281,8 +283,8 @@ class Challenge(Resource):
         i = 0
         for thumbnail in challenge['thumbnails']:
             if thumbnail['size'] == size:
-                return self.model('file').filter(
-                    self.model('file').load(thumbnail['fileId'], force=True),
+                return File().filter(
+                    File().load(thumbnail['fileId'], force=True),
                     user)
             elif size < thumbnail['size']:
                 break
@@ -300,9 +302,9 @@ class Challenge(Resource):
             'size': size,
             'fileId': newThumb['_id']
         })
-        self.model('challenge', 'covalic').save(challenge)
+        Challenge().save(challenge)
 
-        return self.model('file').filter(newThumb, user)
+        return File().filter(newThumb, user)
     createThumb.description = (
         Description('Create a new thumbnail for this challenge.')
         .param('id', 'The ID of the challenge.', paramType='path')
@@ -324,7 +326,7 @@ class Challenge(Resource):
     def removeThumb(self, challenge, params):
         del challenge['thumbnailSourceId']
         del challenge['thumbnails']
-        self.model('challenge', 'covalic').save(challenge)
+        Challenge().save(challenge)
 
         return {'message': 'Thumbnail deleted.'}
     removeThumb.description = (

@@ -23,10 +23,16 @@ import json
 import bson.json_util
 from girder.api import access
 from girder.api.describe import Description, describeRoute
-from girder.api.rest import filtermodel, loadmodel, getApiUrl, Resource, \
-    RestException
+from girder.api.rest import filtermodel, loadmodel, getApiUrl, Resource, RestException
 from girder.constants import AccessType
+from girder.models.folder import Folder
+from girder.models.group import Group
+from girder.models.token import Token
 from girder.utility.progress import ProgressContext
+from girder_jobs.models.job import Job
+
+from covalic.models.phase import Phase
+from covalic.models.submission import Submission
 
 
 def _loadMetadata(params):
@@ -42,9 +48,9 @@ def _loadMetadata(params):
     return meta
 
 
-class Phase(Resource):
+class PhaseResource(Resource):
     def __init__(self):
-        super(Phase, self).__init__()
+        super(PhaseResource, self).__init__()
 
         self.resourceName = 'challenge_phase'
 
@@ -82,9 +88,9 @@ class Phase(Resource):
         limit, offset, sort = self.getPagingParameters(params, 'ordinal')
 
         user = self.getCurrentUser()
-        results = self.model('phase', 'covalic').list(
+        results = Phase().list(
             challenge, user=user, offset=offset, limit=limit, sort=sort)
-        return [self.model('phase', 'covalic').filter(p, user)
+        return [Phase().filter(p, user)
                 for p in results]
 
     @access.user
@@ -151,13 +157,13 @@ class Phase(Resource):
 
         participantGroupId = params.get('participantGroupId')
         if participantGroupId:
-            group = self.model('group').load(
+            group = Group().load(
                 participantGroupId, user=user, level=AccessType.READ)
         else:
             group = None
 
-        ordinal = len([self.model('phase', 'covalic').filter(p, user)
-                       for p in self.model('phase', 'covalic').list(
+        ordinal = len([Phase().filter(p, user)
+                       for p in Phase().list(
                            challenge, user=user)])
 
         startDate = params.get('startDate')
@@ -166,7 +172,7 @@ class Phase(Resource):
         type = params.get('type', '').strip()
         meta = _loadMetadata(params)
 
-        phase = self.model('phase', 'covalic').createPhase(
+        phase = Phase().createPhase(
             name=params['name'].strip(), description=description,
             instructions=instructions, active=active, public=public,
             creator=user, challenge=challenge, participantGroup=group,
@@ -191,7 +197,7 @@ class Phase(Resource):
         .errorResponse('Admin access was denied for the phase.', 403)
     )
     def getAccess(self, phase, params):
-        return self.model('phase', 'covalic').getFullAccessList(phase)
+        return Phase().getFullAccessList(phase)
 
     @access.user
     @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
@@ -207,17 +213,15 @@ class Phase(Resource):
     def updateAccess(self, phase, params):
         self.requireParams('access', params)
 
-        folderModel = self.model('folder')
-        phaseModel = self.model('phase', 'covalic')
-        folder = folderModel.load(phase['folderId'], force=True)
+        folder = Folder().load(phase['folderId'], force=True)
         public = self.boolParam('public', params, default=False)
-        phaseModel.setPublic(phase, public)
-        folderModel.setPublic(folder, public)
+        Phase().setPublic(phase, public)
+        Folder().setPublic(folder, public)
 
         try:
             access = json.loads(params['access'])
-            folderModel.setAccessList(folder, access, save=True)
-            return phaseModel.setAccessList(phase, access, save=True)
+            Folder().setAccessList(folder, access, save=True)
+            return Phase().setAccessList(phase, access, save=True)
         except ValueError:
             raise RestException('The access parameter must be JSON.')
 
@@ -299,25 +303,25 @@ class Phase(Resource):
             phase['ordinal'] = int(params.get('ordinal').strip())
         if ('participantGroupId' in params and params['participantGroupId'] !=
                 str(phase.get('participantGroupId'))):
-            group = self.model('group').load(
+            group = Group().load(
                 params['participantGroupId'],
                 user=user, level=AccessType.READ, exc=True)
             phase['participantGroupId'] = group['_id']
         if ('folderId' in params and
                 params['folderId'] != str(phase['folderId'])):
-            folder = self.model('folder').load(
+            folder = Folder().load(
                 params['folderId'], user=user,
                 level=AccessType.READ, exc=True)
             phase['folderId'] = folder['_id']
         if ('groundTruthFolderId' in params and params['groundTruthFolderId'] !=
                 str(phase.get('groundTruthFolderId'))):
-            folder = self.model('folder').load(
+            folder = Folder().load(
                 params['groundTruthFolderId'], user=user,
                 level=AccessType.READ, exc=True)
             phase['groundTruthFolderId'] = folder['_id']
         if ('testDataFolderId' in params and params['testDataFolderId'] !=
                 str(phase.get('testDataFolderId'))):
-            folder = self.model('folder').load(
+            folder = Folder().load(
                 params['testDataFolderId'], user=user, level=AccessType.READ,
                 exc=True)
             phase['testDataFolderId'] = folder['_id']
@@ -332,7 +336,7 @@ class Phase(Resource):
         if meta is not None:
             phase['meta'] = meta
 
-        return self.model('phase', 'covalic').updatePhase(phase)
+        return Phase().updatePhase(phase)
 
     @access.public
     @loadmodel(model='phase', plugin='covalic', level=AccessType.READ)
@@ -344,7 +348,7 @@ class Phase(Resource):
         .errorResponse('Read permission denied on the phase.', 403)
     )
     def getPhase(self, phase, params):
-        return self.model('phase', 'covalic').filter(
+        return Phase().filter(
             phase, self.getCurrentUser())
 
     @access.user
@@ -358,14 +362,12 @@ class Phase(Resource):
     )
     def joinPhase(self, phase, params):
         user = self.getCurrentUser()
-        phase = self.model('phase', 'covalic').filter(
+        phase = Phase().filter(
             phase, self.getCurrentUser())
         participantGroupId = phase['participantGroupId']
         if 'groups' not in user or participantGroupId not in user['groups']:
-            participantGroup = self.model('group').load(
-                participantGroupId, force=True, exc=True)
-            self.model('group').addUser(participantGroup, user,
-                                        level=AccessType.READ)
+            participantGroup = Group().load(participantGroupId, force=True, exc=True)
+            Group().addUser(participantGroup, user, level=AccessType.READ)
         return phase
 
     @access.user
@@ -385,8 +387,8 @@ class Phase(Resource):
                              message='Calculating total size...') as ctx:
             if progress:
                 ctx.update(
-                    total=self.model('phase', 'covalic').subtreeCount(phase))
-            self.model('phase', 'covalic').remove(phase, progress=ctx)
+                    total=Phase().subtreeCount(phase))
+            Phase().remove(phase, progress=ctx)
         return {'message': 'Deleted phase %s.' % phase['name']}
 
     @access.public
@@ -401,10 +403,10 @@ class Phase(Resource):
         # All participants can see the names of the ground truth items in
         # order to validate their submissions, even if they don't have
         # read access to the folder.
-        folder = self.model('folder').load(
+        folder = Folder().load(
             phase['groundTruthFolderId'], force=True)
 
-        return list(self.model('folder').childItems(folder, limit=0, fields=(
+        return list(Folder().childItems(folder, limit=0, fields=(
             'name', '_id'
         )))
 
@@ -422,11 +424,11 @@ class Phase(Resource):
 
         limit, offset, sort = self.getPagingParameters(params, 'name')
 
-        folder = self.model('folder').load(
+        folder = Folder().load(
             phase['testDataFolderId'], user=self.getCurrentUser(),
             level=AccessType.READ, exc=True)
 
-        return list(self.model('folder').childItems(
+        return list(Folder().childItems(
             folder, limit=limit, offset=offset, sort=sort))
 
     @access.user
@@ -442,13 +444,12 @@ class Phase(Resource):
                'the challenge.', required=False, paramType='body')
     )
     def setMetrics(self, phase, params):
-        phaseModel = self.model('phase', 'covalic')
         user = self.getCurrentUser()
 
         oldMetrics = phase.get('metrics', {})
 
         if 'copyFrom' in params:
-            srcPhase = self.model('phase', 'covalic').load(
+            srcPhase = Phase().load(
                 params['copyFrom'], level=AccessType.READ, exc=True, user=user)
 
             phase['metrics'] = srcPhase.get('metrics', {})
@@ -468,9 +469,9 @@ class Phase(Resource):
         # If they have changed, recompute all scores using the new weights
         if changed:
             # TODO progress context
-            self.model('submission', 'covalic').recomputeOverallScores(phase)
+            Submission().recomputeOverallScores(phase)
 
-        return phaseModel.filter(phaseModel.save(phase), user)
+        return Phase().filter(Phase().save(phase), user)
 
     @access.user
     @loadmodel(model='phase', plugin='covalic', level=AccessType.WRITE)
@@ -485,16 +486,15 @@ class Phase(Resource):
         user = self.getCurrentUser()
 
         apiUrl = getApiUrl()
-        jobModel = self.model('job', 'jobs')
 
         title = '%s: metric weight initialization' % phase['name']
-        job = jobModel.createJob(
+        job = Job().createJob(
             title=title, type='covalic_weight_init', user=user,
             handler='worker_handler')
-        jobToken = jobModel.createJobToken(job)
+        jobToken = Job().createJobToken(job)
 
-        scoreToken = self.model('token').createToken(user=user, days=7)
-        groundTruth = self.model('folder').load(
+        scoreToken = Token().createToken(user=user, days=7)
+        groundTruth = Folder().load(
             phase['groundTruthFolderId'], user=user, level=AccessType.READ,
             exc=True)
 
@@ -552,10 +552,10 @@ class Phase(Resource):
             'cleanup': True
         }
         job['kwargs'] = kwargs
-        job = jobModel.save(job)
-        jobModel.scheduleJob(job)
+        job = Job().save(job)
+        Job().scheduleJob(job)
 
-        return jobModel.filter(job, user)
+        return Job().filter(job, user)
 
     @access.user
     @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
@@ -575,9 +575,8 @@ class Phase(Resource):
         if 'dockerArgs' in params:
             phase['scoreTask']['dockerArgs'] = params['dockerArgs']
 
-        phaseModel = self.model('phase', 'covalic')
-        return self.model('phase', 'covalic').filter(
-            phaseModel.save(phase), self.getCurrentUser())
+        return Phase().filter(
+            Phase().save(phase), self.getCurrentUser())
 
     @access.admin
     @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
@@ -588,13 +587,11 @@ class Phase(Resource):
         .errorResponse('Site admin access is required.', 403)
     )
     def rescorePhase(self, phase, params):
-        submissionModel = self.model('submission', 'covalic')
-
-        submissions = submissionModel.list(
+        submissions = Submission().list(
             phase, limit=0, sort=[('created', 1)], fields={'score': False}, latest=True)
 
         # Get API URL by removing this endpoint's parameters
         apiUrl = '/'.join(cherrypy.url().split('/')[:-3])
 
         for submission in submissions:
-            submissionModel.scoreSubmission(submission, apiUrl)
+            Submission().scoreSubmission(submission, apiUrl)

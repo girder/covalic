@@ -19,7 +19,10 @@
 
 import datetime
 
+from girder.models.user import User
 from tests import base
+
+from covalic.models.challenge import Challenge
 
 
 def setUpModule():
@@ -43,7 +46,7 @@ class ChallengeTimeframeTestCase(base.TestCase):
             'password': 'goodpassword',
             'admin': False
         }
-        self.user = self.model('user').createUser(**user)
+        self.user = User().createUser(**user)
 
         # Create sets of challenges with combinations of specified/empty/null
         # start/end dates
@@ -55,73 +58,73 @@ class ChallengeTimeframeTestCase(base.TestCase):
         date4 = now + datetime.timedelta(2)
 
         # Neither date specified
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='neither (null)',
             creator=self.user,
             startDate=None,
             endDate=None)
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='neither (empty)',
             creator=self.user,
             startDate='',
             endDate='')
 
         # Only start date specified
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='only start, in past (null)',
             creator=self.user,
             startDate=date2,
             endDate=None)
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='only start, in past (empty)',
             creator=self.user,
             startDate=date2,
             endDate='')
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='only start, in future (null)',
             creator=self.user,
             startDate=date3,
             endDate=None)
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='only start, in future (empty)',
             creator=self.user,
             startDate=date3,
             endDate='')
 
         # Only end date specified
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='only end, in past (null)',
             creator=self.user,
             startDate=None,
             endDate=date2)
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='only end, in past (empty)',
             creator=self.user,
             startDate='',
             endDate=date2)
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='only end, in future (null)',
             creator=self.user,
             startDate=None,
             endDate=date3)
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='only end, in future (empty)',
             creator=self.user,
             startDate='',
             endDate=date3)
 
         # Both dates specified
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='both, in past',
             creator=self.user,
             startDate=date1,
             endDate=date2)
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='both, active',
             creator=self.user,
             startDate=date2,
             endDate=date3)
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='both, in future',
             creator=self.user,
             startDate=date3,

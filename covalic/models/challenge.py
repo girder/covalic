@@ -24,8 +24,8 @@ from girder.models.collection import Collection
 from girder.models.model_base import AccessControlledModel, ValidationException
 from girder.utility.progress import noProgress
 
-from .phase import Phase
-from ..utility import validateDate
+from covalic.models.phase import Phase
+from covalic.utility import validateDate
 
 
 class Challenge(AccessControlledModel):
@@ -58,14 +58,13 @@ class Challenge(AccessControlledModel):
         Count up the recursive size of the challenge. This sums the size of
         each individual phase, then adds 1 for the challenge itself.
         """
-        phaseModel = Phase()
         count = 1
 
-        phases = phaseModel.find({
+        phases = Phase().find({
             'challengeId': challenge['_id']
         }, fields=(), limit=0)
         for phase in phases:
-            count += phaseModel.subtreeCount(phase)
+            count += Phase().subtreeCount(phase)
 
         return count
 
@@ -121,25 +120,23 @@ class Challenge(AccessControlledModel):
     def createChallenge(self, name, creator, description='', instructions='',
                         public=True, organizers='', startDate=None,
                         endDate=None):
-        collectionModel = Collection()
-
         if not name.strip():
             # pre-validate this since we have to create a collection first
             # with the same name.
             raise ValidationException(
                 'You must provide a name for your challenge.', field='name')
 
-        collection = collectionModel.findOne({
+        collection = Collection().findOne({
             'name': name
         })
 
         if collection is None:
-            collection = collectionModel.createCollection(
+            collection = Collection().createCollection(
                 name, creator=creator, public=public)
         else:
             # If using a pre-existing collection, we must make sure we have
             # full access to it.
-            collectionModel.requireAccess(
+            Collection().requireAccess(
                 collection, user=creator, level=AccessType.ADMIN)
 
         challenge = {

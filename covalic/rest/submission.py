@@ -22,27 +22,25 @@ import math
 import os
 import posixpath
 
-from ..utility.user_emails import getPhaseUserEmails
-from ..models.phase import Phase
-from ..models.submission import Submission
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute, describeRoute
-from girder.api.rest import Resource, filtermodel, loadmodel, getApiUrl
+from girder.api.rest import Resource, filtermodel, loadmodel
 from girder.constants import AccessType, SortDir
 from girder.exceptions import AccessException, GirderException, RestException, ValidationException
 from girder.models.folder import Folder
+from girder.models.token import Token
+from girder.models.user import User
 from girder.utility import mail_utils
-from girder_worker.girder_plugin import utils
 
-from ..constants import PluginSettings
-from ..utility.user_emails import getPhaseUserEmails
-from ..models.phase import Phase
-from ..models.submission import Submission
+from covalic.utility.user_emails import getPhaseUserEmails
+from covalic.models.challenge import Challenge
+from covalic.models.phase import Phase
+from covalic.models.submission import Submission
 
 
-class Submission(Resource):
+class SubmissionResource(Resource):
     def __init__(self):
-        super(Submission, self).__init__()
+        super(SubmissionResource, self).__init__()
 
         self.resourceName = 'covalic_submission'
 
@@ -66,7 +64,7 @@ class Submission(Resource):
         to corresponding strings so they can be JSON encoded.
         """
         if (phase.get('hideScores') and
-                not self.model('phase', 'covalic').hasAccess(
+                not Phase().hasAccess(
                     phase, user, level=AccessType.WRITE)):
             submission.pop('score', None)
             submission.pop('overallScore', None)
@@ -128,7 +126,7 @@ class Submission(Resource):
 
         # If scores are hidden, do not allow sorting by score fields
         if (phase.get('hideScores') and
-                not self.model('phase', 'covalic').hasAccess(
+                not Phase().hasAccess(
                     phase, user, AccessType.WRITE)):
             for field, _ in sort:
                 if field == 'overallScore' or field.startswith('score.'):
@@ -139,7 +137,7 @@ class Submission(Resource):
         # Exclude score field
         fields = {'score': False}
 
-        submissions = self.model('submission', 'covalic').list(
+        submissions = Submission().list(
             phase, limit=limit, offset=offset, sort=sort, userFilter=userFilter,
             fields=fields, latest=latest, approach=approach)
         return [self._filterScore(phase, s, user) for s in submissions]
@@ -162,7 +160,7 @@ class Submission(Resource):
         if user['_id'] != currentUser['_id']:
             self.requireAdmin(currentUser, 'Only admins can see other user\'s approaches.')
 
-        return self.model('submission', 'covalic').listApproaches(phase=phase, user=user)
+        return Submission().listApproaches(phase=phase, user=user)
 
     @access.user
     @filtermodel(model=Submission)
@@ -201,7 +199,7 @@ class Submission(Resource):
 
         # Only users in the participant group (or with write access) may submit
         if phase['participantGroupId'] not in user['groups']:
-            self.model('phase', 'covalic').requireAccess(
+            Phase().requireAccess(
                 phase, user, level=AccessType.WRITE)
 
         # Require optional fields that are enabled in phase
@@ -231,12 +229,9 @@ class Submission(Resource):
         if params['userId'] is not None:
             self.requireAdmin(user, 'Administrator access required to submit '
                                     'to this phase on behalf of another user.')
-            user = self.model('user').load(params['userId'], force=True,
-                                           exc=True)
+            user = User().load(params['userId'], force=True, exc=True)
 
-        submissionModel = self.model('submission', 'covalic')
-
-        submission = submissionModel.createSubmission(
+        submission = Submission().createSubmission(
             creator=user,
             phase=phase,
             folder=folder,
@@ -252,9 +247,9 @@ class Submission(Resource):
         apiUrl = os.path.dirname(cherrypy.url())
 
         try:
-            submission = submissionModel.scoreSubmission(submission, apiUrl)
+            submission = Submission().scoreSubmission(submission, apiUrl)
         except GirderException:
-            submissionModel.remove(submission)
+            Submission().remove(submission)
             raise
 
         return self._filterScore(phase, submission, user)
@@ -285,7 +280,7 @@ class Submission(Resource):
     def updateSubmission(self, submission, **params):
         # Ensure write access on the containing challenge phase
         user = self.getCurrentUser()
-        phase = self.model('phase', 'covalic').load(
+        phase = Phase().load(
             submission['phaseId'], user=user, exc=True, level=AccessType.WRITE)
 
         title = self._getStrippedParam(params, 'title')
@@ -319,7 +314,7 @@ class Submission(Resource):
         if disqualified is not None:
             submission['latest'] = not disqualified
 
-        submission = self.model('submission', 'covalic').save(submission)
+        submission = Submission().save(submission)
 
         return self._filterScore(phase, submission, user)
 
@@ -364,7 +359,7 @@ class Submission(Resource):
     )
     def postScore(self, submission, score, params):
         # Ensure admin access on the containing challenge phase
-        phase = self.model('phase', 'covalic').load(
+        phase = Phase().load(
             submission['phaseId'], user=self.getCurrentUser(), exc=True,
             level=AccessType.ADMIN)
 
@@ -374,15 +369,14 @@ class Submission(Resource):
         # Save document to trigger computing overall score
         submission.pop('overallScore', None)
         submission['score'] = score
-        submission = self.model('submission', 'covalic').save(submission)
+        submission = Submission().save(submission)
 
         # Delete the scoring user's job token since the job is now complete.
         token = self.getCurrentToken()
-        self.model('token').remove(token)
+        Token().remove(token)
 
-        user = self.model('user').load(submission['creatorId'], force=True)
-        challenge = self.model('challenge', 'covalic').load(
-            phase['challengeId'], force=True)
+        user = User().load(submission['creatorId'], force=True)
+        challenge = Challenge().load(phase['challengeId'], force=True)
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
 
         # Mail user
@@ -428,7 +422,7 @@ class Submission(Resource):
     def getSubmission(self, submission, params):
         # Ensure read access on the containing challenge phase
         user = self.getCurrentUser()
-        phase = self.model('phase', 'covalic').load(
+        phase = Phase().load(
             submission['phaseId'], user=user, exc=True, level=AccessType.READ)
 
         return self._filterScore(phase, submission, user)
@@ -460,21 +454,18 @@ class Submission(Resource):
         .errorResponse('Site admin access is required.', 403)
     )
     def rescoreSubmission(self, submission):
-        phaseModel = self.model('phase', 'covalic')
-        submissionModel = self.model('submission', 'covalic')
-
         user = self.getCurrentUser()
 
         # Allow rescoring only the latest submission
         if not submission.get('latest', False):
             raise RestException('Only the latest submission may be re-scored.')
 
-        phase = phaseModel.load(submission['phaseId'], force=True)
+        phase = Phase().load(submission['phaseId'], force=True)
 
         # Get API URL like in postSubmission(), but remove this endpoint's parameters
         apiUrl = '/'.join(cherrypy.url().split('/')[:-3])
 
-        submission = submissionModel.scoreSubmission(submission, apiUrl)
+        submission = Submission().scoreSubmission(submission, apiUrl)
 
         return self._filterScore(phase, submission, user)
 
@@ -488,12 +479,10 @@ class Submission(Resource):
     )
     def deleteSubmission(self, submission, params):
         user = self.getCurrentUser()
-        phase = self.model('phase', 'covalic').load(submission['phaseId'],
-                                                    force=True)
+        phase = Phase().load(submission['phaseId'], force=True)
         if (user['_id'] == submission['creatorId'] or
-                self.model('phase', 'covalic').hasAccess(
-                    phase, user, AccessType.WRITE)):
-            self.model('submission', 'covalic').remove(submission)
+                Phase().hasAccess(phase, user, AccessType.WRITE)):
+            Submission().remove(submission)
         else:
             raise AccessException(
                 'You may only remove submissions that you made, or those under '

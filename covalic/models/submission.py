@@ -23,13 +23,17 @@ from girder.constants import AccessType
 from girder.exceptions import GirderException
 from girder.models.folder import Folder
 from girder.models.model_base import Model, ValidationException
+from girder.models.setting import Setting
+from girder.models.token import Token
 from girder.models.user import User
 from girder.utility.progress import noProgress
+from girder_jobs.models.job import Job
 from girder_worker.girder_plugin import utils
 
-from .phase import Phase
-from .. import scoring
-from ..utility import validateDate
+from covalic import scoring
+from covalic.constants import PluginSettings
+from covalic.models.phase import Phase
+from covalic.utility import validateDate
 
 
 class Submission(Model):
@@ -122,10 +126,9 @@ class Submission(Model):
                 self.save(submission, validate=False)
 
     def remove(self, doc, progress=noProgress):
-        folderModel = Folder()
-        folder = folderModel.load(doc['folderId'], force=True)
+        folder = Folder().load(doc['folderId'], force=True)
         if folder:
-            folderModel.remove(folder)
+            Folder().remove(folder)
 
         Model.remove(self, doc, progress=progress)
 
@@ -200,45 +203,41 @@ class Submission(Model):
         the phase. Phase admins should have read access on the submission
         folders.
         """
-        folderModel = Folder()
-        userModel = User()
-        phaseModel = Phase()
-
         # Get phase admin users
-        phaseAcl = phaseModel.getFullAccessList(phase)
+        phaseAcl = Phase().getFullAccessList(phase)
         phaseAdminUserIds = set([user['id']
                                  for user in phaseAcl.get('users')
                                  if user['level'] >= AccessType.WRITE])
-        phaseAdminUsers = [userModel.load(userId, force=True, exc=True)
+        phaseAdminUsers = [User().load(userId, force=True, exc=True)
                            for userId in phaseAdminUserIds]
 
         # Update submission folder ACL for current phase admins
         try:
             for sub in submissions:
-                folder = folderModel.load(sub['folderId'], force=True)
+                folder = Folder().load(sub['folderId'], force=True)
                 if not folder:
                     continue
-                folderAcl = folderModel.getFullAccessList(folder)
+                folderAcl = Folder().getFullAccessList(folder)
 
                 # Revoke access to users who are not phase admins; ignore folder
                 # owner
-                usersToRemove = [userModel.load(user['id'], force=True,
-                                                exc=True)
+                usersToRemove = [User().load(user['id'], force=True,
+                                             exc=True)
                                  for user in folderAcl.get('users')
                                  if (user['id'] not in phaseAdminUserIds and
                                      user['id'] != folder['creatorId'])]
                 for user in usersToRemove:
-                    folderModel.setUserAccess(folder, user, None)
+                    Folder().setUserAccess(folder, user, None)
 
                 # Add access to phase admins; ignore folder owner
                 usersToAdd = [user for user in phaseAdminUsers
                               if user['_id'] != folder['creatorId']]
                 for user in usersToAdd:
-                    folderModel.setUserAccess(folder, user, AccessType.READ)
+                    Folder().setUserAccess(folder, user, AccessType.READ)
 
                 # Save folder if access changed
                 if usersToRemove or usersToAdd:
-                    folderModel.save(folder, validate=False)
+                    Folder().save(folder, validate=False)
         except TypeError:
             raise ValidationException('A list of submissions is required.')
 
@@ -246,47 +245,40 @@ class Submission(Model):
         """
         Run a Girder Worker job to score a submission.
         """
-        folderModel = self.model('folder')
-        jobModel = self.model('job', 'jobs')
-        phaseModel = self.model('phase', 'covalic')
-        settingModel = self.model('setting')
-        tokenModel = self.model('token')
-        userModel = self.model('user')
-
-        phase = phaseModel.load(submission['phaseId'], force=True)
-        folder = folderModel.load(submission['folderId'], force=True)
-        user = userModel.load(submission['creatorId'], force=True)
+        phase = Phase().load(submission['phaseId'], force=True)
+        folder = Folder().load(submission['folderId'], force=True)
+        user = User().load(submission['creatorId'], force=True)
 
         otherFields = {}
         if 'overallScore' in submission:
             otherFields['rescoring'] = True
 
         jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
-        job = jobModel.createJob(
+        job = Job().createJob(
             title=jobTitle, type='covalic_score', handler='worker_handler', user=user,
             otherFields=otherFields)
 
-        scoreUserId = settingModel.get(PluginSettings.SCORING_USER_ID)
+        scoreUserId = Setting().get(PluginSettings.SCORING_USER_ID)
         if not scoreUserId:
             raise GirderException(
                 'No scoring user ID is set. Please set one on the plugin configuration page.')
 
-        scoreUser = userModel.load(scoreUserId, force=True)
+        scoreUser = User().load(scoreUserId, force=True)
         if not scoreUser:
             raise GirderException('Invalid scoring user setting (%s).' % scoreUserId)
 
-        scoreToken = tokenModel.createToken(user=scoreUser, days=7)
-        folderModel.setUserAccess(
+        scoreToken = Token().createToken(user=scoreUser, days=7)
+        Folder().setUserAccess(
             folder, user=scoreUser, level=AccessType.READ, save=True)
 
-        groundTruth = folderModel.load(phase['groundTruthFolderId'], force=True)
+        groundTruth = Folder().load(phase['groundTruthFolderId'], force=True)
 
-        if not phaseModel.hasAccess(phase, user=scoreUser, level=AccessType.ADMIN):
-            phaseModel.setUserAccess(
+        if not Phase().hasAccess(phase, user=scoreUser, level=AccessType.ADMIN):
+            Phase().setUserAccess(
                 phase, user=scoreUser, level=AccessType.ADMIN, save=True)
 
-        if not folderModel.hasAccess(groundTruth, user=scoreUser, level=AccessType.READ):
-            folderModel.setUserAccess(
+        if not Folder().hasAccess(groundTruth, user=scoreUser, level=AccessType.READ):
+            Folder().setUserAccess(
                 groundTruth, user=scoreUser, level=AccessType.READ, save=True)
 
         task = phase.get('scoreTask', {})
@@ -344,8 +336,8 @@ class Submission(Model):
         }
         job['kwargs'] = kwargs
         job['covalicSubmissionId'] = submission['_id']
-        job = jobModel.save(job)
-        jobModel.scheduleJob(job)
+        job = Job().save(job)
+        Job().scheduleJob(job)
 
         submission['jobId'] = job['_id']
         return self.save(submission, validate=False)

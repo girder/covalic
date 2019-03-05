@@ -19,8 +19,14 @@
 
 import six
 
-from tests import base
 from girder.constants import AccessType
+from girder.models.folder import Folder
+from girder.models.user import User
+from tests import base
+
+from covalic.models.challenge import Challenge
+from covalic.models.phase import Phase
+from covalic.models.submission import Submission
 
 
 def setUpModule():
@@ -50,44 +56,39 @@ class SubmissionFolderAccessTestCase(base.TestCase):
 
     def testSubmissionFolderAccess(self):
         # Create users
-        challengeAdmin = self.model('user').createUser(
+        challengeAdmin = User().createUser(
             email='challenge@email.com', login='challenge',
             firstName='Challenge', lastName='Admin', password='passwd')
-        phaseAdmin1 = self.model('user').createUser(
+        phaseAdmin1 = User().createUser(
             email='phase1@email.com', login='phase1',
             firstName='Phase', lastName='Admin 1', password='passwd')
-        phaseAdmin2 = self.model('user').createUser(
+        phaseAdmin2 = User().createUser(
             email='phase2@email.com', login='phase2',
             firstName='Phase', lastName='Admin 2', password='passwd')
-        user1 = self.model('user').createUser(
+        user1 = User().createUser(
             email='user1@email.com', login='user1',
             firstName='User', lastName='1', password='passwd')
 
-        challengeModel = self.model('challenge', 'covalic')
-        phaseModel = self.model('phase', 'covalic')
-        folderModel = self.model('folder')
-        submissionModel = self.model('submission', 'covalic')
-
         # Create challenge and phase
-        challenge = challengeModel.createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge 1', creator=challengeAdmin, public=False)
-        phase = phaseModel.createPhase(
+        phase = Phase().createPhase(
             name='phase 1', challenge=challenge, creator=phaseAdmin1,
             ordinal=1)
 
         # Add phaseAdmin2 and user 1 as phase admins
-        phaseModel.setUserAccess(phase, phaseAdmin2, AccessType.WRITE,
-                                 save=True)
-        phaseModel.setUserAccess(phase, user1, AccessType.WRITE, save=True)
+        Phase().setUserAccess(phase, phaseAdmin2, AccessType.WRITE,
+                              save=True)
+        Phase().setUserAccess(phase, user1, AccessType.WRITE, save=True)
 
         # Create folder and submission as user1
-        submissionFolder = folderModel.createFolder(
+        submissionFolder = Folder().createFolder(
             parent=user1, name='submission 1', parentType='user', creator=user1)
-        submissionModel.createSubmission(
+        Submission().createSubmission(
             creator=user1, phase=phase, folder=submissionFolder)
 
         # Submission folder ACL should include phase admins with read access
-        submissionFolder = folderModel.load(
+        submissionFolder = Folder().load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 3)
         self._filterUserAccessKeys(submissionFolder)
@@ -108,8 +109,8 @@ class SubmissionFolderAccessTestCase(base.TestCase):
 
         # Remove user1 as phase admin. This shouldn't change folder ACL because
         # user1 is the folder's owner.
-        phaseModel.setUserAccess(phase, user1, None, save=True)
-        submissionFolder = folderModel.load(
+        Phase().setUserAccess(phase, user1, None, save=True)
+        submissionFolder = Folder().load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 3)
         self._filterUserAccessKeys(submissionFolder)
@@ -130,8 +131,8 @@ class SubmissionFolderAccessTestCase(base.TestCase):
 
         # Remove phaseAdmin2 as a phase admin. This should remove phaseAdmin2
         # from the submission folder ACL.
-        phaseModel.setUserAccess(phase, phaseAdmin2, None, save=True)
-        submissionFolder = folderModel.load(
+        Phase().setUserAccess(phase, phaseAdmin2, None, save=True)
+        submissionFolder = Folder().load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 2)
         self._filterUserAccessKeys(submissionFolder)
@@ -148,9 +149,9 @@ class SubmissionFolderAccessTestCase(base.TestCase):
 
         # Re-add phaseAdmin2 as phase admin. This should add phaseAdmin2 back to
         # the submission folder ACL.
-        phaseModel.setUserAccess(phase, phaseAdmin2, AccessType.WRITE,
-                                 save=True)
-        submissionFolder = folderModel.load(
+        Phase().setUserAccess(phase, phaseAdmin2, AccessType.WRITE,
+                              save=True)
+        submissionFolder = Folder().load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 3)
         self._filterUserAccessKeys(submissionFolder)
@@ -171,8 +172,8 @@ class SubmissionFolderAccessTestCase(base.TestCase):
 
         # Change phaseAdmin2's access to read-only. This should remove
         # phaseAdmin2 from the submission folder ACL.
-        phaseModel.setUserAccess(phase, phaseAdmin2, AccessType.READ, save=True)
-        submissionFolder = folderModel.load(
+        Phase().setUserAccess(phase, phaseAdmin2, AccessType.READ, save=True)
+        submissionFolder = Folder().load(
             submissionFolder['_id'], force=True, exc=True)
         self.assertEqual(len(submissionFolder['access']['users']), 2)
         self._filterUserAccessKeys(submissionFolder)
@@ -189,5 +190,5 @@ class SubmissionFolderAccessTestCase(base.TestCase):
 
         # Verify that the phase can be modified and saved successfully if a
         # submission folder has been deleted
-        folderModel.remove(submissionFolder)
-        phaseModel.setUserAccess(phase, phaseAdmin1, None, save=True)
+        Folder().remove(submissionFolder)
+        Phase().setUserAccess(phase, phaseAdmin1, None, save=True)

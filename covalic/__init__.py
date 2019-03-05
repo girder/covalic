@@ -26,18 +26,23 @@ from girder.api.rest import getCurrentUser
 from girder.api.v1 import resource
 from girder.constants import AccessType, STATIC_ROOT_DIR
 from girder.models.model_base import ValidationException
+from girder.models.folder import Folder
+from girder.models.user import User
 from girder.plugin import getPlugin, GirderPlugin, loadedPlugins, registerPluginWebroot
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
 from girder_jobs.constants import JobStatus
+from girder_jobs.models.job import Job
 
-from .rest import challenge, phase, submission
-from .constants import PluginSettings, JOB_LOG_PREFIX
-from .models.challenge import Challenge
-from .models.phase import Phase
-from .models.submission import Submission
-from .utility import getAssetsFolder
-from .utility.user_emails import getPhaseUserEmails
+from covalic.constants import PluginSettings, JOB_LOG_PREFIX
+from covalic.models.challenge import Challenge
+from covalic.models.phase import Phase
+from covalic.models.submission import Submission
+from covalic.rest.challenge import ChallengeResource
+from covalic.rest.phase import PhaseResource
+from covalic.rest.submission import SubmissionResource
+from covalic.utility import getAssetsFolder
+from covalic.utility.user_emails import getPhaseUserEmails
 
 _HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -120,7 +125,7 @@ def validateSettings(event):
         if not event.info['value']:
             raise ValidationException(
                 'Scoring user ID must not be empty.', 'value')
-        ModelImporter.model('user').load(
+        User().load(
             event.info['value'], force=True, exc=True)
         event.preventDefault().stopPropagation()
 
@@ -132,7 +137,7 @@ def challengeSaved(event):
     """
     challenge = event.info
     folder = getAssetsFolder(challenge, getCurrentUser(), False)
-    ModelImporter.model('folder').copyAccessPolicies(
+    Folder().copyAccessPolicies(
         challenge, folder, save=True)
 
 
@@ -142,9 +147,8 @@ def onPhaseSave(event):
     and submission folders for the phase.
     """
     phase = event.info
-    submissionModel = ModelImporter.model('submission', 'covalic')
-    submissions = submissionModel.getAllSubmissions(phase)
-    submissionModel.updateFolderAccess(phase, submissions)
+    submissions = Submission().getAllSubmissions(phase)
+    Submission().updateFolderAccess(phase, submissions)
 
 
 def onJobUpdate(event):
@@ -165,7 +169,7 @@ def onJobUpdate(event):
         # Create minimal log that contains only Covalic errors.
         # Use full log if no Covalic-specific errors are found.
         # Fetch log from model, because log in event may not be up-to-date.
-        job = ModelImporter.model('job', 'jobs').load(
+        job = Job().load(
             event.info['job']['_id'], includeLog=True, force=True)
         log = job.get('log')
 
@@ -178,13 +182,13 @@ def onJobUpdate(event):
         if not minimalLog:
             minimalLog = log
 
-        submission = ModelImporter.model('submission', 'covalic').load(
+        submission = Submission().load(
             event.info['job']['covalicSubmissionId'])
-        phase = ModelImporter.model('phase', 'covalic').load(
+        phase = Phase().load(
             submission['phaseId'], force=True)
-        challenge = ModelImporter.model('challenge', 'covalic').load(
+        challenge = Challenge().load(
             phase['challengeId'], force=True)
-        user = ModelImporter.model('user').load(
+        user = User().load(
             event.info['job']['userId'], force=True)
 
         rescoring = job.get('rescoring', False)
@@ -221,8 +225,7 @@ def onUserSave(event):
     Hook into user save event and update the user's name in their submissions.
     """
     user = event.info
-    subModel = ModelImporter.model('submission', 'covalic')
-    userName = subModel.getUserName(user)
+    userName = Submission().getUserName(user)
 
     query = {
         'creatorId': user['_id']
@@ -232,7 +235,7 @@ def onUserSave(event):
             'creatorName': userName
         }
     }
-    subModel.update(query, update)
+    Submission().update(query, update)
 
 
 class CovalicPlugin(GirderPlugin):
@@ -257,9 +260,9 @@ class CovalicPlugin(GirderPlugin):
 
         resource.allowedSearchTypes.add('challenge.covalic')
 
-        info['apiRoot'].challenge = challenge.Challenge()
-        info['apiRoot'].challenge_phase = phase.Phase()
-        info['apiRoot'].covalic_submission = submission.Submission()
+        info['apiRoot'].challenge = ChallengeResource()
+        info['apiRoot'].challenge_phase = PhaseResource()
+        info['apiRoot'].covalic_submission = SubmissionResource()
 
         registerPluginWebroot(CustomAppRoot(), 'covalic')
 

@@ -29,7 +29,7 @@ from girder.models.group import Group
 from girder.models.model_base import AccessControlledModel, ValidationException
 from girder.utility.progress import noProgress
 
-from ..utility import validateDate
+from covalic.utility import validateDate
 
 
 class Phase(AccessControlledModel):
@@ -101,17 +101,16 @@ class Phase(AccessControlledModel):
         Returns the subtree count of this phase, which is the number of
         submissions, plus one record for the phase itself.
         """
-        from .submission import Submission  # prevent circular import
+        from covalic.models.submission import Submission  # prevent circular import
         return Submission().getAllSubmissions(phase).count() + 1
 
     def remove(self, phase, progress=noProgress):
         """
         Remove this phase, which also removes all submissions to it.
         """
-        from .submission import Submission  # prevent circular import
-        subModel = Submission()
-        for sub in subModel.getAllSubmissions(phase):
-            subModel.remove(sub)
+        from covalic.models.submission import Submission  # prevent circular import
+        for sub in Submission().getAllSubmissions(phase):
+            Submission().remove(sub)
             progress.update(increment=1,
                             message='Deleted submission %s' % sub['title'])
 
@@ -219,38 +218,36 @@ class Phase(AccessControlledModel):
         }
         self.validate(phase)
 
-        folderModel = Folder()
-        groupModel = Group()
-        folder = folderModel.createFolder(
+        folder = Folder().createFolder(
             collection, name, parentType='collection', public=public,
             creator=creator, allowRename=True)
         phase['folderId'] = folder['_id']
 
         if groundTruthFolder is None:
-            groundTruthFolder = folderModel.createFolder(
+            groundTruthFolder = Folder().createFolder(
                 folder, 'Ground truth', parentType='folder', public=False,
                 creator=creator, allowRename=True)
         phase['groundTruthFolderId'] = groundTruthFolder['_id']
 
         if testDataFolder is None:
-            testDataFolder = folderModel.createFolder(
+            testDataFolder = Folder().createFolder(
                 folder, 'Test dataset', parentType='folder', public=False,
                 creator=creator, allowRename=True)
         phase['testDataFolderId'] = testDataFolder['_id']
 
         if participantGroup is None:
             groupName = '%s %s participants' % (challenge['name'], name)
-            participantGroup = groupModel.findOne({'name': groupName})
+            participantGroup = Group().findOne({'name': groupName})
             if participantGroup is None:
-                participantGroup = groupModel.createGroup(
+                participantGroup = Group().createGroup(
                     groupName, creator, public=public)
         phase['participantGroupId'] = participantGroup['_id']
 
         self.setPublic(phase, public=public)
         self.setUserAccess(phase, user=creator, level=AccessType.ADMIN)
         self.setGroupAccess(phase, participantGroup, level=AccessType.READ)
-        folderModel.setGroupAccess(testDataFolder, participantGroup,
-                                   level=AccessType.READ, save=True)
+        Folder().setGroupAccess(testDataFolder, participantGroup,
+                                level=AccessType.READ, save=True)
 
         return self.save(phase)
 

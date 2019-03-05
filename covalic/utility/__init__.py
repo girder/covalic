@@ -22,7 +22,9 @@ import dateutil.tz
 
 from girder.constants import AccessType
 from girder.models.model_base import ValidationException
-from girder.utility.model_importer import ModelImporter
+from girder.models.collection import Collection
+from girder.models.folder import Folder
+from girder.models.user import User
 
 
 def getAssetsFolder(challenge, user, testAccess=True):
@@ -40,22 +42,20 @@ def getAssetsFolder(challenge, user, testAccess=True):
     :type testAccess: bool
     :returns: The assets folder.
     """
-    collection = ModelImporter.model('collection').load(
+    collection = Collection().load(
         challenge['collectionId'], force=True)
 
     if user is None and challenge['creatorId']:
-        user = ModelImporter.model('user').load(
+        user = User().load(
             challenge['creatorId'], force=True)
 
-    folderModel = ModelImporter.model('folder')
-
-    folder = folderModel.createFolder(
+    folder = Folder().createFolder(
         parentType='collection', parent=collection,
         name='Assets', creator=user, reuseExisting=True,
         description='Assets related to this challenge.')
 
     if testAccess:
-        folderModel.requireAccess(folder, user=user, level=AccessType.READ)
+        Folder().requireAccess(folder, user=user, level=AccessType.READ)
 
     return folder
 
