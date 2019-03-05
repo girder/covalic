@@ -23,6 +23,8 @@ import dateutil.tz
 import json
 import mock
 
+from covalic.constants import PluginSettings as CovalicSettings
+from girder_jobs.models.job import Job
 from tests import base
 
 
@@ -371,8 +373,6 @@ class PhaseTestCase(base.TestCase):
         self.assertValidationError(resp, 'id')
 
     def testPhaseRescore(self):
-        from girder.plugins.covalic.constants import PluginSettings as CovalicSettings
-        from girder.plugins.jobs.models.job import Job
 
         # Configure scoring user
         scoringUserParams = {
