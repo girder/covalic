@@ -5,7 +5,7 @@ import View from '../view';
 import ChallengePhaseCollection from '../../collections/ChallengePhaseCollection';
 import template from '../../templates/widgets/challengePhases.pug';
 import '../../stylesheets/body/challengePage.styl';
-import '../../ext/html.sortable';
+import 'html5sortable/dist/html.sortable';
 
 var ChallengePhasesWidget = View.extend({
     events: {

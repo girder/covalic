@@ -11,7 +11,8 @@
         "url": "https://github.com/girder/covalic.git"
     },
     "dependencies": {
-        "bootstrap-3-typeahead": "^4.0.2"
+        "bootstrap-3-typeahead": "^4.0.2",
+        "html5sortable": "0.2.0"
     },
     "peerDependencies": {
         "@girder/jobs": "*"
@@ -19,6 +20,8 @@
     "girderPlugin": {
         "name": "covalic_external",
         "main": "./main.js",
-        "dependencies": ["jobs"]
+        "dependencies": [
+            "jobs"
+        ]
     }
 }
