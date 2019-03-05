@@ -1,3 +1,4 @@
-girder*
-mongodb
-docker
+girder/
+girder-worker/
+mongodb/
+docker/
