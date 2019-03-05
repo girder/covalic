@@ -17,6 +17,7 @@
 #  limitations under the License.
 ###############################################################################
 
+import cherrypy
 import json
 
 import bson.json_util
@@ -60,6 +61,7 @@ class Phase(Resource):
         self.route('PUT', (':id', 'metrics'), self.setMetrics)
         self.route('PUT', (':id', 'scoring_info'), self.setScoringInfo)
         self.route('POST', (':id', 'metrics', 'init'), self.initMetrics)
+        self.route('POST', (':id', 'rescore'), self.rescorePhase)
 
     @access.public
     @loadmodel(map={'challengeId': 'challenge'}, model='challenge',
@@ -242,28 +244,26 @@ class Phase(Resource):
             'active', 'Whether the phase will accept and score additional '
             'submissions.', dataType='boolean', required=False)
         .param('hideScores', 'Whether submission scores should be hidden from '
-               'participants.', dataType='boolean', default=False,
-               required=False)
+               'participants.', dataType='boolean', required=False)
         .param('startDate', 'The start date of the phase (ISO 8601 format).',
                dataType='dateTime', required=False)
         .param('endDate', 'The end date of the phase (ISO 8601 format).',
                dataType='dateTime', required=False)
         .param('type', 'The type of the phase.', required=False)
         .param('matchSubmissions', 'Whether to require that submission '
-               'filenames match ground truth filenames', dataType='boolean',
-               default=True, required=False)
+               'filenames match ground truth filenames', dataType='boolean', required=False)
         .param('enableOrganization', 'Enable submission Organization field.', dataType='boolean',
-               default=False, required=False)
+               required=False)
         .param('enableOrganizationUrl', 'Enable submission Organization URL field.',
-               dataType='boolean', default=False, required=False)
+               dataType='boolean', required=False)
         .param('enableDocumentationUrl', 'Enable submission Documentation URL field.',
-               dataType='boolean', default=False, required=False)
+               dataType='boolean', required=False)
         .param('requireOrganization', 'Require submission Organization field.', dataType='boolean',
-               default=True, required=False)
+               required=False)
         .param('requireOrganizationUrl', 'Require submission Organization URL field.',
-               dataType='boolean', default=True, required=False)
+               dataType='boolean', required=False)
         .param('requireDocumentationUrl', 'Require submission Documentation URL field.',
-               dataType='boolean', default=True, required=False)
+               dataType='boolean', required=False)
         .param('meta', 'A JSON object containing additional metadata. '
                'If present, replaces the existing metadata.', required=False)
         .errorResponse('ID was invalid.')
@@ -578,3 +578,23 @@ class Phase(Resource):
         phaseModel = self.model('phase', 'covalic')
         return self.model('phase', 'covalic').filter(
             phaseModel.save(phase), self.getCurrentUser())
+
+    @access.admin
+    @loadmodel(model='phase', plugin='covalic', level=AccessType.ADMIN)
+    @describeRoute(
+        Description('Re-run scoring for the latest submissions in the phase.')
+        .param('id', 'The ID of the phase.', paramType='path')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Site admin access is required.', 403)
+    )
+    def rescorePhase(self, phase, params):
+        submissionModel = self.model('submission', 'covalic')
+
+        submissions = submissionModel.list(
+            phase, limit=0, sort=[('created', 1)], fields={'score': False}, latest=True)
+
+        # Get API URL by removing this endpoint's parameters
+        apiUrl = '/'.join(cherrypy.url().split('/')[:-3])
+
+        for submission in submissions:
+            submissionModel.scoreSubmission(submission, apiUrl)

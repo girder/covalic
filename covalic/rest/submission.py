@@ -22,12 +22,15 @@ import math
 import os
 import posixpath
 
+from ..utility.user_emails import getPhaseUserEmails
+from ..models.phase import Phase
+from ..models.submission import Submission
 from girder.api import access
 from girder.api.describe import Description, autoDescribeRoute, describeRoute
 from girder.api.rest import Resource, filtermodel, loadmodel, getApiUrl
 from girder.constants import AccessType, SortDir
+from girder.exceptions import AccessException, GirderException, RestException, ValidationException
 from girder.models.folder import Folder
-from girder.models.model_base import AccessException, ValidationException
 from girder.utility import mail_utils
 from girder_worker.girder_plugin import utils
 
@@ -50,6 +53,7 @@ class Submission(Resource):
         self.route('POST', (), self.postSubmission)
         self.route('PUT', (':id',), self.updateSubmission)
         self.route('POST', (':id', 'score'), self.postScore)
+        self.route('POST', (':id', 'rescore'), self.rescoreSubmission)
         self.route('DELETE', (':id',), self.deleteSubmission)
 
     def _filterScore(self, phase, submission, user):
@@ -193,6 +197,7 @@ class Submission(Resource):
                                       'because it is not currently active.')
 
         self.requireParams('title', params)
+        title = self._getStrippedParam(params, 'title')
 
         # Only users in the participant group (or with write access) may submit
         if phase['participantGroupId'] not in user['groups']:
@@ -229,107 +234,32 @@ class Submission(Resource):
             user = self.model('user').load(params['userId'], force=True,
                                            exc=True)
 
-        jobTitle = '%s submission: %s' % (phase['name'], folder['name'])
-        apiUrl = getApiUrl()
-        jobModel = self.model('job', 'jobs')
+        submissionModel = self.model('submission', 'covalic')
 
-        job = jobModel.createJob(
-            title=jobTitle, type='covalic_score', handler='worker_handler',
-            user=user)
-        scoreUserId = self.model('setting').get(PluginSettings.SCORING_USER_ID)
+        submission = submissionModel.createSubmission(
+            creator=user,
+            phase=phase,
+            folder=folder,
+            job=None,
+            title=title,
+            created=created,
+            organization=organization,
+            organizationUrl=organizationUrl,
+            documentationUrl=documentationUrl,
+            approach=approach,
+            meta=params.get('meta'))
 
-        if not scoreUserId:
-            raise Exception('No scoring user ID is set. Please set one on the '
-                            'plugin configuration page.')
-        scoreUser = self.model('user').load(scoreUserId, force=True)
+        apiUrl = os.path.dirname(cherrypy.url())
 
-        if not scoreUser:
-            raise Exception('Invalid scoring user setting (%s).' % scoreUserId)
-
-        scoreToken = self.model('token').createToken(user=scoreUser, days=7)
-        self.model('folder').setUserAccess(
-            folder, user=scoreUser, level=AccessType.READ, save=True)
-
-        groundTruth = self.model('folder').load(phase['groundTruthFolderId'],
-                                                force=True)
-
-        title = params['title'].strip()
-        submission = self.model('submission', 'covalic').createSubmission(
-            user, phase, folder, job, title, created, organization, organizationUrl,
-            documentationUrl, approach, params.get('meta'))
-
-        if not self.model('phase', 'covalic').hasAccess(
-                phase, user=scoreUser, level=AccessType.ADMIN):
-            self.model('phase', 'covalic').setUserAccess(
-                phase, user=scoreUser, level=AccessType.ADMIN, save=True)
-
-        if not self.model('folder').hasAccess(
-                groundTruth, user=scoreUser, level=AccessType.READ):
-            self.model('folder').setUserAccess(
-                groundTruth, user=scoreUser, level=AccessType.READ,
-                save=True)
-
-        task = phase.get('scoreTask', {})
-        image = task.get('dockerImage') or 'girder/covalic-metrics:latest'
-        containerArgs = task.get('dockerArgs') or [
-            '--groundtruth=$input{groundtruth}',
-            '--submission=$input{submission}'
-        ]
-
-        kwargs = {
-            'task': {
-                'name': jobTitle,
-                'mode': 'docker',
-                'docker_image': image,
-                'container_args': containerArgs,
-                'inputs': [{
-                    'id': 'submission',
-                    'type': 'string',
-                    'format': 'text',
-                    'target': 'filepath',
-                    'filename': 'submission.zip'
-                }, {
-                    'id': 'groundtruth',
-                    'type': 'string',
-                    'format': 'text',
-                    'target': 'filepath',
-                    'filename': 'groundtruth.zip'
-                }],
-                'outputs': [{
-                    'id': '_stdout',
-                    'format': 'string',
-                    'type': 'string'
-                }]
-            },
-            'inputs': {
-                'submission': utils.girderInputSpec(
-                    folder, 'folder', token=scoreToken),
-                'groundtruth': utils.girderInputSpec(
-                    groundTruth, 'folder', token=scoreToken)
-            },
-            'outputs': {
-                '_stdout': {
-                    'mode': 'http',
-                    'method': 'POST',
-                    'format': 'string',
-                    'url': '/'.join((apiUrl, 'covalic_submission',
-                                     str(submission['_id']), 'score')),
-                    'headers': {'Girder-Token': scoreToken['_id']}
-                }
-            },
-            'jobInfo': utils.jobInfoSpec(job),
-            'validate': False,
-            'auto_convert': False,
-            'cleanup': True
-        }
-        job['kwargs'] = kwargs
-        job['covalicSubmissionId'] = submission['_id']
-        job = jobModel.save(job)
-        jobModel.scheduleJob(job)
+        try:
+            submission = submissionModel.scoreSubmission(submission, apiUrl)
+        except GirderException:
+            submissionModel.remove(submission)
+            raise
 
         return self._filterScore(phase, submission, user)
 
-    @access.admin
+    @access.user
     @filtermodel(model=Submission)
     @autoDescribeRoute(
         Description('Overwrite the properties of a submission.')
@@ -350,11 +280,10 @@ class Submission(Resource):
                    'If present, replaces the existing metadata.',
                    paramType='form', requireObject=True, required=False)
         .errorResponse('ID was invalid.')
-        .errorResponse('Site admin access is required.', 403)
+        .errorResponse('Write access to phase is required.', 403)
     )
     def updateSubmission(self, submission, **params):
-        # Ensure write access on the containing challenge phase, in case this
-        # endpoint is ever opened to non-site-admins
+        # Ensure write access on the containing challenge phase
         user = self.getCurrentUser()
         phase = self.model('phase', 'covalic').load(
             submission['phaseId'], user=user, exc=True, level=AccessType.WRITE)
@@ -439,6 +368,11 @@ class Submission(Resource):
             submission['phaseId'], user=self.getCurrentUser(), exc=True,
             level=AccessType.ADMIN)
 
+        # Record whether submission is being re-scored
+        rescoring = 'overallScore' in submission
+
+        # Save document to trigger computing overall score
+        submission.pop('overallScore', None)
         submission['score'] = score
         submission = self.model('submission', 'covalic').save(submission)
 
@@ -452,17 +386,18 @@ class Submission(Resource):
         covalicHost = posixpath.dirname(mail_utils.getEmailUrlPrefix())
 
         # Mail user
-        html = mail_utils.renderTemplate(
-            'covalic.submissionCompleteUser.mako',
-            {
-                'phase': phase,
-                'challenge': challenge,
-                'submission': submission,
-                'host': covalicHost
-            })
-        mail_utils.sendEmail(
-            to=user['email'], subject='Your submission has been scored',
-            text=html)
+        if not rescoring:
+            html = mail_utils.renderTemplate(
+                'covalic.submissionCompleteUser.mako',
+                {
+                    'phase': phase,
+                    'challenge': challenge,
+                    'submission': submission,
+                    'host': covalicHost
+                })
+            mail_utils.sendEmail(
+                to=user['email'], subject='Your submission has been scored',
+                text=html)
 
         # Mail admins
         emails = sorted(getPhaseUserEmails(
@@ -514,6 +449,34 @@ class Submission(Resource):
                required=False)
         .errorResponse('Phase ID was invalid.')
         .errorResponse('Admin access was denied for the challenge phase.', 403))
+
+    @access.admin
+    @filtermodel(model=Submission)
+    @autoDescribeRoute(
+        Description('Re-run scoring for a submission.')
+        .modelParam('id', 'The ID of the submission.', model=Submission, paramType='path',
+                    destName='submission')
+        .errorResponse('ID was invalid.')
+        .errorResponse('Site admin access is required.', 403)
+    )
+    def rescoreSubmission(self, submission):
+        phaseModel = self.model('phase', 'covalic')
+        submissionModel = self.model('submission', 'covalic')
+
+        user = self.getCurrentUser()
+
+        # Allow rescoring only the latest submission
+        if not submission.get('latest', False):
+            raise RestException('Only the latest submission may be re-scored.')
+
+        phase = phaseModel.load(submission['phaseId'], force=True)
+
+        # Get API URL like in postSubmission(), but remove this endpoint's parameters
+        apiUrl = '/'.join(cherrypy.url().split('/')[:-3])
+
+        submission = submissionModel.scoreSubmission(submission, apiUrl)
+
+        return self._filterScore(phase, submission, user)
 
     @access.user
     @loadmodel(model='submission', plugin='covalic')

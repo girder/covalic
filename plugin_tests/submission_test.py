@@ -335,6 +335,17 @@ class SubmissionModelTest(SubmissionBase):
         latest = self.model('submission', 'covalic').findOne({'title': 'User submission 2 phase 1'})
         self.assertEqual(latest['latest'], True)
 
+    def testScoreSubmission(self):
+        submission = self.createSubmission(self.phase1, self.user, 'submission')
+        self.assertNotIn('jobId', submission)
+
+        submission = self.model('submission', 'covalic').scoreSubmission(
+            submission, 'http://127.0.0.1/api/v1')
+        self.assertIn('jobId', submission)
+
+        job = self.model('job', 'jobs').load(submission['jobId'], force=True)
+        self.assertIsNotNone(job)
+
 
 class SubmissionRestTest(SubmissionBase):
     def setUp(self):
@@ -366,6 +377,7 @@ class SubmissionRestTest(SubmissionBase):
             'phaseId': str(self.phase1['_id']),
             'title': 'submission phase 1'
         }, resp.json)
+        self.assertIn('jobId', resp.json)
         id = resp.json['_id']
 
         # modify a submission
@@ -468,6 +480,7 @@ class SubmissionRestTest(SubmissionBase):
             'phaseId': str(self.phase1['_id']),
             'title': 'submission phase 1'
         }, resp.json)
+        self.assertIn('jobId', resp.json)
         id = resp.json['_id']
 
         # user cannot modify submissions
@@ -636,6 +649,52 @@ class SubmissionRestTest(SubmissionBase):
                 'value': None
             }]
         }])
+
+    def testPostRescore(self):
+        submission1 = self.createSubmission(self.phase1, self.user, 'submission1')
+        submission2 = self.createSubmission(self.phase1, self.user, 'submission2')
+
+        score = json.dumps([{
+            'dataset': 'dataset1',
+            'metrics': [{
+                'name': 'accuracy',
+                'value': 0.1
+            }, {
+                'name': 'error',
+                'value': 0.9
+            }]
+        }])
+
+        # post scores as admin
+        for submission in [submission1, submission2]:
+            resp = self.request(
+                path='/covalic_submission/%s/score' % str(submission['_id']),
+                method='POST', user=self.admin,
+                body=score, type='application/json'
+            )
+            self.assertStatus(resp, 200)
+
+        # cannot re-score submissions that aren't 'latest'
+        resp = self.request(
+            path='/covalic_submission/%s/rescore' % submission1['_id'],
+            method='POST', user=self.admin
+        )
+        self.assertStatus(resp, 400)
+
+        # re-score submission as admin
+        resp = self.request(
+            path='/covalic_submission/%s/rescore' % submission2['_id'],
+            method='POST', user=self.admin
+        )
+        self.assertStatusOk(resp)
+        self.assertIn('jobId', resp.json)
+
+        # user cannot re-score submission
+        resp = self.request(
+            path='/covalic_submission/%s/rescore' % submission2['_id'],
+            method='POST', user=self.user
+        )
+        self.assertStatus(resp, 403)
 
     def testSubmissionWithMetadata(self):
         folder = self.model('folder').createFolder(
