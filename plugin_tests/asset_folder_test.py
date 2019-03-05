@@ -17,8 +17,13 @@
 #  limitations under the License.
 ###############################################################################
 
-from tests import base
 from girder.constants import AccessType
+from girder.models.folder import Folder
+from girder.models.group import Group
+from girder.models.user import User
+from tests import base
+
+from covalic.models.challenge import Challenge
 
 
 def setUpModule():
@@ -32,19 +37,18 @@ def tearDownModule():
 
 class AssetFolderTestCase(base.TestCase):
     def testAssetFolder(self):
-        challengeModel = self.model('challenge', 'covalic')
-        admin = self.model('user').createUser(
+        admin = User().createUser(
             email='admin@email.com', login='admin', firstName='Admin',
             lastName='Admin', password='passwd')
-        challenge = challengeModel.createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge 1', creator=admin, public=False)
-        group = self.model('group').createGroup('A group', creator=admin)
+        group = Group().createGroup('A group', creator=admin)
 
         # Make sure asset folder gets created
         resp = self.request('/challenge/%s/assets_folder' % challenge['_id'],
                             method='GET', user=admin)
         self.assertStatusOk(resp)
-        folder = self.model('folder').load(
+        folder = Folder().load(
             resp.json['_id'], force=True, exc=True)
         self.assertEqual(folder['name'], 'Assets')
         self.assertEqual(folder['public'], False)
@@ -59,9 +63,9 @@ class AssetFolderTestCase(base.TestCase):
         })
 
         # Make sure assets folder tracks challenge ACL
-        challengeModel.setGroupAccess(
+        Challenge().setGroupAccess(
             challenge, group, level=AccessType.WRITE, save=True)
-        folder = self.model('folder').load(folder['_id'], force=True)
+        folder = Folder().load(folder['_id'], force=True)
         self.assertEqual(folder['access'], {
             'users': [{
                 'id': admin['_id'],

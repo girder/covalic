@@ -1,0 +1,133 @@
+@import "~nib/index.styl"
+
+.c-challenge-list-header
+  padding-bottom 10px
+
+  .c-challenges-filter
+    margin-right 13px
+
+  .c-challenge-pagination
+    display inline-block
+    >ul
+      margin 0 15px 0 0
+
+    .pagination>li>a
+      float none
+      line-height 1.5
+      padding 7px 12px
+
+  .c-challenge-search-form
+    display inline
+
+  .c-challenges-search-container
+    margin-right 15px
+
+.c-challenge-cards-container
+  border-top 1px solid #ddd
+  background-color #efefef
+  padding 30px 0 0 30px
+  background linear-gradient(top, #e4e4e4 0, #efefef 4px)
+
+.c-challenge-card
+  display inline-block
+  margin-right 30px
+  margin-bottom 25px
+  width 220px
+  height 280px
+  box-shadow 0 2px 4px rgba(0, 0, 0, 0.1)
+  background white
+  padding 10px
+
+  .c-challenge-image
+    height 200px
+    width 200px
+    display block
+
+  .c-thumbnail-container
+    position relative
+    height 200px
+    width 200px
+
+  .c-thumbnail-link
+    display block
+    position absolute
+    top 0
+    bottom 0
+    left 0
+    right 0
+
+  .c-thumbnail-overlay
+    transition all 0.35s ease
+    background rgba(0, 0, 0, 0.3)
+    cursor pointer
+    height 100%
+    width 100%
+    left 0
+    top 0
+    position absolute
+    opacity 0
+
+    &:hover
+      opacity 1
+
+  .c-card-bottom
+    padding-top 5px
+    position relative
+
+    .c-challenge-link.c-text-link
+      color #333
+      font-size 16px
+      overflow hidden
+      white-space nowrap
+      max-width 100%
+      display inline-block
+
+      &:hover
+        text-decoration underline !important
+
+    .c-challenge-organizers
+      color #888
+      font-size 14px
+      overflow hidden
+      white-space nowrap
+      max-width 100%
+      display block
+
+    .c-text-fade
+      height 20px
+      width 45px
+      position absolute
+      background linear-gradient(left, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1))
+      right 0
+
+.c-edit-thumbnail
+  position absolute
+  z-index 5
+  right 5px
+  top 5px
+  border-radius 3px
+  background-color rgba(255, 255, 255, 0.84)
+  color #333
+  padding 3px
+
+  &:hover
+    background-color white
+    color #333
+
+.c-challenge-create-button
+  color white
+  background-color #44ce82
+  font-size 18px
+  padding 0 10px
+  line-height 30px
+  height 30px
+  box-shadow 0 2px 4px rgba(0, 0, 0, 0.15)
+
+  &:hover
+    color white
+    background-color #44d788
+    box-shadow 0 2px 3px rgba(0, 0, 0, 0.22)
+
+  &:focus
+    color white
+    outline none

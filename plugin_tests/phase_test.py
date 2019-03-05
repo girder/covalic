@@ -23,7 +23,16 @@ import dateutil.tz
 import json
 import mock
 
+from girder.models.folder import Folder
+from girder.models.setting import Setting
+from girder.models.user import User
+from girder_jobs.models.job import Job
 from tests import base
+
+from covalic.constants import PluginSettings as CovalicSettings
+from covalic.models.challenge import Challenge
+from covalic.models.phase import Phase
+from covalic.models.submission import Submission
 
 
 def setUpModule():
@@ -47,7 +56,7 @@ class PhaseTestCase(base.TestCase):
             'password': 'adminpassword',
             'admin': True
         }
-        self.admin = self.model('user').createUser(**adminUser)
+        self.admin = User().createUser(**adminUser)
 
         user = {
             'email': 'good@email.com',
@@ -57,9 +66,9 @@ class PhaseTestCase(base.TestCase):
             'password': 'goodpassword',
             'admin': False
         }
-        self.user = self.model('user').createUser(**user)
+        self.user = User().createUser(**user)
 
-        self.challenge = self.model('challenge', 'covalic').createChallenge(
+        self.challenge = Challenge().createChallenge(
             name='challenge 1',
             creator=self.user,
             public=False)
@@ -177,7 +186,7 @@ class PhaseTestCase(base.TestCase):
         self.assertEqual(resp.json.get('meta'), {'test': 1})
 
     def testListPhase(self):
-        self.model('phase', 'covalic').createPhase(
+        Phase().createPhase(
             challenge=self.challenge,
             name='phase 1',
             creator=self.user,
@@ -191,7 +200,7 @@ class PhaseTestCase(base.TestCase):
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json), 1)
 
-        self.model('phase', 'covalic').createPhase(
+        Phase().createPhase(
             challenge=self.challenge,
             name='phase 2',
             creator=self.user,
@@ -203,7 +212,7 @@ class PhaseTestCase(base.TestCase):
         self.assertEqual(len(resp.json), 2)
 
     def testGetPhase(self):
-        phase = self.model('phase', 'covalic').createPhase(
+        phase = Phase().createPhase(
             challenge=self.challenge,
             name='phase 1',
             creator=self.user,
@@ -255,7 +264,7 @@ class PhaseTestCase(base.TestCase):
         self.assertValidationError(resp, field='id')
 
     def testUpdatePhase(self):
-        phase = self.model('phase', 'covalic').createPhase(
+        phase = Phase().createPhase(
             challenge=self.challenge,
             name='phase 1',
             creator=self.user,
@@ -320,7 +329,7 @@ class PhaseTestCase(base.TestCase):
         self.assertTrue(resp.json['requireDocumentationUrl'])
 
     def testPhaseUpdateMetadata(self):
-        phase = self.model('phase', 'covalic').createPhase(
+        phase = Phase().createPhase(
             challenge=self.challenge,
             name='phase 1',
             creator=self.user,
@@ -336,7 +345,7 @@ class PhaseTestCase(base.TestCase):
         self.assertEqual(resp.json.get('meta'), {'test2': 2})
 
     def testPhaseClearDates(self):
-        phase = self.model('phase', 'covalic').createPhase(
+        phase = Phase().createPhase(
             challenge=self.challenge,
             name='phase',
             creator=self.user,
@@ -355,7 +364,7 @@ class PhaseTestCase(base.TestCase):
         self.assertTrue(not resp.json['endDate'])
 
     def testPhaseDeletion(self):
-        phase = self.model('phase', 'covalic').createPhase(
+        phase = Phase().createPhase(
             challenge=self.challenge,
             name='phase',
             creator=self.user,
@@ -371,8 +380,6 @@ class PhaseTestCase(base.TestCase):
         self.assertValidationError(resp, 'id')
 
     def testPhaseRescore(self):
-        from girder.plugins.covalic.constants import PluginSettings as CovalicSettings
-        from girder.plugins.jobs.models.job import Job
 
         # Configure scoring user
         scoringUserParams = {
@@ -383,9 +390,9 @@ class PhaseTestCase(base.TestCase):
             'password': 'scoringpassword',
             'admin': False
         }
-        scoringUser = self.model('user').createUser(**scoringUserParams)
+        scoringUser = User().createUser(**scoringUserParams)
 
-        self.model('setting').set(
+        Setting().set(
             CovalicSettings.SCORING_USER_ID,
             scoringUser['_id']
         )
@@ -395,16 +402,16 @@ class PhaseTestCase(base.TestCase):
             'accuracy': {'weight': 0.5},
             'error': {'weight': 0.5}
         }
-        phase = self.model('phase', 'covalic').createPhase(
+        phase = Phase().createPhase(
             'phase 1', self.challenge, creator=self.user, ordinal=1)
         phase['metrics'] = metrics
         phase['active'] = True
-        phase = self.model('phase', 'covalic').save(phase)
+        phase = Phase().save(phase)
 
         # Create submission
-        folder = self.model('folder').createFolder(
+        folder = Folder().createFolder(
             self.user, 'submission', parentType='user', creator=self.user)
-        submission = self.model('submission', 'covalic').createSubmission(
+        submission = Submission().createSubmission(
             self.user, phase, folder, title='submission')
 
         # Add score to submission
@@ -419,7 +426,7 @@ class PhaseTestCase(base.TestCase):
             }]
         }]
         submission['score'] = scoreDict
-        submission = self.model('submission', 'covalic').save(submission)
+        submission = Submission().save(submission)
 
         # User can't re-score phase
         resp = self.request(path='/challenge_phase/%s/rescore' % phase['_id'], method='POST',
@@ -433,5 +440,5 @@ class PhaseTestCase(base.TestCase):
                                 user=self.admin)
             self.assertStatusOk(resp)
 
-        submission = self.model('submission', 'covalic').load(submission['_id'])
+        submission = Submission().load(submission['_id'])
         self.assertIn('jobId', submission)

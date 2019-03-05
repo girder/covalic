@@ -1,0 +1,4 @@
+include setup.py
+include README.md
+graft covalic
+global-exclude *.py[oc] __pycache__

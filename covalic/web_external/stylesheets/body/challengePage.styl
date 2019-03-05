@@ -1,0 +1,104 @@
+@require "~nib/index.styl"
+
+.c-challenge-header
+  border-bottom 1px solid #ddd
+  margin-bottom 10px
+  padding-bottom 5px
+  min-height 40px
+
+  .c-challenge-title
+    font-weight bold
+    font-size 21px
+    color #222
+
+  .c-challenge-organizers
+    font-variant small-caps
+    font-size 16px
+    color #777
+
+  .c-challenge-description
+    color #444
+    margin-top 6px
+
+.c-challenge-timeline-container
+  margin-top 5px
+
+.c-section-header
+  color #7e8685
+  font-size 25px
+  text-transform uppercase
+  margin 20px 0
+  line-height 30px
+
+.c-edit-instructions
+  color #444
+  margin-left 15px
+  border 1px solid #ddd
+  border-radius 3px
+  padding 3px
+  font-size 16px
+  line-height 30px
+  vertical-align middle
+
+  &:hover
+    background linear-gradient(top, white 60%, #f6f6f6 100%)
+
+  &:active
+    background linear-gradient(bottom, white 60%, #f6f6f6 100%)
+
+.c-challenge-instructions-container
+  padding 0 20px
+
+.c-challenge-phase-container
+  ul.c-phase-list
+    padding-left 0
+
+    &>li
+      list-style-type none
+      margin-top 5px
+      padding 7px 12px 7px 6px
+      font-weight bold
+      font-size 16px
+      background-color #f6f6f6
+      border 1px solid #e6e6e6
+      display flex
+
+      .c-phase-reorder
+        float right
+        font-size 0.8em
+        cursor grab
+
+    &>li.sortable-placeholder
+      border 1px dashed #CCC
+      background none
+
+    .c-phase-icon
+      padding-right 4px
+      color #666
+
+    .c-phase-text
+      flex 1
+
+      .c-phase-description
+        font-weight normal
+        color #666
+
+.c-phase-create
+  color white
+  background-color #44ce82
+  font-size 18px
+  padding 0 10px
+  line-height 30px
+  height 30px
+  box-shadow 0 2px 4px rgba(0, 0, 0, 0.15)
+  margin-left 15px
+  vertical-align top
+
+  &:hover
+    color white
+    background-color #44d788
+    box-shadow 0 2px 3px rgba(0, 0, 0, 0.22)
+
+  &:focus
+    color white
+    outline none

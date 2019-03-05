@@ -17,13 +17,14 @@
 #  limitations under the License.
 ###############################################################################
 
-import os
-import six
 import datetime
 import dateutil.parser
 import dateutil.tz
 
+from girder.models.user import User
 from tests import base
+
+from covalic.models.challenge import Challenge
 
 
 def setUpModule():
@@ -47,14 +48,14 @@ class ChallengeTestCase(base.TestCase):
             'password': 'goodpassword',
             'admin': False
         }
-        self.user = self.model('user').createUser(**user)
+        self.user = User().createUser(**user)
 
     def testChallengeCreationRequiredParams(self):
         self.ensureRequiredParams(
-                path='/challenge',
-                method='POST',
-                required=['name'],
-                user=self.user)
+            path='/challenge',
+            method='POST',
+            required=['name'],
+            user=self.user)
 
     def testChallengeCreationMinimal(self):
         params = {
@@ -145,7 +146,7 @@ class ChallengeTestCase(base.TestCase):
         self.assertValidationError(resp, 'endDate')
 
     def testListChallenges(self):
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='challenge 1',
             creator=self.user,
             description='description',
@@ -159,7 +160,7 @@ class ChallengeTestCase(base.TestCase):
         self.assertStatusOk(resp)
         self.assertEqual(len(resp.json), 1)
 
-        self.model('challenge', 'covalic').createChallenge(
+        Challenge().createChallenge(
             name='challenge 2',
             creator=self.user,
             description='description',
@@ -174,7 +175,7 @@ class ChallengeTestCase(base.TestCase):
         self.assertEqual(len(resp.json), 2)
 
     def testGetChallenge(self):
-        challenge = self.model('challenge', 'covalic').createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge 1',
             creator=self.user,
             description='description',
@@ -198,12 +199,13 @@ class ChallengeTestCase(base.TestCase):
         endDate = endDate.replace(tzinfo=dateutil.tz.tzutc())
         self.assertEqual(endDate, datetime.datetime(2015, 12, 1, 14, 0, 0, 0,
                                                     dateutil.tz.tzutc()))
+
     def testGetChallengeInvalid(self):
         resp = self.request(path='/challenge/1', user=self.user)
         self.assertValidationError(resp, field='id')
 
     def testUpdateChallenge(self):
-        challenge = self.model('challenge', 'covalic').createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge 1',
             creator=self.user,
             description='description',
@@ -235,8 +237,9 @@ class ChallengeTestCase(base.TestCase):
         endDate = endDate.replace(tzinfo=dateutil.tz.tzutc())
         self.assertEqual(endDate, datetime.datetime(2015, 4, 1, 14, 0, 0, 0,
                                                     dateutil.tz.tzutc()))
+
     def testChallengeClearDates(self):
-        challenge = self.model('challenge', 'covalic').createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge',
             creator=self.user,
             startDate='2015-01-01T14:00:00.000Z',
@@ -253,7 +256,7 @@ class ChallengeTestCase(base.TestCase):
         self.assertTrue(not resp.json['endDate'])
 
     def testChallengeDeletion(self):
-        challenge = self.model('challenge', 'covalic').createChallenge(
+        challenge = Challenge().createChallenge(
             name='challenge', creator=self.user)
 
         resp = self.request(path='/challenge/%s' % challenge['_id'],

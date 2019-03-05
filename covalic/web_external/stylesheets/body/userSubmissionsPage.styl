@@ -1,0 +1,69 @@
+@import "~nib/index"
+
+.c-user-submissions-panel
+
+  .c-user-submissions-user-info
+    background-color #ffffff
+    font-size 16px
+    cursor default
+
+    .c-user-name
+      font-size larger
+
+    .c-user-login
+    .c-user-email
+      color #aaa
+      padding-left 1em
+
+    .c-user-submissions-pagination
+      >ul
+        margin 0
+
+      .pagination
+        user-select none
+
+      .pagination>li>a
+        float none
+        line-height 1.5
+        padding 3px 12px
+
+.c-user-submissions-table
+  width 100%
+
+  thead>tr, th
+    font-weight normal
+
+  tbody>tr
+    &:nth-child(odd)>td
+    &:nth-child(odd)>th
+      background-color #f2f2f2
+
+  tbody
+    .c-submission-title
+      width 15%
+    .c-submission-organization
+      width 15%
+    .c-submission-documentation
+      width 5%
+    .c-submission-status
+      width 10%
+    .c-submission-date
+      width 30%
+    .c-submission-score
+      width 10%
+
+.c-job-log-tooltip-inner
+  white-space pre
+  max-width none
+  text-align left
+
+.c-user-submissions-footer
+  padding 5px 15px
+  font-size 12px
+  color #aaa
+  background-color #fff
+
+.c-no-submit
+.c-no-success
+  font-size 14px
+

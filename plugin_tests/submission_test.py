@@ -20,7 +20,18 @@
 import json
 import mock
 
+from girder.models.folder import Folder
+from girder.models.group import Group
+from girder.models.setting import Setting
+from girder.models.user import User
+from girder_jobs.models.job import Job
+from girder_worker.girder_plugin.constants import PluginSettings as WorkerSettings
 from tests import base
+
+from covalic.constants import PluginSettings as CovalicSettings
+from covalic.models.challenge import Challenge
+from covalic.models.phase import Phase
+from covalic.models.submission import Submission
 
 
 def setUpModule():
@@ -36,14 +47,10 @@ class SubmissionBase(base.TestCase):
     def setUp(self):
         super(SubmissionBase, self).setUp()
 
-        from girder.plugins.jobs.models.job import Job
-        from girder.plugins.worker.constants import PluginSettings as WorkerSettings
-        from girder.plugins.covalic.constants import PluginSettings as CovalicSettings
-
         self.scheduleJobMock = mock.patch.object(Job, 'scheduleJob')
         self.scheduleJobMock.start()
 
-        self.model('setting').set(WorkerSettings.API_URL, 'http://example.com/api/v1')
+        Setting().set(WorkerSettings.API_URL, 'http://example.com/api/v1')
 
         user = {
             'email': 'admin@email.com',
@@ -53,7 +60,7 @@ class SubmissionBase(base.TestCase):
             'password': 'adminpassword',
             'admin': True
         }
-        self.admin = self.model('user').createUser(**user)
+        self.admin = User().createUser(**user)
 
         user = {
             'email': 'good@email.com',
@@ -63,10 +70,10 @@ class SubmissionBase(base.TestCase):
             'password': 'goodpassword',
             'admin': False
         }
-        self.user = self.model('user').createUser(**user)
+        self.user = User().createUser(**user)
 
-        self.group = self.model('group').createGroup('phase1', self.admin)
-        self.model('group').addUser(self.group, self.user)
+        self.group = Group().createGroup('phase1', self.admin)
+        Group().addUser(self.group, self.user)
 
         user = {
             'email': 'scoring@email.com',
@@ -76,13 +83,13 @@ class SubmissionBase(base.TestCase):
             'password': 'scoringpassword',
             'admin': False
         }
-        self.scoringUser = self.model('user').createUser(**user)
-        self.model('setting').set(
+        self.scoringUser = User().createUser(**user)
+        Setting().set(
             CovalicSettings.SCORING_USER_ID,
             self.scoringUser['_id']
         )
 
-        self.challenge = self.model('challenge', 'covalic').createChallenge(
+        self.challenge = Challenge().createChallenge(
             name='challenge 1',
             creator=self.admin,
             public=False)
@@ -91,27 +98,27 @@ class SubmissionBase(base.TestCase):
             'accuracy': {'weight': 0.5},
             'error': {'weight': 0.5}
         }
-        self.phase1 = self.model('phase', 'covalic').createPhase(
+        self.phase1 = Phase().createPhase(
             'phase 1', self.challenge, creator=self.admin, ordinal=1
         )
         self.phase1['metrics'] = metrics
         self.phase1['active'] = True
         self.phase1['participantGroupId'] = self.group['_id']
-        self.model('phase', 'covalic').save(self.phase1)
-        self.phase2 = self.model('phase', 'covalic').createPhase(
+        Phase().save(self.phase1)
+        self.phase2 = Phase().createPhase(
             'phase 2', self.challenge, creator=self.admin, ordinal=2
         )
         self.phase2['metrics'] = metrics
-        self.model('phase', 'covalic').save(self.phase2)
+        Phase().save(self.phase2)
 
     def tearDown(self):
         self.scheduleJobMock.stop()
         super(SubmissionBase, self).tearDown()
 
     def createSubmission(self, phase, user, title, score=None, **kwargs):
-        folder = self.model('folder').createFolder(
+        folder = Folder().createFolder(
             user, title, parentType='user', creator=user)
-        submission = self.model('submission', 'covalic').createSubmission(
+        submission = Submission().createSubmission(
             user, phase, folder, title=title, **kwargs)
         if score is not None:
             scoreDict = [{
@@ -125,7 +132,7 @@ class SubmissionBase(base.TestCase):
                 }]
             }]
             submission['score'] = scoreDict
-        return self.model('submission', 'covalic').save(submission)
+        return Submission().save(submission)
 
     def generateSubmissionList(self, userApproaches=None, adminApproaches=None):
         userApproaches = userApproaches or [None, None, None]
@@ -153,7 +160,7 @@ class SubmissionBase(base.TestCase):
 
 class SubmissionModelTest(SubmissionBase):
     def testCreateAndDelete(self):
-        job = self.model('job', 'jobs').createJob(
+        job = Job().createJob(
             title='submission', type='covalic_score', handler='null_handler',
             user=self.user
         )
@@ -170,11 +177,11 @@ class SubmissionModelTest(SubmissionBase):
         # 'default' should be injected as the approach, but it should not be present
         # in the database.
         self.assertEqual(submission['approach'], 'default')
-        self.assertNotIn('approach', self.model('submission', 'covalic').findOne(submission['_id']))
+        self.assertNotIn('approach', Submission().findOne(submission['_id']))
 
-        self.model('submission', 'covalic').remove(submission)
-        self.assertIsNone(self.model('submission', 'covalic').findOne(submission['_id']))
-        self.assertIsNone(self.model('folder').findOne(submission['folderId']))
+        Submission().remove(submission)
+        self.assertIsNone(Submission().findOne(submission['_id']))
+        self.assertIsNone(Folder().findOne(submission['folderId']))
 
     def testCreateWithApproach(self):
         submission = self.createSubmission(
@@ -194,19 +201,19 @@ class SubmissionModelTest(SubmissionBase):
 
     def testListSubmissionsByPhase(self):
         self.generateSubmissionList()
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, latest=False))
         self.assertEqual(len(submissions), 6)
 
     def testListSubmissionsByUser(self):
         self.generateSubmissionList()
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, latest=False, userFilter=self.admin))
         self.assertEqual(len(submissions), 3)
 
     def testListLatestSubmissions(self):
         self.generateSubmissionList()
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, latest=True))
         self.assertEqual(len(submissions), 2)
 
@@ -218,26 +225,26 @@ class SubmissionModelTest(SubmissionBase):
         )
 
         # by approach only
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, approach='default', latest=False))
         self.assertEqual(len(submissions), 1)
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, approach='A', latest=False))
         self.assertEqual(len(submissions), 2)
 
         # by approach and user
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, userFilter=self.user, approach='default', latest=False))
         self.assertEqual(len(submissions), 0)
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, userFilter=self.admin, approach='default', latest=False))
         self.assertEqual(len(submissions), 1)
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, userFilter=self.user, approach='A', latest=False))
         self.assertEqual(len(submissions), 1)
 
         # approach == '' should be the same as 'default'
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, userFilter=self.admin, approach='', latest=False))
         self.assertEqual(len(submissions), 1)
 
@@ -249,21 +256,21 @@ class SubmissionModelTest(SubmissionBase):
         )
 
         # by approach only
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, approach='default'))
         self.assertEqual(len(submissions), 1)
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, approach='D'))
         self.assertEqual(len(submissions), 2)
 
         # by approach and user
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, userFilter=self.user, approach='default'))
         self.assertEqual(len(submissions), 0)
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, userFilter=self.admin, approach='default'))
         self.assertEqual(len(submissions), 2)
-        submissions = list(self.model('submission', 'covalic').list(
+        submissions = list(Submission().list(
             self.phase1, userFilter=self.user, approach='D'))
         self.assertEqual(len(submissions), 1)
 
@@ -276,44 +283,44 @@ class SubmissionModelTest(SubmissionBase):
 
         # list all globally
         self.assertEqual(
-            self.model('submission', 'covalic').listApproaches(),
+            Submission().listApproaches(),
             ['A', 'b', 'c', 'd', 'default']
         )
 
         # list by phase
         self.assertEqual(
-            self.model('submission', 'covalic').listApproaches(phase=self.phase1),
+            Submission().listApproaches(phase=self.phase1),
             ['A', 'b', 'c', 'd', 'default']
         )
         self.assertEqual(
-            self.model('submission', 'covalic').listApproaches(phase=self.phase2),
+            Submission().listApproaches(phase=self.phase2),
             ['default']
         )
 
         # list by user
         self.assertEqual(
-            self.model('submission', 'covalic').listApproaches(user=self.admin),
+            Submission().listApproaches(user=self.admin),
             ['A', 'd', 'default']
         )
         self.assertEqual(
-            self.model('submission', 'covalic').listApproaches(user=self.user),
+            Submission().listApproaches(user=self.user),
             ['A', 'b', 'c', 'default']
         )
 
         # list by user and phase
         self.assertEqual(
-            self.model('submission', 'covalic').listApproaches(user=self.admin, phase=self.phase1),
+            Submission().listApproaches(user=self.admin, phase=self.phase1),
             ['A', 'd', 'default']
         )
         self.assertEqual(
-            self.model('submission', 'covalic').listApproaches(user=self.user, phase=self.phase2),
+            Submission().listApproaches(user=self.user, phase=self.phase2),
             ['default']
         )
 
     def testRecomputeOverallScores(self):
         self.generateSubmissionList()
 
-        submission = self.model('submission', 'covalic').findOne(
+        submission = Submission().findOne(
             {'title': 'User submission 0 phase 1'})
         self.assertEqual(submission['overallScore'], (1.0 + 0.25) / 2.0)
 
@@ -321,10 +328,10 @@ class SubmissionModelTest(SubmissionBase):
             'accuracy': {'weight': 0.3},
             'error': {'weight': 0.7}
         }
-        self.model('phase', 'covalic').save(self.phase1)
-        self.model('submission', 'covalic').recomputeOverallScores(self.phase1)
+        Phase().save(self.phase1)
+        Submission().recomputeOverallScores(self.phase1)
 
-        submission = self.model('submission', 'covalic').findOne(
+        submission = Submission().findOne(
             {'title': 'User submission 0 phase 1'})
         self.assertEqual(submission['overallScore'], 0.25 * 0.3 + 1.0 * 0.7)
 
@@ -332,18 +339,18 @@ class SubmissionModelTest(SubmissionBase):
         self.generateSubmissionList()
         submission = self.createSubmission(self.phase1, self.user, 'no score')
         self.assertNotIn('latest', submission)
-        latest = self.model('submission', 'covalic').findOne({'title': 'User submission 2 phase 1'})
+        latest = Submission().findOne({'title': 'User submission 2 phase 1'})
         self.assertEqual(latest['latest'], True)
 
     def testScoreSubmission(self):
         submission = self.createSubmission(self.phase1, self.user, 'submission')
         self.assertNotIn('jobId', submission)
 
-        submission = self.model('submission', 'covalic').scoreSubmission(
+        submission = Submission().scoreSubmission(
             submission, 'http://127.0.0.1/api/v1')
         self.assertIn('jobId', submission)
 
-        job = self.model('job', 'jobs').load(submission['jobId'], force=True)
+        job = Job().load(submission['jobId'], force=True)
         self.assertIsNotNone(job)
 
 
@@ -352,7 +359,7 @@ class SubmissionRestTest(SubmissionBase):
         super(SubmissionRestTest, self).setUp()
 
     def testCRUDSubmissionAsAdmin(self):
-        folder = self.model('folder').createFolder(
+        folder = Folder().createFolder(
             self.admin, 'submission phase 1', parentType='user', creator=self.admin
         )
 
@@ -420,7 +427,7 @@ class SubmissionRestTest(SubmissionBase):
         self.assertStatus(resp, 400)
 
     def testCRUDSubmissionAsUser(self):
-        folder = self.model('folder').createFolder(
+        folder = Folder().createFolder(
             self.user, 'submission phase 1', parentType='user', creator=self.user
         )
         # user cannot override date
@@ -697,7 +704,7 @@ class SubmissionRestTest(SubmissionBase):
         self.assertStatus(resp, 403)
 
     def testSubmissionWithMetadata(self):
-        folder = self.model('folder').createFolder(
+        folder = Folder().createFolder(
             self.admin, 'submission phase 1', parentType='user', creator=self.user
         )
         resp = self.request(
