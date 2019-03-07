@@ -17,7 +17,6 @@
 #  limitations under the License.
 ###############################################################################
 
-import mako
 import os
 import posixpath
 
@@ -31,6 +30,7 @@ from girder.models.user import User
 from girder.plugin import getPlugin, GirderPlugin, loadedPlugins, registerPluginWebroot
 from girder.utility import mail_utils
 from girder.utility.model_importer import ModelImporter
+from girder.utility.webroot import WebrootBase
 from girder_jobs.constants import JobStatus
 from girder_jobs.models.job import Job
 
@@ -45,79 +45,6 @@ from covalic.utility import getAssetsFolder
 from covalic.utility.user_emails import getPhaseUserEmails
 
 _HERE = os.path.abspath(os.path.dirname(__file__))
-
-
-class CustomAppRoot(ModelImporter):
-    """
-    The webroot endpoint simply serves the main index HTML file of covalic.
-    """
-    exposed = True
-
-    indexHtml = None
-
-    vars = {
-        'apiRoot': '/api/v1',
-        'staticRoot': '/static',
-        'title': 'Covalic'
-    }
-
-    template = r"""
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>${title}</title>
-        <link rel="stylesheet"
-              href="//fonts.googleapis.com/css?family=Droid+Sans:400,700">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/fontello/css/fontello.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/fontello/css/animation.css">
-        <link rel="stylesheet" href="${staticRoot}/built/girder_lib.min.css">
-        <link rel="stylesheet"
-              href="${staticRoot}/built/plugins/covalic_external/plugin.min.css">
-        % for plugin in pluginCss:
-            <link rel="stylesheet"
-                  href="${staticRoot}/built/plugins/${plugin}/plugin.min.css">
-        % endfor
-        <link rel="icon"
-              type="image/png"
-              href="${staticRoot}/img/Girder_Favicon.png">
-
-      </head>
-      <body>
-        <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
-        <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
-        <script src="${staticRoot}/built/girder_lib.min.js"></script>
-        <script src="${staticRoot}/built/girder_app.min.js"></script>
-        % for plugin in pluginJs:
-          <script src="${staticRoot}/built/plugins/${plugin}/plugin.min.js"></script>
-        % endfor
-        <script src="${staticRoot}/built/plugins/covalic_external/plugin.min.js"></script>
-      </body>
-    </html>
-    """
-
-    def GET(self):
-        if self.indexHtml is None:
-            self.vars['pluginCss'] = []
-            self.vars['pluginJs'] = []
-
-            builtDir = os.path.join(
-                STATIC_ROOT_DIR, 'built', 'plugins')
-            plugins = loadedPlugins()
-
-            for plugin in plugins:
-                if os.path.exists(os.path.join(builtDir, plugin,
-                                               'plugin.min.css')):
-                    self.vars['pluginCss'].append(plugin)
-                if os.path.exists(os.path.join(builtDir, plugin,
-                                               'plugin.min.js')):
-                    self.vars['pluginJs'].append(plugin)
-            self.indexHtml = mako.template.Template(self.template).render(
-                **self.vars)
-
-        return self.indexHtml
 
 
 def validateSettings(event):
@@ -264,7 +191,20 @@ class CovalicPlugin(GirderPlugin):
         info['apiRoot'].challenge_phase = PhaseResource()
         info['apiRoot'].covalic_submission = SubmissionResource()
 
-        registerPluginWebroot(CustomAppRoot(), 'covalic')
+        webroot = WebrootBase(os.path.join(_HERE, 'webroot.mako'))
+        webroot.updateHtmlVars({
+            'pluginCss': [
+                plugin for plugin in loadedPlugins()
+                if os.path.exists(os.path.join(
+                    STATIC_ROOT_DIR, 'built', 'plugins', plugin, 'plugin.min.css'))
+            ],
+            'pluginJs': [
+                plugin for plugin in loadedPlugins()
+                if os.path.exists(os.path.join(
+                    STATIC_ROOT_DIR, 'built', 'plugins', plugin, 'plugin.min.js'))
+            ]
+        })
+        registerPluginWebroot(webroot, 'covalic')
 
         events.bind('jobs.job.update', 'covalic', onJobUpdate)
         events.bind('model.setting.validate', 'covalic', validateSettings)
