@@ -7,8 +7,8 @@ var PhaseModel = AccessControlledModel.extend({
 
     fetchGroundtruthItems: function () {
         restRequest({
-            path: `${this.resourceName}/${this.id}/groundtruth/item`,
-            type: 'GET'
+            url: `${this.resourceName}/${this.id}/groundtruth/item`,
+            method: 'GET'
         }).done((resp) => {
             this.set('groundtruthItems', resp);
             this.trigger('c:groundtruthItemsFetched', resp);
@@ -29,8 +29,8 @@ var PhaseModel = AccessControlledModel.extend({
 
     saveMetrics: function () {
         restRequest({
-            path: `${this.resourceName}/${this.id}/metrics`,
-            type: 'PUT',
+            url: `${this.resourceName}/${this.id}/metrics`,
+            method: 'PUT',
             data: JSON.stringify(this.get('metrics') || {}),
             processData: false,
             contentType: 'application/json'
@@ -43,8 +43,8 @@ var PhaseModel = AccessControlledModel.extend({
 
     saveScoringInfo: function (args) {
         restRequest({
-            path: `${this.resourceName}/${this.id}/scoring_info`,
-            type: 'PUT',
+            url: `${this.resourceName}/${this.id}/scoring_info`,
+            method: 'PUT',
             data: args,
             error: null
         }).done((resp) => {
@@ -57,8 +57,8 @@ var PhaseModel = AccessControlledModel.extend({
 
     initMetrics: function () {
         restRequest({
-            path: `${this.resourceName}/{this.id}/metrics/init`,
-            type: 'POST'
+            url: `${this.resourceName}/{this.id}/metrics/init`,
+            method: 'POST'
         }).done((resp) => {
             this.trigger('c:metricsInitialized', resp);
         }).error((err) => {
@@ -68,9 +68,9 @@ var PhaseModel = AccessControlledModel.extend({
 
     cleanGroundTruthData: function () {
         restRequest({
-            path: `folder/${this.get('groundTruthFolderId')}/contents`,
+            url: `folder/${this.get('groundTruthFolderId')}/contents`,
             progress: true,
-            type: 'DELETE'
+            method: 'DELETE'
         }).done((resp) => {
             this.trigger('c:groundTruthDeleted', resp);
         }).error((err) => {
@@ -80,9 +80,9 @@ var PhaseModel = AccessControlledModel.extend({
 
     cleanInputData: function () {
         restRequest({
-            path: `folder/${this.get('testDataFolderId')}/contents`,
+            url: `folder/${this.get('testDataFolderId')}/contents`,
             progress: true,
-            type: 'DELETE'
+            method: 'DELETE'
         }).done((resp) => {
             this.trigger('c:inputDataDeleted', resp);
         }).error((err) => {

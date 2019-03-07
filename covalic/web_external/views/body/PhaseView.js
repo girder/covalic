@@ -24,8 +24,8 @@ var PhaseView = View.extend({
                 events.trigger('g:loginUi');
             } else {
                 restRequest({
-                    path: `challenge_phase/${this.model.id}/participant`,
-                    type: 'POST',
+                    url: `challenge_phase/${this.model.id}/participant`,
+                    method: 'POST',
                     error: null
                 }).done(() => {
                     var participantGroupId = this.model.get('participantGroupId');

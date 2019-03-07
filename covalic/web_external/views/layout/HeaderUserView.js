@@ -20,8 +20,8 @@ var HeaderUserView = View.extend({
 
         'click a.g-logout': function () {
             restRequest({
-                path: 'user/authentication',
-                type: 'DELETE'
+                url: 'user/authentication',
+                method: 'DELETE'
             }).done(_.bind(function () {
                 setCurrentUser(null);
                 events.trigger('g:login');

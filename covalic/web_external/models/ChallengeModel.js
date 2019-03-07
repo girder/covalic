@@ -14,8 +14,8 @@ var ChallengeModel = AccessControlledModel.extend({
 
     fetchAssetsFolder: function () {
         restRequest({
-            path: `${this.resourceName}/${this.id}/assets_folder`,
-            type: 'GET'
+            url: `${this.resourceName}/${this.id}/assets_folder`,
+            method: 'GET'
         }).done((resp) => {
             this.trigger('c:assetsFolderFetched', resp);
         }).error((err) => {
@@ -27,8 +27,8 @@ var ChallengeModel = AccessControlledModel.extend({
         size = size || this.DEFAULT_THUMB_SIZE;
 
         restRequest({
-            path: `${this.resourceName}/${this.id}/thumbnail`,
-            type: 'POST',
+            url: `${this.resourceName}/${this.id}/thumbnail`,
+            method: 'POST',
             data: {
                 fileId: fileId,
                 size: size
@@ -74,8 +74,8 @@ var ChallengeModel = AccessControlledModel.extend({
      */
     findByName: function (name) {
         restRequest({
-            path: this.resourceName,
-            type: 'GET',
+            url: this.resourceName,
+            method: 'GET',
             data: {
                 name: this.transformNameForUrl(name, true)
             }

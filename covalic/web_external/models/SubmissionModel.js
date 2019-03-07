@@ -8,8 +8,8 @@ var SubmissionModel = Model.extend({
 
     postSubmission: function (opts) {
         restRequest({
-            path: this.resourceName,
-            type: 'POST',
+            url: this.resourceName,
+            method: 'POST',
             data: {
                 folderId: opts.folderId,
                 phaseId: opts.phaseId,
