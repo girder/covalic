@@ -12,7 +12,7 @@ var PhaseModel = AccessControlledModel.extend({
         }).done((resp) => {
             this.set('groundtruthItems', resp);
             this.trigger('c:groundtruthItemsFetched', resp);
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },
@@ -36,7 +36,7 @@ var PhaseModel = AccessControlledModel.extend({
             contentType: 'application/json'
         }).done((resp) => {
             this.trigger('c:metricsSaved', resp);
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },
@@ -50,7 +50,7 @@ var PhaseModel = AccessControlledModel.extend({
         }).done((resp) => {
             this.set(resp);
             this.trigger('c:scoringInfoSaved', resp);
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },
@@ -61,7 +61,7 @@ var PhaseModel = AccessControlledModel.extend({
             method: 'POST'
         }).done((resp) => {
             this.trigger('c:metricsInitialized', resp);
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },
@@ -73,7 +73,7 @@ var PhaseModel = AccessControlledModel.extend({
             method: 'DELETE'
         }).done((resp) => {
             this.trigger('c:groundTruthDeleted', resp);
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },
@@ -85,7 +85,7 @@ var PhaseModel = AccessControlledModel.extend({
             method: 'DELETE'
         }).done((resp) => {
             this.trigger('c:inputDataDeleted', resp);
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },

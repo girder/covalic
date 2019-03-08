@@ -72,17 +72,17 @@ const ConfigView = View.extend({
                 list: JSON.stringify(settings)
             },
             error: null
-        }).done(_.bind(function () {
+        }).done(() => {
             events.trigger('g:alert', {
                 icon: 'ok',
                 text: 'Settings saved.',
                 type: 'success',
                 timeout: 4000
             });
-        }, this)).error(_.bind(function (resp) {
+        }).fail((resp) => {
             this.$('#g-covalic-error-message').text(
                 resp.responseJSON.message);
-        }, this));
+        });
     }
 });
 

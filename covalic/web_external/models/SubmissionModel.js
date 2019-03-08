@@ -23,7 +23,7 @@ var SubmissionModel = Model.extend({
         }).done((resp) => {
             this.set(resp);
             this.trigger('c:submissionPosted', resp);
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },

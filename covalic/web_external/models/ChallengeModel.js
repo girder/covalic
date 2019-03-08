@@ -18,7 +18,7 @@ var ChallengeModel = AccessControlledModel.extend({
             method: 'GET'
         }).done((resp) => {
             this.trigger('c:assetsFolderFetched', resp);
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },
@@ -36,7 +36,7 @@ var ChallengeModel = AccessControlledModel.extend({
             error: null
         }).done(() => {
             this.trigger('c:thumbnailCreated');
-        }).error((err) => {
+        }).fail((err) => {
             this.trigger('c:error', err);
         });
     },
