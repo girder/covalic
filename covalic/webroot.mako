@@ -8,7 +8,7 @@
     % for plugin in pluginCss:
     <link rel="stylesheet" href="/static/built/plugins/${plugin}/plugin.min.css">
     % endfor
-    <script src="/static/built/plugins/covalic_external/plugin.min.css"></script>
+    <link rel="stylesheet" href="/static/built/plugins/covalic_external/plugin.min.css">
   </head>
   <body>
     <div id="g-global-info-apiroot" class="hide">/api/v1</div>
