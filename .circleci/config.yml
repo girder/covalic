@@ -20,14 +20,13 @@ commands:
             echo "source $CIRCLE_WORKING_DIRECTORY/girder_env/bin/activate" >> $BASH_ENV
       - run:
           name: Install Girder
-          command: pip install . --requirement requirements-dev.txt
-          working_directory: girder
+          command: pip install ./girder
       - run:
           name: Install girder_worker
           command: pip install --upgrade-strategy=eager --upgrade --pre girder-worker
       - run:
           name: Install Covalic
-          command: pip install girder/plugins/covalic
+          command: pip install ./girder/plugins/covalic
 
       - run:
           name: Install @girder/lint for Javascript linting
