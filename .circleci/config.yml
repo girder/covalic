@@ -22,11 +22,11 @@ commands:
           name: Install Girder
           command: pip install ./girder
       - run:
-          name: Install girder_worker
-          command: pip install --upgrade-strategy=eager --upgrade --pre girder-worker
-      - run:
           name: Install Covalic
           command: pip install ./girder/plugins/covalic
+      - run:
+          name: Install development requirements
+          command: pip install -r ./girder/plugins/covalic/requirements-dev.txt
 
       - run:
           name: Install @girder/lint for Javascript linting
