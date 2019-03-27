@@ -8,7 +8,7 @@ commands:
     steps:
       - run:
           name: Clone Girder
-          command: git clone --depth 1 --branch master -- https://github.com/girder/girder.git girder
+          command: git clone --branch master -- https://github.com/girder/girder.git girder
       - checkout:
           # Covalic must live here for CTest to pick up tests
           path: girder/plugins/covalic
