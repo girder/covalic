@@ -42,8 +42,13 @@ setup(
     include_package_data=True,
     packages=find_packages(exclude=['plugin_tests']),
     zip_safe=False,
-    install_requires=['girder', 'girder-gravatar', 'girder-worker', 'girder-thumbnails',
-                      'girder-jobs'],
+    install_requires=[
+        'girder',
+        'girder-gravatar',
+        'girder-worker==0.5.1',
+        'girder-thumbnails',
+        'girder-jobs'
+    ],
     entry_points={
         'girder.plugin': [
             'covalic = covalic:CovalicPlugin'

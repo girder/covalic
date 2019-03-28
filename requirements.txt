@@ -35,7 +35,7 @@ girder-jobs==3.0.0a6.dev15
 girder-oauth==3.0.0a6.dev15
 girder-thumbnails==3.0.0a6.dev15
 girder-client==2.4.0
-girder-worker==0.5.1.dev213
+girder-worker==0.5.1
 girder-worker-utils==0.8.4
 idna==2.8
 ipaddress==1.0.22
