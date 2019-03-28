@@ -49,7 +49,7 @@ class Submission(Model):
         ], {})
         userPhaseIdx = ([('creatorId', 1), ('phaseId', 1), ('approach', 1)], {})
         self.ensureIndices((leaderboardIdx, userPhaseIdx, 'folderId',
-                            'overallScore', 'approach'))
+                            'overallScore', 'approach', 'created'))
         self.exposeFields(level=AccessType.READ, fields=(
             '_id', 'creatorId', 'creatorName', 'phaseId', 'folderId', 'created',
             'score', 'title', 'latest', 'overallScore', 'jobId', 'organization', 'organizationUrl',
