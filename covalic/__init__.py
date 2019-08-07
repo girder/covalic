@@ -131,8 +131,7 @@ def onJobUpdate(event):
             'host': covalicHost,
             'log': log
         })
-        mail_utils.sendEmail(
-            to=emails, subject='Submission processing error', text=html)
+        mail_utils.sendMail('Submission processing error', html, emails)
 
         # Mail user, include minimal log
         if not rescoring:
@@ -143,8 +142,7 @@ def onJobUpdate(event):
                 'host': covalicHost,
                 'log': minimalLog
             })
-            mail_utils.sendEmail(
-                to=user['email'], subject='Submission processing error', text=html)
+            mail_utils.sendMail('Submission processing error', html, [user['email']])
 
 
 def onUserSave(event):

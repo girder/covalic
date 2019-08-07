@@ -389,9 +389,7 @@ class SubmissionResource(Resource):
                     'submission': submission,
                     'host': covalicHost
                 })
-            mail_utils.sendEmail(
-                to=user['email'], subject='Your submission has been scored',
-                text=html)
+            mail_utils.sendMail('Your submission has been scored', html, [user['email']])
 
         # Mail admins
         emails = sorted(getPhaseUserEmails(
@@ -405,8 +403,7 @@ class SubmissionResource(Resource):
                 'submission': submission,
                 'host': covalicHost
             })
-        mail_utils.sendEmail(
-            to=emails, subject='A submission has been scored', text=html)
+        mail_utils.sendMail('A submission has been scored', html, emails)
 
         return self._filterScore(phase, submission, user)
 
