@@ -43,9 +43,7 @@ class Challenge(AccessControlledModel):
             'thumbnails', 'thumbnailSourceId'})
 
     def list(self, user=None, limit=50, offset=0, sort=None, filters=None):
-        """
-        List a page of challenges.
-        """
+        """List a page of challenges."""
         cursor = self.find(filters or {}, limit=0, sort=sort)
 
         for r in self.filterResultsByPermission(cursor=cursor, user=user,
@@ -55,7 +53,9 @@ class Challenge(AccessControlledModel):
 
     def subtreeCount(self, challenge):
         """
-        Count up the recursive size of the challenge. This sums the size of
+        Count up the recursive size of the challenge.
+
+        This sums the size of
         each individual phase, then adds 1 for the challenge itself.
         """
         count = 1

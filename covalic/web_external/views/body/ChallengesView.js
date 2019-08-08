@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 import { getCurrentUser } from '@girder/core/auth';
 import { AccessType } from '@girder/core/constants';
 import { cancelRestRequests } from '@girder/core/rest';
@@ -72,7 +74,7 @@ var ChallengesView = View.extend({
     },
 
     _gotoChallenge: function (challenge) {
-        router.navigate(`challenge/${challenge.id}`, {trigger: true});
+        router.navigate(`challenge/${challenge.id}`, { trigger: true });
     },
 
     challengeFilterChanged: function (e) {

@@ -8,7 +8,7 @@ var PhaseConfigureSubmissionsView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
             this._save(() => {
-                router.navigate(`phase/${this.model.id}`, {trigger: true});
+                router.navigate(`phase/${this.model.id}`, { trigger: true });
             });
         },
 

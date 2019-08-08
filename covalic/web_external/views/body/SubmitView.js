@@ -1,4 +1,5 @@
 import 'bootstrap-3-typeahead';
+import $ from 'jquery';
 import _ from 'underscore';
 import events from '@girder/core/events';
 import { getCurrentUser } from '@girder/core/auth';
@@ -209,7 +210,7 @@ var SubmitView = View.extend({
 
     uploadFinished: function () {
         this.submission.on('c:submissionPosted', function () {
-            router.navigate(`submission/${this.submission.id}`, {trigger: true});
+            router.navigate(`submission/${this.submission.id}`, { trigger: true });
         }, this).postSubmission({
             phaseId: this.phase.id,
             folderId: this.folder.id,

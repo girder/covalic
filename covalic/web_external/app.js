@@ -38,9 +38,9 @@ const CovalicApp = App.extend({
 
         if (getCurrentUser()) {
             eventStream.open();
-            router.navigate(route, {trigger: true});
+            router.navigate(route, { trigger: true });
         } else {
-            router.navigate('/', {trigger: true});
+            router.navigate('/', { trigger: true });
         }
     }
 });

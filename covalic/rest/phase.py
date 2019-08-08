@@ -77,13 +77,13 @@ class PhaseResource(Resource):
     @describeRoute(
         Description('List phases for a challenge.')
         .param('challengeId', 'The ID of the challenge.')
-        .param('limit', "Result set size limit (default=50).", required=False,
+        .param('limit', 'Result set size limit (default=50).', required=False,
                dataType='int')
-        .param('offset', "Offset into result set (default=0).", required=False,
+        .param('offset', 'Offset into result set (default=0).', required=False,
                dataType='int')
-        .param('sort', "Field to sort the result list by (default=ordinal)",
+        .param('sort', 'Field to sort the result list by (default=ordinal)',
                required=False)
-        .param('sortdir', "1 for ascending, -1 for descending (default=1)",
+        .param('sortdir', '1 for ascending, -1 for descending (default=1)',
                required=False, dataType='int')
     )
     def listPhases(self, challenge, params):
@@ -213,7 +213,7 @@ class PhaseResource(Resource):
         participantCount = User().find({
             'groups': phase['participantGroupId']
         }).count()
-        submissionStats = Submission().collection.aggregrate([
+        submissionStats = next(Submission().collection.aggregrate([
             {
                 '$match': {
                     'phaseId': phase['_id'],
@@ -237,7 +237,7 @@ class PhaseResource(Resource):
                     ]
                 }
             }
-        ]).next()
+        ]))
         submissionCount = submissionStats['submissionCount'][0]['count']
         submittingParticipantCount = submissionStats['submittingParticipantCount'][0]['count']
 
@@ -349,26 +349,26 @@ class PhaseResource(Resource):
 
         if 'ordinal' in params:
             phase['ordinal'] = int(params.get('ordinal').strip())
-        if ('participantGroupId' in params and params['participantGroupId'] !=
-                str(phase.get('participantGroupId'))):
+        if ('participantGroupId' in params
+                and params['participantGroupId'] != str(phase.get('participantGroupId'))):
             group = Group().load(
                 params['participantGroupId'],
                 user=user, level=AccessType.READ, exc=True)
             phase['participantGroupId'] = group['_id']
-        if ('folderId' in params and
-                params['folderId'] != str(phase['folderId'])):
+        if ('folderId' in params
+                and params['folderId'] != str(phase['folderId'])):
             folder = Folder().load(
                 params['folderId'], user=user,
                 level=AccessType.READ, exc=True)
             phase['folderId'] = folder['_id']
-        if ('groundTruthFolderId' in params and params['groundTruthFolderId'] !=
-                str(phase.get('groundTruthFolderId'))):
+        if ('groundTruthFolderId' in params
+                and params['groundTruthFolderId'] != str(phase.get('groundTruthFolderId'))):
             folder = Folder().load(
                 params['groundTruthFolderId'], user=user,
                 level=AccessType.READ, exc=True)
             phase['groundTruthFolderId'] = folder['_id']
-        if ('testDataFolderId' in params and params['testDataFolderId'] !=
-                str(phase.get('testDataFolderId'))):
+        if ('testDataFolderId' in params
+                and params['testDataFolderId'] != str(phase.get('testDataFolderId'))):
             folder = Folder().load(
                 params['testDataFolderId'], user=user, level=AccessType.READ,
                 exc=True)
@@ -508,7 +508,7 @@ class PhaseResource(Resource):
         newMetrics = phase['metrics']
         changed = set(oldMetrics.keys()) != set(newMetrics.keys())
         if not changed:
-            for key in oldMetrics.iterkeys():
+            for key in oldMetrics.keys():
                 if oldMetrics[key].get('weight') != \
                         newMetrics[key].get('weight'):
                     changed = True

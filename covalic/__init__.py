@@ -59,6 +59,8 @@ def validateSettings(event):
 
 def challengeSaved(event):
     """
+    Event handler for challenge save.
+
     After a challenge is saved, we want to update the Assets folder permissions
     to be the same as the challenge.
     """
@@ -70,6 +72,8 @@ def challengeSaved(event):
 
 def onPhaseSave(event):
     """
+    Event handler for phase save.
+
     Hook into phase save event to synchronize access control between the phase
     and submission folders for the phase.
     """
@@ -80,9 +84,9 @@ def onPhaseSave(event):
 
 def onJobUpdate(event):
     """
-    Hook into job update event so we can look for job failure events and email
-    the user and challenge/phase administrators accordingly. Here, an
-    administrator is defined to be a user with WRITE access or above.
+    Look for job failure events and email the user and challenge/phase administrators accordingly.
+
+    Here, an administrator is defined to be a user with WRITE access or above.
     """
     isErrorStatus = False
     try:
@@ -146,9 +150,7 @@ def onJobUpdate(event):
 
 
 def onUserSave(event):
-    """
-    Hook into user save event and update the user's name in their submissions.
-    """
+    """Update the user's name in their submissions, on user save."""
     user = event.info
     userName = Submission().getUserName(user)
 

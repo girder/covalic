@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 import View from '../view';
 import template from '../../templates/widgets/initializeMetricsDialog.pug';
 import '@girder/core/utilities/jquery/girderModal';

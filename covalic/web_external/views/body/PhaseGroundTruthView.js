@@ -97,7 +97,7 @@ var PhaseGroundTruthView = View.extend({
 
     _saveAndGoTo: function (route) {
         this.model.once('g:saved', function () {
-            router.navigate(route, {trigger: true});
+            router.navigate(route, { trigger: true });
         }, this).set({
 
         }).save();

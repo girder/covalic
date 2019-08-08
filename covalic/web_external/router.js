@@ -60,7 +60,7 @@ router.route('challenge/:id', 'challenge', function (id) {
             challenge: challenge
         });
     }, this).on('g:error', function () {
-        router.navigate('challenges', {trigger: true});
+        router.navigate('challenges', { trigger: true });
     }, this).fetch();
 });
 
@@ -73,7 +73,7 @@ router.route('phase/:id', 'phase', function (id) {
             phase: phase
         });
     }).once('g:error', function () {
-        router.navigate('challenges', {trigger: true});
+        router.navigate('challenges', { trigger: true });
     });
     phase.fetch();
 });
@@ -85,7 +85,7 @@ router.route('challenge/n/:name', 'challengeByName', function (name) {
             challenge: challenge
         });
     }).once('c:notFound', function () {
-        router.navigate('challenges', {trigger: true});
+        router.navigate('challenges', { trigger: true });
     });
 });
 
@@ -122,7 +122,7 @@ router.route('phase/:id/metrics', 'phaseMetrics', function (id) {
             phase: phase
         });
     }, this).on('g:error', function () {
-        router.navigate('challenges', {trigger: true});
+        router.navigate('challenges', { trigger: true });
     }, this);
     phase.fetch();
 });
@@ -136,7 +136,7 @@ router.route('phase/:id/submit', 'phase_submit', function (id) {
             phase
         });
     }).once('g:error', function () {
-        router.navigate('challenges', {trigger: true});
+        router.navigate('challenges', { trigger: true });
     }, this).fetch();
 });
 
@@ -149,7 +149,7 @@ router.route('submission/:id', 'phase_submission', function (id) {
             submission
         });
     }).once('g:error', function () {
-        router.navigate('challenges', {trigger: true});
+        router.navigate('challenges', { trigger: true });
     }).fetch();
 });
 
@@ -158,7 +158,7 @@ router.route('phase/:id/submissions', 'phaseSubmissions', function (id, params) 
         _id: id
     }).once('g:fetched', function () {
         if (phase.getAccessLevel() < AccessType.WRITE) {
-            router.navigate('challenges', {trigger: true});
+            router.navigate('challenges', { trigger: true });
         } else {
             params = parseQueryString(params);
 
@@ -178,14 +178,14 @@ router.route('phase/:id/submissions', 'phaseSubmissions', function (id, params) 
             });
         }
     }, this).on('g:error', function () {
-        router.navigate('challenges', {trigger: true});
+        router.navigate('challenges', { trigger: true });
     }, this);
     phase.fetch();
 });
 
 var _wizardPage = function (route, routeName, modelType, viewType) {
     router.route(route, routeName, function (id, params) {
-        var model = new modelType({_id: id}), // eslint-disable-line new-cap
+        var model = new modelType({ _id: id }), // eslint-disable-line new-cap
             wizard = false;
 
         params = parseQueryString(params);
@@ -203,7 +203,7 @@ var _wizardPage = function (route, routeName, modelType, viewType) {
                 wizard
             });
         }).once('g:error', () => {
-            router.navigate('challenges', {trigger: true});
+            router.navigate('challenges', { trigger: true });
         }).fetch();
     });
 };

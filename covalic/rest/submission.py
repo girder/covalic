@@ -56,16 +56,16 @@ class SubmissionResource(Resource):
 
     def _filterScore(self, phase, submission, user):
         """
-        If the phase is configured to hide scores from participants, removes
-        the relevant score fields from the document. Users with WRITE access
-        or above on the phase will still be able to view the scores.
+        Remove the relevant score fields from the document.
+
+        Only operates if the phase is configured to hide scores from participants.
+        Users with WRITE access or above on the phase will still be able to view the scores.
 
         Additionally, ensures that any NaN or Infinity score values are coerced
         to corresponding strings so they can be JSON encoded.
         """
-        if (phase.get('hideScores') and
-                not Phase().hasAccess(
-                    phase, user, level=AccessType.WRITE)):
+        if (phase.get('hideScores')
+                and not Phase().hasAccess(phase, user, level=AccessType.WRITE)):
             submission.pop('score', None)
             submission.pop('overallScore', None)
         else:
@@ -125,9 +125,8 @@ class SubmissionResource(Resource):
         user = self.getCurrentUser()
 
         # If scores are hidden, do not allow sorting by score fields
-        if (phase.get('hideScores') and
-                not Phase().hasAccess(
-                    phase, user, AccessType.WRITE)):
+        if (phase.get('hideScores')
+                and not Phase().hasAccess(phase, user, AccessType.WRITE)):
             for field, _ in sort:
                 if field == 'overallScore' or field.startswith('score.'):
                     raise AccessException(
@@ -158,7 +157,7 @@ class SubmissionResource(Resource):
             user = currentUser
 
         if user['_id'] != currentUser['_id']:
-            self.requireAdmin(currentUser, 'Only admins can see other user\'s approaches.')
+            self.requireAdmin(currentUser, "Only admins can see other user's approaches.")
 
         return Submission().listApproaches(phase=phase, user=user)
 
@@ -326,7 +325,7 @@ class SubmissionResource(Resource):
             'score', 'The JSON object containing the scores for this submission.',
             paramType='body',
             schema={
-                "$schema": "http://json-schema.org/schema#",
+                '$schema': 'http://json-schema.org/schema#',
                 'type': 'array',
                 'items': {'$ref': '#/definitions/score'},
                 'definitions': {
@@ -432,9 +431,9 @@ class SubmissionResource(Resource):
     getUnscoredSubmissions.description = (
         Description('List unscored submissions for a given phase.')
         .param('phaseId', 'The ID of the phase.')
-        .param('limit', "Result set size limit (default=50).", required=False,
+        .param('limit', 'Result set size limit (default=50).', required=False,
                dataType='int')
-        .param('offset', "Offset into result set (default=0).", required=False,
+        .param('offset', 'Offset into result set (default=0).', required=False,
                dataType='int')
         .param('sort', 'Field to sort the result list by (default=created)',
                required=False)
@@ -477,8 +476,8 @@ class SubmissionResource(Resource):
     def deleteSubmission(self, submission, params):
         user = self.getCurrentUser()
         phase = Phase().load(submission['phaseId'], force=True)
-        if (user['_id'] == submission['creatorId'] or
-                Phase().hasAccess(phase, user, AccessType.WRITE)):
+        if (user['_id'] == submission['creatorId']
+                or Phase().hasAccess(phase, user, AccessType.WRITE)):
             Submission().remove(submission)
         else:
             raise AccessException(

@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import _ from 'underscore';
 import 'bootstrap/js/dropdown';
 import moment from 'moment';
@@ -99,7 +100,7 @@ var UserSubmissionsView = View.extend({
         var tooltipParams = {
             container: this.$el,
             animation: false,
-            delay: {show: 100}
+            delay: { show: 100 }
         };
 
         this.$('.c-tooltip').tooltip(tooltipParams);
@@ -138,7 +139,7 @@ var UserSubmissionsView = View.extend({
                 });
                 $.when.apply($, promises).done(() => {
                     var jobMap = _.indexBy(jobs, 'id');
-                    this.render({jobs: jobMap});
+                    this.render({ jobs: jobMap });
                 });
             } else {
                 this.render();

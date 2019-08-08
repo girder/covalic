@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 import FolderModel from '@girder/core/models/FolderModel';
 import LoadingAnimation from '@girder/core/views/widgets/LoadingAnimation';
 import UploadWidget from '@girder/core/views/widgets/UploadWidget';

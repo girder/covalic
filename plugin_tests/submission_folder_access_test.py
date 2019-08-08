@@ -42,11 +42,10 @@ class SubmissionFolderAccessTestCase(base.TestCase):
     @staticmethod
     def _filterUserAccessKeys(folder):
         """
-        Filter a folder's user access control list to contain only keys relevant
-        for this test. In certain workflows,
-        AccessControlledModel.getFullAccessList() adds additional keys such as
-        'login' and 'name'. Removing the additional keys simplifies writing
-        equality assertions.
+        Filter a folder's user access control list to contain only keys relevant for this test.
+
+        In certain workflows, AccessControlledModel.getFullAccessList() adds additional keys such as
+        'login' and 'name'. Removing the additional keys simplifies writing equality assertions.
         """
         for item in folder['access']['users']:
             toDelete = [key for key in six.viewkeys(item)

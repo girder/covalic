@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import _ from 'underscore';
 import { getCurrentUser } from '@girder/core/auth';
 import { AccessType } from '@girder/core/constants';
@@ -144,7 +145,7 @@ var PhaseView = View.extend({
                     }
                     this.$('.c-download-test-data').removeClass('hide')
                         .attr('href', downloadUrl);
-                }, this).fetchTestDataItems({limit: 2});
+                }, this).fetchTestDataItems({ limit: 2 });
             }, this).fetch({
                 ignoreError: true
             });

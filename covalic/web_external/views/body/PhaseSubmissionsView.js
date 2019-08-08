@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import _ from 'underscore';
 import { cancelRestRequests } from '@girder/core/rest';
 import UserCollection from '@girder/core/collections/UserCollection';

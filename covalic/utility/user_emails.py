@@ -24,15 +24,14 @@ from covalic.models.phase import Phase
 
 
 def _getUser(userId):
-    """Convenience function to get a user document from a user ID."""
+    """Get a user document from a user ID."""
     user = User().load(userId, force=True)
     return user
 
 
 def _getUsers(acl, accessLevel):
     """
-    Given an access list and an access level, return a list of the users at or
-    above the access level in the access list.
+    Return a list of the users at or above the access level in the access list.
 
     :param acl: an access list such as that returned by
         AccessControlledModel.getFullAccessList()
@@ -48,8 +47,7 @@ def _getUsers(acl, accessLevel):
 
 def getChallengeUserEmails(challenge, accessLevel):
     """
-    Get a list of the email addresses for users with admin access on a
-    challenge.
+    Get a list of the email addresses for users with admin access on a challenge.
 
     :param challenge: the challenge document
     :type challenge: dict
@@ -64,8 +62,7 @@ def getChallengeUserEmails(challenge, accessLevel):
 
 def getPhaseUserEmails(phase, accessLevel, includeChallengeUsers=True):
     """
-    Get a list of the email addresses for users with the given access level or
-    above on the given phase.
+    List the email addresses for users with the given access level or above on the given phase.
 
     :param phase: the phase document
     :type phase: dict

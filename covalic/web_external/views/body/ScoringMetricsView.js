@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import _ from 'underscore';
 import events from '@girder/core/events';
 import { cancelRestRequests } from '@girder/core/rest';

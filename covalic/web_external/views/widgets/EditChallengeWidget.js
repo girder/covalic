@@ -65,7 +65,7 @@ var EditChallengeWidget = View.extend({
                 this.create = true;
             }
         });
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         this.$('#c-challenge-name').focus();
 
         if (this.model) {

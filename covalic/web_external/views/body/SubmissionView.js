@@ -59,7 +59,7 @@ var SubmissionView = View.extend({
             // create a new submission with the same properties
             var submission = new SubmissionModel();
             submission.on('c:submissionPosted', function () {
-                router.navigate('submission/' + submission.id, {trigger: true});
+                router.navigate('submission/' + submission.id, { trigger: true });
             }, this).postSubmission({
                 phaseId: this.submission.get('phaseId'),
                 folderId: this.submission.get('folderId'),

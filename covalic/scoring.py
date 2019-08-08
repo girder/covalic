@@ -23,8 +23,7 @@ import six
 
 def computeAverageScores(score):
     """
-    Compute the average score for each metric and add it to the score list
-    under the name "Average".
+    Compute the average score for each metric and add it to the score list under the name "Average".
 
     Datasets with a score of None are omitted from the average calculation.
 
@@ -56,8 +55,9 @@ def computeAverageScores(score):
 
 def computeOverallScore(submission, phase):
     """
-    Compute the overall score based on the matrix of individual scores. This
-    computes the scalar product of the weighting vector defined by the challenge
+    Compute the overall score based on the matrix of individual scores.
+
+    This computes the scalar product of the weighting vector defined by the challenge
     administrators and the average scores in those metrics, using a weight of
     0 for metrics that are not defined by the admins.
 

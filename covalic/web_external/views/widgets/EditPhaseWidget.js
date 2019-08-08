@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import _ from 'underscore';
 import { handleClose, handleOpen } from '@girder/core/dialog';
 import DateTimeRangeWidget from '@girder/core/views/widgets/DateTimeRangeWidget';
@@ -85,7 +86,7 @@ var EditPhaseWidget = View.extend({
                 view.create = true;
             }
         });
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         this.$('#c-phase-name').focus();
 
         if (view.model) {

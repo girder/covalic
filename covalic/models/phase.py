@@ -50,9 +50,7 @@ class Phase(AccessControlledModel):
         self.exposeFields(level=AccessType.ADMIN, fields={'scoreTask'})
 
     def list(self, challenge, user=None, limit=50, offset=0, sort=None):
-        """
-        List phases for a challenge.
-        """
+        """List phases for a challenge."""
         cursor = self.find(
             {'challengeId': challenge['_id']}, limit=0, sort=sort)
 
@@ -98,16 +96,16 @@ class Phase(AccessControlledModel):
 
     def subtreeCount(self, phase):
         """
-        Returns the subtree count of this phase, which is the number of
+        Return the subtree count of this phase.
+
+        This is the number of
         submissions, plus one record for the phase itself.
         """
         from covalic.models.submission import Submission  # prevent circular import
         return Submission().getAllSubmissions(phase).count() + 1
 
     def remove(self, phase, progress=noProgress):
-        """
-        Remove this phase, which also removes all submissions to it.
-        """
+        """Remove this phase, which also removes all submissions to it."""
         from covalic.models.submission import Submission  # prevent circular import
         for sub in Submission().getAllSubmissions(phase):
             Submission().remove(sub)
@@ -127,7 +125,9 @@ class Phase(AccessControlledModel):
                     requireOrganizationUrl=False, requireDocumentationUrl=False,
                     meta=None):
         """
-        Create a new phase for a challenge. Will create a top-level folder under
+        Create a new phase for a challenge.
+
+        Will create a top-level folder under
         the challenge's collection. Will also create a new group for the
         participants of this phase unless an existing group is passed as the
         participantGroup parameter.
@@ -253,7 +253,7 @@ class Phase(AccessControlledModel):
 
     def updatePhase(self, phase):
         """
-        Updates a phase.
+        Update a phase.
 
         :param phase: The phase document to update
         :type phase: dict

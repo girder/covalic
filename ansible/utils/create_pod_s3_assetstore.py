@@ -12,11 +12,14 @@ def get_bucket(bucket_name):
 
     return bucket
 
+
 def set_bucket_policy(bucket):
     from boto.s3.cors import CORSConfiguration
     cors_cfg = CORSConfiguration()
-    cors_cfg.add_rule(['PUT', 'POST', 'GET'], '*', allowed_header='*', max_age_seconds=3000, expose_header='ETag')
+    cors_cfg.add_rule(
+        ['PUT', 'POST', 'GET'], '*', allowed_header='*', max_age_seconds=3000, expose_header='ETag')
     bucket.set_cors(cors_cfg)
+
 
 def create_assetstore_iam_user(bucket_name):
     import boto.iam
@@ -47,6 +50,7 @@ def create_assetstore_iam_user(bucket_name):
 
     return username, access_key_id, secret_access_key
 
+
 def backup_assetstore_file(assetstore_file_path):
     import os
     if os.path.exists(assetstore_file_path):
@@ -55,10 +59,13 @@ def backup_assetstore_file(assetstore_file_path):
         import shutil
         shutil.move(assetstore_file_path, backup_path)
 
+
 def encrypt_assetstore_file(assetstore_file_path):
-    cmd = ['ansible-vault', 'encrypt', assetstore_file_path, '--vault-password-file', 'vault-password.txt']
+    cmd = ['ansible-vault', 'encrypt', assetstore_file_path,
+           '--vault-password-file', 'vault-password.txt']
     import subprocess
     subprocess.call(cmd)
+
 
 def create_assetstore_file(pod, username, access_key_id, secret_access_key):
     assetstore_file_path = 'pod_static_vars/%s_s3_assetstore.yml' % pod
@@ -78,11 +85,10 @@ iam_assetstore_secret_access_key: %s
     encrypt_assetstore_file(assetstore_file_path)
 
 
-
 if __name__ == '__main__':
     import sys
     if len(sys.argv) < 2:
-        print "usage:\n\npython setup_pod_s3_assetstore.py podname"
+        print('usage:\n\npython setup_pod_s3_assetstore.py podname')
 
     pod = sys.argv[1]
     bucket_name = 'covalic-%s-assetstore' % pod
