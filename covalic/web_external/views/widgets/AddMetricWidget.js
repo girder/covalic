@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import _ from 'underscore';
 
 import View from '../view';
@@ -36,7 +37,7 @@ var AddMetricWidget = View.extend({
                 view.$('#c-metric-id').focus();
             });
 
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         this.$('#c-metric-id').focus();
 
         return this;

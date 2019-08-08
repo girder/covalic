@@ -10,7 +10,7 @@ import '../../stylesheets/body/challengeThumbnail.styl';
 var ChallengeThumbnailView = View.extend({
     events: {
         'click .c-wizard-next-button': function () {
-            router.navigate('challenge/' + this.model.id, {trigger: true});
+            router.navigate('challenge/' + this.model.id, { trigger: true });
         }
     },
 

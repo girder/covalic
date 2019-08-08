@@ -29,9 +29,9 @@ from girder.models.user import User
 
 def getAssetsFolder(challenge, user, testAccess=True):
     """
-    Get the Assets folder for a given challenge, creating one if it does not
-    already exist. Ensures the specified user has read access on the folder if
-    it already exists.
+    Get the Assets folder for a given challenge, creating one if it does not already exist.
+
+    Ensures the specified user has read access on the folder if it already exists.
 
     :param challenge: The challenge.
     :type challenge: dict
@@ -61,10 +61,7 @@ def getAssetsFolder(challenge, user, testAccess=True):
 
 
 def validateDate(date, field):
-    """
-    Helper to convert datetime objects or ISO 8601-formatted strings to
-    datetime objects in UTC.
-    """
+    """Convert datetime objects or ISO 8601-formatted strings to datetime objects in UTC."""
     date = str(date).strip()
     try:
         date = dateutil.parser.parse(date)

@@ -9,7 +9,7 @@ var HeaderView = View.extend({
 
         this.$('a[title]').tooltip({
             placement: 'bottom',
-            delay: {show: 300}
+            delay: { show: 300 }
         });
 
         new HeaderUserView({

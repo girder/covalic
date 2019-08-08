@@ -13,7 +13,7 @@ var PhaseAccessView = View.extend({
             this.accessWidget.once('g:accessListSaved', function () {
                 router.navigate('phase/' + this.model.id +
                     '/instructions?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
-                    this.wizard.total, {trigger: true});
+                    this.wizard.total, { trigger: true });
             }, this).saveAccessList();
         },
 

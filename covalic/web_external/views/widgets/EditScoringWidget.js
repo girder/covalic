@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 import View from '../view';
 import template from '../../templates/widgets/editScoringWidget.pug';
 import '@girder/core/utilities/jquery/girderModal';
@@ -34,7 +36,7 @@ var EditScoringWidget = View.extend({
                 }
             }
         });
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
 
         return this;
     }

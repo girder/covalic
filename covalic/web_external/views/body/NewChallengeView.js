@@ -22,7 +22,7 @@ var NewChallengeView = View.extend({
             challenge.on('g:saved', function () {
                 router.navigate(
                     `challenge/${challenge.id}/access?wizard&curr=${this.wizard.current + 1}&total=${this.wizard.total}`,
-                    {trigger: true});
+                    { trigger: true });
             }, this).off('g:error').on('g:error', function (err) {
                 this.$('.g-validation-failed-message').text(err.responseJSON.message);
                 this.$('#c-challenge-' + err.responseJSON.field).focus();

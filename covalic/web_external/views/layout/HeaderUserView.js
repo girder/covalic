@@ -29,7 +29,7 @@ var HeaderUserView = View.extend({
         },
 
         'click a.g-my-settings': function () {
-            router.navigate(`useraccount/${getCurrentUser().id}/info`, {trigger: true});
+            router.navigate(`useraccount/${getCurrentUser().id}/info`, { trigger: true });
         }
     },
 

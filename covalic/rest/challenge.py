@@ -236,7 +236,7 @@ class ChallengeResource(Resource):
                 {'challengeId': challenge['_id']}
             )}
         }).count()
-        submissionStats = Submission().collection.aggregrate([
+        submissionStats = next(Submission().collection.aggregrate([
             {
                 '$match': {
                     'challengeId': challenge['_id'],
@@ -260,7 +260,7 @@ class ChallengeResource(Resource):
                     ]
                 }
             }
-        ]).next()
+        ]))
         submissionCount = submissionStats['submissionCount'][0]['count']
         submittingParticipantCount = submissionStats['submittingParticipantCount'][0]['count']
 

@@ -113,8 +113,9 @@ class Submission(Model):
 
     def recomputeOverallScores(self, phase):
         """
-        Recompute all of the overall score values for the submissions of a
-        given phase. This might be fairly expensive, so it should only be done
+        Recompute all of the overall score values for the submissions of a given phase.
+
+        This might be fairly expensive, so it should only be done
         if the metric identifiers or weighting values actually change.
 
         :param phase: The phase to recompute all submissions on.
@@ -199,8 +200,9 @@ class Submission(Model):
 
     def updateFolderAccess(self, phase, submissions):
         """
-        Synchronize access control between the phase and submission folders for
-        the phase. Phase admins should have read access on the submission
+        Synchronize access control between the phase and submission folders for the phase.
+
+        Phase admins should have read access on the submission
         folders.
         """
         # Get phase admin users
@@ -224,8 +226,8 @@ class Submission(Model):
                 usersToRemove = [User().load(user['id'], force=True,
                                              exc=True)
                                  for user in folderAcl.get('users')
-                                 if (user['id'] not in phaseAdminUserIds and
-                                     user['id'] != folder['creatorId'])]
+                                 if (user['id'] not in phaseAdminUserIds
+                                     and user['id'] != folder['creatorId'])]
                 for user in usersToRemove:
                     Folder().setUserAccess(folder, user, None)
 
@@ -242,9 +244,7 @@ class Submission(Model):
             raise ValidationException('A list of submissions is required.')
 
     def scoreSubmission(self, submission, apiUrl):
-        """
-        Run a Girder Worker job to score a submission.
-        """
+        """Run a Girder Worker job to score a submission."""
         phase = Phase().load(submission['phaseId'], force=True)
         folder = Folder().load(submission['folderId'], force=True)
         user = User().load(submission['creatorId'], force=True)

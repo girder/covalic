@@ -1,82 +1,24 @@
 version: 2.1
-
-commands:
-  build:
-    parameters:
-      python_version:
-        type: string
-    steps:
-      - run:
-          name: Clone Girder
-          command: git clone --branch master -- https://github.com/girder/girder.git girder
-      - checkout:
-          # Covalic must live here for CTest to pick up tests
-          path: girder/plugins/covalic
-
-      - run:
-          name: Create and activate virtualenv
-          command: |
-            virtualenv girder_env
-            echo "source $CIRCLE_WORKING_DIRECTORY/girder_env/bin/activate" >> $BASH_ENV
-      - run:
-          name: Install Girder
-          command: pip install ./girder
-      - run:
-          name: Install Covalic
-          command: pip install ./girder/plugins/covalic
-      - run:
-          name: Install development requirements
-          command: pip install -r ./girder/plugins/covalic/requirements-dev.txt
-
-      - run:
-          name: Install @girder/lint for Javascript linting
-          command: npm ci
-          working_directory: girder
-      - run:
-          name: Build web client
-          command: girder build --dev
-      - run:
-          name: Create test build directory
-          command: mkdir girder_build
-      - run:
-          name: Run CMake
-          command: |
-            cmake -DRUN_CORE_TESTS:BOOL=OFF -DBUILD_JAVASCRIPT_TESTS:BOOL=OFF -DTEST_PLUGINS:STRING=covalic -DPYTHON_VERSION:STRING=<< parameters.python_version >> $CIRCLE_WORKING_DIRECTORY/girder
-            make
-          working_directory: girder_build
-      - run:
-          name: Run CTest
-          command: ctest -V
-          working_directory: girder_build
-
-executors:
-  girder_test:
-    parameters:
-      tag:
-        type: string
-    docker:
-      - image: girder/girder_test:<< parameters.tag >>
-      - image: circleci/mongo:3.6-ram
-        command: ["mongod", "--storageEngine", "ephemeralForTest", "--dbpath", "/dev/shm/mongo"]
-
 jobs:
-  build_py2:
-    executor:
-      name: girder_test
-      tag: latest-py2
+  build:
+    docker:
+      - image: girder/girder_test:latest-py3
+      - image: circleci/mongo:4.0-ram
+        command: ["mongod", "--storageEngine", "ephemeralForTest", "--dbpath", "/dev/shm/mongo"]
     steps:
-      - build:
-          python_version: "2.7"
-  build_py3:
-    executor:
-      name: girder_test
-      tag: latest-py3
-    steps:
-      - build:
-          python_version: "3.5"
-
-workflows:
-  build_all:
-    jobs:
-      - build_py2
-      - build_py3
+      - checkout
+      - run:
+          name: Lint Python
+          command: tox
+      - run:
+          name: Lint web client
+          command: |
+            npm install
+            npm run lint
+          working_directory: covalic/web_client
+      - run:
+          name: Lint web external
+          command: |
+            npm install
+            npm run lint
+          working_directory: covalic/web_external

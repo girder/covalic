@@ -15,7 +15,7 @@ var PhaseInputView = View.extend({
             this.accessWidget.once('g:accessListSaved', function () {
                 router.navigate('phase/' + this.model.id +
                     '/groundtruth?wizard&curr=' + (this.wizard.current + 1) + '&total=' +
-                    this.wizard.total, {trigger: true});
+                    this.wizard.total, { trigger: true });
             }, this).saveAccessList();
         },
 
@@ -90,7 +90,7 @@ var PhaseInputView = View.extend({
 
     _saveAndGoTo: function (route) {
         this.model.once('g:saved', function () {
-            router.navigate(route, {trigger: true});
+            router.navigate(route, { trigger: true });
         }, this).set({
 
         }).saveAccessList();

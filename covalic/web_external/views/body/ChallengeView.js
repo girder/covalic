@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 import { AccessType } from '@girder/core/constants';
 import { confirm } from '@girder/core/dialog';
 import events from '@girder/core/events';
@@ -42,7 +44,7 @@ var ChallengeView = View.extend({
                             type: 'success',
                             timeout: 4000
                         });
-                        router.navigate('challenges', {trigger: true});
+                        router.navigate('challenges', { trigger: true });
                     }).destroy({
                         progress: true
                     });

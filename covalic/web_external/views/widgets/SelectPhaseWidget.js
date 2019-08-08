@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 import View from '../view';
 import PhaseModel from '../../models/PhaseModel';
 import template from '../../templates/widgets/selectPhase.pug';
@@ -11,7 +13,7 @@ var SelectPhaseWidget = View.extend({
             this.$('.g-validation-failed-message').empty();
 
             var id = this.$('#c-phase-id').val(),
-                phase = new PhaseModel({_id: id});
+                phase = new PhaseModel({ _id: id });
 
             phase.on('g:fetched', function () {
                 this.$el.modal('hide');
@@ -34,7 +36,7 @@ var SelectPhaseWidget = View.extend({
             this.$('#c-phase-id').focus();
         });
 
-        modal.trigger($.Event('ready.girder.modal', {relatedTarget: modal}));
+        modal.trigger($.Event('ready.girder.modal', { relatedTarget: modal }));
         this.$('#c-phase-id').focus();
 
         return this;

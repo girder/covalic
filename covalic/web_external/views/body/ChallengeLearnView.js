@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 import { cancelRestRequests, staticRoot } from '@girder/core/rest';
 
 import View from '../view';
