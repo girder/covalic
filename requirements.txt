@@ -71,6 +71,6 @@ shutilwhich==1.1.0
 six==1.12.0
 stevedore==1.30.1
 tempora==1.14
-urllib3==1.24.1
+urllib3==1.24.2
 vine==1.2.0
 websocket-client==0.55.0
